@@ -138,6 +138,74 @@ def getFileList(path, recurse=False):
         for filename in filenames:
             print(os.path.join(dirname, filename))
 
+def gridSearchAOR(params1=None, construct='', results=[]):
+    # params is a list of dicts/lists of lists
+    params = [{'methods': ['method1', 'method2']}, ['pos1arg1', 'pos1arg2'], ['pos2arg1', 'pos2arg2'],
+              {'key1': ['a1-1', 'a1-2']}, {'key2': ['a2-1', 'a2-2']}] if params1 == None else params1[:]
+    #results = []
+    #print('DBG: recurse params = %s, \nconstruct = %s' % (str(params), construct))
+
+    if not params == []:
+        # grab and process the first param
+        param = params.pop(0)
+
+        if type(param) == type({}):
+            # process dictionary
+            kName = ''
+            for key in param:
+                kName = key
+
+            for item in param[kName]:
+                result = None
+
+                if kName == 'methods':
+                    # processing the methods
+                    #print('DBG: method = %s' % item)
+                    result = gridSearchAOR(params, item + '(', results)  # start constructing method call
+                    #print('DBG: method result = %s' % result)
+
+                else:
+                    # processing named args
+
+                    if type(item) == type('') and not item == 'False' and not item == 'True':
+                        item = '\"%s\"' % item
+                    #print('DBG: narg = %s, construct = %s' % (item, construct))
+                    result = gridSearchAOR(params, '%s %s=%s,' % (construct, kName, item), results)
+                    #print('DBG: narg result = %s' % result)
+                    #if result[-1] == ')' and not construct == '': return result
+
+                if construct == '' and not result == []:
+                    # back on top
+                    #print('DBG: final result = %s' % result)
+                    #results.append(result)
+                    pass
+
+        elif type(param) == type([]):
+            # process list, ie positional args
+
+            for item in param:
+                # processing positional args
+                #print('DBG: construct = %s, item = %s' % (construct, item))
+
+                if type(item) == type('') and not item == 'False' and not item == 'True':
+                    item = '\"%s\"' % item
+                result = gridSearchAOR(params, '%s %s,' % (construct, item), results)
+                #print('DBG: arg result = %s' % result)
+
+    else:
+        # no more params to process
+        result = construct[:-1] + ' )' # complete method call
+        #if not result in results: print('DBG: add to results %s' % result)
+        if not result in results: results.append(result)
+        return result
+    #print('DBG: evaluate all %d in %s' % (len(results), str(results)))
+
+    for idx in range(len(results)):
+        # evaluate them all
+        print('Evaluating call #%d %s...' % (idx, results[idx]))
+        #results[idx] = [results[idx], eval(results[idx])]
+    print('Grid search complete! Returning results.')
+    return results
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
