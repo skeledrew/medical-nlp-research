@@ -164,8 +164,8 @@ def gridSearchAOR(params1=None, construct='', results=[]):
                 else:
                     # processing named args
 
-                    if type(item) == type('') and not item == 'False' and not item == 'True':
-                        item = '\"%s\"' % item
+                    #if type(item) == type('') and not item == 'False' and not item == 'True':
+                        #item = '\"%s\"' % item
                     result = gridSearchAOR(params, '%s %s=%s,' % (construct, kName, item), results)
                     #if result[-1] == ')' and not construct == '': return result
 
@@ -180,8 +180,8 @@ def gridSearchAOR(params1=None, construct='', results=[]):
             for item in param:
                 # processing positional args
 
-                if type(item) == type('') and not item == 'False' and not item == 'True':
-                    item = '\"%s\"' % item
+                #if type(item) == type('') and not item == 'False' and not item == 'True':
+                    #item = '\"%s\"' % item
                 result = gridSearchAOR(params, '%s %s,' % (construct, item), results)
 
     else:
