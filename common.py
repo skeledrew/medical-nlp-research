@@ -189,6 +189,7 @@ def gridSearchAOR(params1=None, construct='', results=[]):
         result = construct[:-1] + ' )' # complete method call
         if not result in results: results.append(result)
         return result
+    if not construct == '': return  # Only continue if we're at the top level
 
     for idx in range(len(results)):
         # evaluate them all
@@ -199,7 +200,7 @@ def gridSearchAOR(params1=None, construct='', results=[]):
 
         except Exception as e:
             print('Error in #%d, %s' % (idx, str(e.args)))
-            results[idx] = str(e.args)
+            results[idx] = [results[idx], str(e.args)]
 
     print('Grid search complete! Returning results.')
     return results
