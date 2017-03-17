@@ -234,8 +234,8 @@ def splitDir(srcDir, destDir, percentOut, random=True, test=False):
     else:
 
         for path in content[numOut:]:
-            shutil.copy2(path, destDir)
-        print('Copied %d files to %s' % (numOut - 1, destDir))
+            shutil.move(path, destDir)
+        print('Moved %d of %d files to %s' % (numOut - 1, len(content), destDir))
     #return content[:numOut], content[numOut:]
 
 if __name__ == '__main__':
