@@ -11,6 +11,9 @@ import codecs
 import sys
 import re
 import os
+from random import shuffle
+import math
+import shutil
 
 
 STRING_TYPE = type('')
@@ -138,10 +141,10 @@ def getFileList(path, recurse=False):
         for filename in filenames:
             print(os.path.join(dirname, filename))
 
-def gridSearchAOR(params1=None, construct='', results=[]):
+def gridSearchAOR(p=None, construct='', results=[], doEval=False):
     # params is a list of dicts/lists of lists
     params = [{'methods': ['method1', 'method2']}, ['pos1arg1', 'pos1arg2'], ['pos2arg1', 'pos2arg2'],
-              {'key1': ['a1-1', 'a1-2']}, {'key2': ['a2-1', 'a2-2']}] if params1 == None else params1[:]
+              {'key1': ['a1-1', 'a1-2']}, {'key2': ['a2-1', 'a2-2']}] if p == None else p[:]
     #results = []
 
     if not params == []:
@@ -189,7 +192,7 @@ def gridSearchAOR(params1=None, construct='', results=[]):
         result = construct[:-1] + ' )' # complete method call
         if not result in results: results.append(result)
         return result
-    if not construct == '': return  # Only continue if we're at the top level
+    if not construct == '' and doEval: return  # Only continue if we're at the top level
 
     for idx in range(len(results)):
         # evaluate them all
@@ -204,6 +207,36 @@ def gridSearchAOR(params1=None, construct='', results=[]):
 
     print('Grid search complete! Returning results.')
     return results
+
+def getExpNum(tracker=''):
+    # get and increment the experiement number on each call for autonaming
+    return 4
+
+def fileList(path, fullpath=False):
+    nameList = os.listdir(path)
+
+    if fullpath:
+
+        for idx in range(len(nameList)):
+            nameList[idx] = path + '/' + nameList[idx]
+    return nameList
+
+def splitDir(srcDir, destDir, percentOut, random=True, test=False):
+    content = fileList(srcDir, True)
+    numOut = len(content) - math.ceil(percentOut / 100 * len(content))  # take from end
+
+    if random:
+        shuffle(content)
+
+    if test:
+        print('Old dir: %s\n\nnew dir: %s' % (content[:numOut], content[numOut:]))
+
+    else:
+
+        for path in content[numOut:]:
+            shutil.copy2(path, destDir)
+        print('Copied %d files to %s' % (numOut - 1, destDir))
+    #return content[:numOut], content[numOut:]
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
