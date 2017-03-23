@@ -211,7 +211,12 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
 
 def getExpNum(tracker=''):
     # get and increment the experiement number on each call for autonaming
-    return 5
+    if tracker == '': return 0
+    tracking = pickleLoad(tracker)
+    expNum = tracking['exp_num']
+    tracking['exp_num'] += 1
+    pickleSave(tracking, tracker)
+    return expNum
 
 def fileList(path, fullpath=False):
     nameList = os.listdir(path)
