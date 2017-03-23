@@ -167,8 +167,8 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
                 else:
                     # processing named args
 
-                    #if type(item) == type('') and not item == 'False' and not item == 'True':
-                        #item = '\"%s\"' % item
+                    if type(item) == type('') and not item == 'False' and not item == 'True' and not item == 'None':
+                        item = '\"%s\"' % item
                     result = gridSearchAOR(params, '%s %s=%s,' % (construct, kName, item), results)
                     #if result[-1] == ')' and not construct == '': return result
 
@@ -183,8 +183,8 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
             for item in param:
                 # processing positional args
 
-                #if type(item) == type('') and not item == 'False' and not item == 'True':
-                    #item = '\"%s\"' % item
+                if type(item) == type('') and not item == 'False' and not item == 'True' and not item == 'None':
+                    item = '\"%s\"' % item
                 result = gridSearchAOR(params, '%s %s,' % (construct, item), results)
 
     else:
@@ -192,7 +192,8 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
         result = construct[:-1] + ' )' # complete method call
         if not result in results: results.append(result)
         return result
-    if not construct == '' and doEval: return  # Only continue if we're at the top level
+    if not construct == '': return  # Only continue if we're at the top level
+    if not doEval: return results
 
     for idx in range(len(results)):
         # evaluate them all
@@ -210,7 +211,7 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
 
 def getExpNum(tracker=''):
     # get and increment the experiement number on each call for autonaming
-    return 4
+    return 5
 
 def fileList(path, fullpath=False):
     nameList = os.listdir(path)
@@ -235,7 +236,7 @@ def splitDir(srcDir, destDir, percentOut, random=True, test=False):
 
         for path in content[numOut:]:
             shutil.move(path, destDir)
-        print('Moved %d of %d files to %s' % (numOut - 1, len(content), destDir))
+    print('Moved %d of %d files to %s' % (len(content) - numOut, len(content), destDir))
     #return content[:numOut], content[numOut:]
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ from common import *
 #ngram_range = (1, 2)
 #min_df = 50
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
-gSParams = [{'methods': ['gSGenericRunner']}, ['anc_notes'], [5]
+gSParams = [{'methods': ['gSGenericRunner']}, ['anc_notes'], [5],
             [(1,1), (1,2), (1,3), (2,2), (2,3)], [5, 10, 50], [0.001, 0.01, 0.1, 1, 10, 100, 1000],
             ['rbf', 'poly'], [2, 3], ['balanced', None]]  # grid search params
 
@@ -63,17 +63,27 @@ def gSGenericRunner(notesDirName, numFolds, ngramRange, minDF, C, kernel, degree
   try:
     result['model'] = classifier.fit(x_train, y_train)
     result['predicted'] = classifier.predict(x_test)
-    result['precision'] = precision_score(y_test, predicted, pos_label=1)
-    result['recall'] = recall_score(y_test, predicted, pos_label=1)
-    result['f1'] = f1_score(y_test, predicted, pos_label=1)
+    result['precision'] = precision_score(y_test, result['predicted'], pos_label=1)
+    result['recall'] = recall_score(y_test, result['predicted'], pos_label=1)
+    result['f1'] = f1_score(y_test, result['predicted'], pos_label=1)
     result['error'] = None
 
   except Exception as e:
     print('Error in classification. Attempting to ignore and recover...', e.args)
     result['error'] = e.args
+  print('Returning result for classifier %s, F1 = %s' % (result['classifier'], result['f1']))
   return result
 
 if __name__ == "__main__":
-  results = gridSearchAOR(gSParams)
+  results = gridSearchAOR(gSParams, doEval=False)
+  print('First and last method calls:', results[0], results[-1])
+
+  for idx in range(len(results)):
+
+    try:
+      results[idx] = eval(results[idx])
+
+    except Exception as e:
+      results[idx] = 'Error in #%d: %s' % (idx, str(e))
   pickleSave(results, '%sanc_notes_SVC_GS_exp%s_results.lst' % (dataDir, getExpNum()))
   print('Operation complete.')
