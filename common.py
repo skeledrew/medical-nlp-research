@@ -211,7 +211,6 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
 
 def getExpNum(tracker=''):
     # get and increment the experiement number on each call for autonaming
-    if tracker == '': return 0
     tracking = pickleLoad(tracker)
     expNum = tracking['exp_num']
     tracking['exp_num'] += 1
@@ -243,6 +242,12 @@ def splitDir(srcDir, destDir, percentOut, random=True, test=False):
             shutil.move(path, destDir)
     print('Moved %d of %d files to %s' % (len(content) - numOut, len(content), destDir))
     #return content[:numOut], content[numOut:]
+
+def calcScores(tp=0, fp=0, fn=0, tn=0):
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    f1 = 2 * ((precision * recall) / (precision + recall))
+    return precision, recall, f1
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
