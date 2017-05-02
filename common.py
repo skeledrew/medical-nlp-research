@@ -15,6 +15,7 @@ from random import shuffle
 import math
 import shutil
 import json
+import pexpect
 
 
 STRING_TYPE = type('')
@@ -290,7 +291,7 @@ def pesh(cmd, out=sys.stdout, shell='/bin/bash', debug=False):
 
     if out == sys.stdout:
         # output went to standard out or not waiting for child to end
-        return 1
+        return
     out.close()
     lines = []
 
