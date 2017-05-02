@@ -14,6 +14,7 @@ import os
 from random import shuffle
 import math
 import shutil
+import json
 
 
 STRING_TYPE = type('')
@@ -248,6 +249,19 @@ def calcScores(tp=0, fp=0, fn=0, tn=0):
     recall = tp / (tp + fn)
     f1 = 2 * ((precision * recall) / (precision + recall))
     return precision, recall, f1
+
+def loadJson(fName):
+    obj = None
+
+    with open(fName) as fo:
+        obj = json.load(fo)
+    return obj
+
+def saveJson(obj, fName):
+
+    with open(fName, 'w') as fo:
+        json.dump(obj, fo)
+    return
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
