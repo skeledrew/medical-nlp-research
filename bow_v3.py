@@ -4,11 +4,12 @@ import numpy as np
 from sklearn.datasets import load_files
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
+from sklearn import svm
 
 from common import *
 
@@ -19,9 +20,9 @@ from common import *
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 gSParams = [{'methods': ['gSGenericRunner']}, ['anc_notes_trim'], [5],
             [(1,1), (1,2), (1,3), (2,2), (2,3)], [5, 10, 50], [1, 10, 100, 1000],
-            ['rbf', 'poly'], [2, 3], ['balanced']]  # grid search params
+            ['rbf', 'poly'], [2, 3], ['balanced'], ['LinearSVC', 'SVC']]  # grid search params
 
-def gSGenericRunner(notesDirName, numFolds, ngramRange, minDF, C, kernel, degree, classWeight):
+def gSGenericRunner(notesDirName, numFolds, ngramRange, minDF, C, kernel, degree, classWeight, clf):
   result = {}  # holds all the created objects, etc since pickleSave can't be used at this time
   notesRoot = dataDir + notesDirName
   bunch = load_files(notesRoot)
@@ -56,7 +57,8 @@ def gSGenericRunner(notesDirName, numFolds, ngramRange, minDF, C, kernel, degree
   result['x_test'] = x_test
   result['y_train'] = y_train
   result['y_test'] = y_test
-  classifier = SVC(C=C, kernel=kernel, degree=degree, class_weight=classWeight)
+  clf = getattr(svm, clf)
+  classifier = clf(C=C, kernel=kernel, degree=degree, class_weight=classWeight)
   result['classifier'] = str(classifier)
   #pickleSave(clfs, dataDir + notesDirName + '_classifiers3.lst')
 

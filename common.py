@@ -16,6 +16,7 @@ import math
 import shutil
 import json
 import pexpect
+import time
 
 
 STRING_TYPE = type('')
@@ -24,12 +25,14 @@ LIST_TYPE = type([])
 baseDir = '/NLPShare/Alcohol/'
 dataDir = baseDir + 'data/'
 
-ancNoteTypes = dataDir + 'anc_note_types.lst'
-labNoteTypes = dataDir + 'lab_note_types.lst'
-otherNoteTypes = dataDir + 'other_note_types.lst'
-allNotes = dataDir + 'all_notes.dct'
-allDiags = dataDir + 'all_diags.dct'
-allNotesWithDiags = dataDir + 'all_notes_with_diags.dct'
+ancNoteTypes = dataDir + 'anc_note_types.txt'
+labNoteTypes = dataDir + 'lab_note_types.txt'
+otherNoteTypes = dataDir + 'other_note_types.txt'
+allNotes = dataDir + 'all_notes.json'
+allDiags = dataDir + 'all_diags.json'
+allNotesWithDiags = dataDir + 'all_notes_with_diags.json'
+logFile = dataDir + 'logs.txt'
+
 
 ### For pickling operations
 
@@ -231,6 +234,8 @@ def fileList(path, fullpath=False):
 def splitDir(srcDir, destDir, percentOut, random=True, test=False):
     content = fileList(srcDir, True)
     numOut = len(content) - math.ceil(percentOut / 100 * len(content))  # take from end
+    if not os.path.exists(srcDir)L raise Exception('Source dir %s doesn\'t exist!' % srcDir)
+    ensureDirs(destDir)
 
     if random:
         shuffle(content)
@@ -291,7 +296,7 @@ def pesh(cmd, out=sys.stdout, shell='/bin/bash', debug=False):
 
     if out == sys.stdout:
         # output went to standard out or not waiting for child to end
-        return
+        return 1
     out.close()
     lines = []
 
@@ -322,6 +327,44 @@ def pesh(cmd, out=sys.stdout, shell='/bin/bash', debug=False):
 def launch(cmd, shell='/bin/bash'):
     child = pexpect.spawnu(shell, ['-c', cmd] if type(cmd) == type('') else cmd, timeout=None)
     child.expect([pexpect.EOF, pexpect.TIMEOUT])
+
+def currentTime():
+    # 17-06-09
+    return time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+
+def writeLog(msg, print_=True):
+    # 17-06-11
+
+    with open(logFile, 'a') as lf:
+        lf.write(msg + '\n')
+    if print_: print(msg)
+    return
+
+def ensureDirs(*paths):
+    # 17-06-11
+
+    for path in paths:
+
+        if isinstance(path, list):
+
+            for sub in path:
+                if not os.path.exists(sub): os.makedirs(sub)
+
+        else:
+            if not os.path.exists(path): os.makedirs(path)
+    return
+
+def loadText(fName):
+    # 17-06-12
+
+    with open(fName) as f:
+        return f.read()
+
+def saveText(text, fName):
+    # 17-06-12
+
+    with open(fName, 'w') as f:
+        return f.write(text)
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')

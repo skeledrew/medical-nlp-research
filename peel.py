@@ -6,7 +6,11 @@ from common import *
 
 oldDir = dataDir + 'anc_notes/'
 newDir = dataDir + 'anc_notes_trim/'
-triggers = ['alcohol', 'beer', 'wine', 'liquor', 'fall', 'fell', 'dizz', 'nausea', 'vomit', 'etoh', 'disorient', 'syncope', 'impair', 'decrease', 'lethargic', 'drowsy', 'shot', 'sluggish', 'drink', 'deficit', 'thc', 'intoxicat', 'male', 'groggy', 'banana bag', 'lorazepam', 'ativan', ' b1', ' b6', 'thiamine', 'pyridoxine', 'multivitamin']
+substances = ['alcohol', 'beer', 'wine', 'liquor']
+posTriggers = ['etoh', 'disorient', 'syncope', 'impair', 'decrease', 'drink', 'deficit', 'thc', 'intoxicat', 'banana bag', 'lorazepam', 'ativan', ' b1', ' b6', 'thiamine', 'pyridoxine', 'multivitamin', 'bac ', 'bal ']
+genTriggers = ['fall', 'fell', 'dizz', 'nausea', 'vomit', 'lethargic', 'drowsy', 'shot', 'sluggish', 'male', 'groggy', ]
+negTriggers = []
+triggers = substances + posTriggers + genTriggers + negTriggers
 
 
 def grabTriggerSections():
@@ -26,6 +30,7 @@ def grabTriggerSections():
             content = makeStruct(content)
 
             for line in content:
+                line = line.lower()  # lowercase every line
 
                 try:
 
@@ -38,10 +43,36 @@ def grabTriggerSections():
                     # something's wrong with the line?
                     continue
 
+                for lNum in range(5):
+                    lNum = ' ' + str(lNum) + ' '
+                    subst = False
+
+                    for itm in substances:
+
+                        if itm in line:
+                            subst = True
+                            break
+
+                    if subst == True and lNum in line:
+                        line = line.replace(lNum, ' NUMBER_LOW' + lNum)
+
+                for hNum in range(5, 10):
+                    hNum = ' ' + str(hNum) + ' '
+                    subst = False
+
+                    for itm in substances:
+
+                        if itm in line:
+                            subst = True
+                            break
+
+                    if subst == True and hNum in line:
+                        line = line.replace(hNum, ' NUMBER_HIGH' + hNum)
+
                 for trigger in triggers:
                     # search the words of interest
 
-                    if trigger in line.lower():
+                    if trigger in line:
                         # add lines with the target word
                         meat.append(line)
                         #print(line)
