@@ -33,12 +33,11 @@ allDiags = dataDir + 'all_diags.json'
 allNotesWithDiags = dataDir + 'all_notes_with_diags.json'
 logFile = dataDir + 'logs.txt'
 
-
 ### For pickling operations
 
 def pickleLoad(fName):
     obj = None
-    
+
     with open(fName, 'rb') as fo:
         obj = pickle.load(fo)
     return obj
@@ -234,7 +233,7 @@ def fileList(path, fullpath=False):
 def splitDir(srcDir, destDir, percentOut, random=True, test=False):
     content = fileList(srcDir, True)
     numOut = len(content) - math.ceil(percentOut / 100 * len(content))  # take from end
-    if not os.path.exists(srcDir)L raise Exception('Source dir %s doesn\'t exist!' % srcDir)
+    if not os.path.exists(srcDir): raise Exception('Source dir %s doesn\'t exist!' % srcDir)
     ensureDirs(destDir)
 
     if random:
@@ -365,6 +364,58 @@ def saveText(text, fName):
 
     with open(fName, 'w') as f:
         return f.write(text)
+
+def runInterpDump(text):
+    # run commands directly copied from the Python interpreter
+    multiline = False
+    cache = []
+    results = []
+
+    for line in text.split('\n'):
+        results.append(line)
+        if re.match('>>>\s+', line): continue
+
+        if line.startswith('>>> ') and line.endswith(':'):
+            # start a block
+            multiline = True
+            cache = [line[4:]]
+            continue
+
+        if re.match('\.{3,3}\s+', line):
+            # end a block
+            multiline = False
+
+            try:
+                exec('\n'.join(l[4:] for l in cache))
+
+            except Exception as e:
+                results.append(str(e))
+            cache = []
+            continue
+
+        if line.startswith('... '):
+            cache.append(line[4:])
+            continue
+
+        if line.startswith('>>> '):
+            # regular 1 line commands
+            line = line[4:]
+            result = None
+
+            try:
+                # handle as expression
+                result = str(eval(line))
+
+            except SyntaxError:
+                # handle as statement(s)
+                exec(line)
+                result = None  # change to captured
+
+            except Exception as e:
+                # it's all broken
+                result = str(e)
+            results.append(result)
+    return '\n'.join(r for r in results if isinstance(r, str))
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
