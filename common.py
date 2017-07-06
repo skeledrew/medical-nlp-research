@@ -3,6 +3,8 @@ Common
 - For importing only
 - Common operations and variables for interactive interpreter and scripts
 - Recommended use: `from common import *`
+- 17-06-18 - upgraded JSON ops to use jsonpickle
+- 17-06-19 - added fix for handling numpy based data <https://github.com/jsonpickle/jsonpickle/issues/147>
 '''
 
 
@@ -17,6 +19,10 @@ import shutil
 import json
 import pexpect
 import time
+import pdb
+import jsonpickle
+import jsonpickle.ext.numpy as jsonpickle_numpy
+jsonpickle_numpy.register_handlers()
 
 
 STRING_TYPE = type('')
@@ -32,6 +38,31 @@ allNotes = dataDir + 'all_notes.json'
 allDiags = dataDir + 'all_diags.json'
 allNotesWithDiags = dataDir + 'all_notes_with_diags.json'
 logFile = dataDir + 'logs.txt'
+ripTest = '''>>> fp = 6
+>>> fn = 10
+>>> tp = 18
+>>> tn = 70
+>>> pre, rec, f1 = calcScores(tp, fp, fn, tn)
+>>> pre
+0.75
+>>> rec
+>>> f1'''
+ripTest2 = '''>>> audits = []
+>>> with open(dataDir + 'audit_mrns.txt') as fo:
+...  audits = fo.read().split('\\n')
+... 
+>>> len(audits)
+1510
+>>> audits[0]
+'MRN'
+>>> audits[-1]
+''
+>>> audits.pop()
+''
+>>> audits.pop(0)
+'MRN'
+>>> len(audits)
+1508'''
 
 ### For pickling operations
 
@@ -215,10 +246,10 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
 
 def getExpNum(tracker=''):
     # get and increment the experiement number on each call for autonaming
-    tracking = pickleLoad(tracker)
+    tracking = loadJson(tracker) if os.path.exists(tracker) else {'exp_num': 0}
     expNum = tracking['exp_num']
     tracking['exp_num'] += 1
-    pickleSave(tracking, tracker)
+    saveJson(tracking, tracker)
     return expNum
 
 def fileList(path, fullpath=False):
@@ -259,13 +290,15 @@ def loadJson(fName):
     obj = None
 
     with open(fName) as fo:
-        obj = json.load(fo)
+        #obj = json.load(fo)
+        obj = jsonpickle.decode(fo.read())
     return obj
 
 def saveJson(obj, fName):
 
     with open(fName, 'w') as fo:
-        json.dump(obj, fo)
+        #json.dump(obj, fo)
+        fo.write(jsonpickle.encode(obj))
     return
 
 def pesh(cmd, out=sys.stdout, shell='/bin/bash', debug=False):
@@ -366,14 +399,16 @@ def saveText(text, fName):
         return f.write(text)
 
 def runInterpDump(text):
+    # 17-06-15
     # run commands directly copied from the Python interpreter
     multiline = False
     cache = []
     results = []
+    #pdb.set_trace()
 
     for line in text.split('\n'):
         results.append(line)
-        if re.match('>>>\s+', line): continue
+        if re.match('^>>>\s+$', line): continue
 
         if line.startswith('>>> ') and line.endswith(':'):
             # start a block
@@ -381,12 +416,12 @@ def runInterpDump(text):
             cache = [line[4:]]
             continue
 
-        if re.match('\.{3,3}\s+', line):
+        if re.match('^\.{3,3}\s+$', line):
             # end a block
             multiline = False
 
             try:
-                exec('\n'.join(l[4:] for l in cache))
+                exec('\n'.join(cache), globals())
 
             except Exception as e:
                 results.append(str(e))
@@ -404,11 +439,11 @@ def runInterpDump(text):
 
             try:
                 # handle as expression
-                result = str(eval(line))
+                result = str(eval(line, globals()))
 
             except SyntaxError:
                 # handle as statement(s)
-                exec(line)
+                exec(line, globals())
                 result = None  # change to captured
 
             except Exception as e:

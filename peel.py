@@ -1,4 +1,4 @@
-#! /NLPShare/nlpenv/bin/python3
+#! /home/aphillips5/envs/nlpenv/bin/python3
 
 
 from common import *
@@ -6,15 +6,16 @@ from common import *
 
 oldDir = dataDir + 'anc_notes/'
 newDir = dataDir + 'anc_notes_trim/'
-substances = ['alcohol', 'beer', 'wine', 'liquor']
-posTriggers = ['etoh', 'disorient', 'syncope', 'impair', 'decrease', 'drink', 'deficit', 'thc', 'intoxicat', 'banana bag', 'lorazepam', 'ativan', ' b1', ' b6', 'thiamine', 'pyridoxine', 'multivitamin', 'bac ', 'bal ']
+substances = ['alcohol', 'beer', 'wine', 'liquor', 'scotch', 'bourbon']
+posTriggers = ['etoh', 'disorient', 'syncope', 'impair', 'decrease', 'drink', 'deficit', 'thc', 'intoxicat', 'banana bag', 'lorazepam', 'ativan', ' b1', ' b6', 'thiamine', 'pyridoxine', 'multivitamin', 'bac ', 'bal ', 'dependence', 'heavy', 'admits']
 genTriggers = ['fall', 'fell', 'dizz', 'nausea', 'vomit', 'lethargic', 'drowsy', 'shot', 'sluggish', 'male', 'groggy', ]
-negTriggers = []
+negTriggers = ['denies', 'none detected', 'sober']
 triggers = substances + posTriggers + genTriggers + negTriggers
 
 
 def grabTriggerSections():
     subDirs = ['yes/', 'no/']
+    ensureDirs(newDir + subDirs[0], newDir + subDirs[1])
 
     for subDir in subDirs:
         noteFiles = fileList(oldDir + subDir)
