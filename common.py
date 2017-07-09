@@ -23,6 +23,7 @@ import pdb
 import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
 jsonpickle_numpy.register_handlers()
+from zlib import adler32
 
 
 STRING_TYPE = type('')
@@ -364,8 +365,10 @@ def currentTime():
     # 17-06-09
     return time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
 
-def writeLog(msg, print_=True):
+def writeLog(msg, print_=True, log=None):
     # 17-06-11
+    global logFile
+    if log: logFile = log
 
     with open(logFile, 'a') as lf:
         lf.write(msg + '\n')
@@ -451,6 +454,10 @@ def runInterpDump(text):
                 result = str(e)
             results.append(result)
     return '\n'.join(r for r in results if isinstance(r, str))
+
+def hash_sum(data):
+    # 17-07-07
+    return adler32(bytes(data, 'utf-8'))
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
