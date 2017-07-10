@@ -70,8 +70,8 @@ def gSGenericRunner(
     kNWeights,
 ):
   result = {}  # holds all the created objects, etc
-  frame = inspect.currentframe()
-  args, _, _, values = inspect.getargvalues(frame)
+  frame = currentframe()
+  args, _, _, values = getargvalues(frame)
   result['options'] = {arg: values[arg] for arg in args}
   preproc_hash = hash_sum('%s%s%d' % (notesDirName, str(ngramRange), minDF))
   tfidf_matrix, bunch = PreProc(notesDirName, ngramRange, minDF, preproc_hash)
@@ -83,10 +83,8 @@ def gSGenericRunner(
     'n_neighbors': nNei,
     'weights': kNWeights
   }
-  #clf = getattr(svm, clf)
-  classifier = MakeClf(clfName, hyParams, clfMods)  #clf(penalty=penalty, C=C, class_weight=classWeight)
+  classifier = MakeClf(clfName, hyParams, clfMods)
   result['classifier'] = str(classifier)
-  #result['hyperparameters'] = result['classifier']
   clf_hash = hash_sum(result['classifier'])
   if not clf_hash in memo: memo[clf_hash] = classifier
 
@@ -151,8 +149,6 @@ def MakeClf(clf_name, hyparams, clf_mods):
   clf = getattr(mod, clf_name)
   clf_str = str(clf())
   params = ', '.join(['%s=%s' % (p, hyparams[p] if not isinstance(hyparams[p], str) else hyparams[p].__repr__()) for p in hyparams if p + '=' in clf_str and not hyparams[p] == IGNORE])  # make parameter string
-  #print(clf_name, params)
-  #if '.' in clf_name: clf_name = clf_name.split('.')[-1]
   classifier = eval('clf(%s)' % (params))
   return classifier
 
@@ -171,7 +167,6 @@ def CrossVal(numFolds, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
     y_train = bunch.target[train_indices]
     x_test = tfidf_matrix[test_indices]
     y_test = bunch.target[test_indices]
-    #classifier = sk.svm.LinearSVC()
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
     ps.append(precision_score(y_test, pred, pos_label=1))
