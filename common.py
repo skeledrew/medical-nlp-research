@@ -24,6 +24,7 @@ import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
 jsonpickle_numpy.register_handlers()
 from zlib import adler32
+import inspect
 
 
 STRING_TYPE = type('')
@@ -64,6 +65,7 @@ ripTest2 = '''>>> audits = []
 'MRN'
 >>> len(audits)
 1508'''
+calls = 0
 
 ### For pickling operations
 
@@ -181,7 +183,9 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
     # params is a list of dicts/lists of lists
     params = [{'methods': ['method1', 'method2']}, ['pos1arg1', 'pos1arg2'], ['pos2arg1', 'pos2arg2'],
               {'key1': ['a1-1', 'a1-2']}, {'key2': ['a2-1', 'a2-2']}] if p == None else p[:]
-    #results = []
+    #global calls
+    #calls += 1
+    #print('gsaor called %d times' % calls)
 
     if not params == []:
         # grab and process the first param
@@ -458,6 +462,14 @@ def runInterpDump(text):
 def hash_sum(data):
     # 17-07-07
     return adler32(bytes(data, 'utf-8'))
+
+def members(itm, print_=True):
+    # 17-07-08
+    mems = []
+    for mem in inspect.getmembers(itm):
+        if print_: print(mem)
+        mems.append(mem)
+    return mems
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
