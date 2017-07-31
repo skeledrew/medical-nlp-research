@@ -1,0 +1,7 @@
+#! /bin/bash
+mvn clean compile
+#export last_dir=`pwd`/
+#cd target/classes/org/apache/ctakes/
+#svn co svn://svn.code.sf.net/p/ctakesresources/code/trunk/ctakes-resources-lvg2008/src/main/resources/org/apache/ctakes/lvg/
+#cd $last_dir
+cp -R lvg target/classes/org/apache/ctakes/lvg
