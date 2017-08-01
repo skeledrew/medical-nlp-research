@@ -181,7 +181,6 @@ def gSGenericRunner(
     result['f1'] = f1
     result['std'] = std
     result['mis'] = mis
-    pdb.set_trace()
     result['error'] = None
 
   except Exception as e:
@@ -270,7 +269,8 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash):
     ps.append(precision_score(y_test, pred, pos_label=1))
     rs.append(recall_score(y_test, pred, pos_label=1))
     f1s.append(f1_score(y_test, pred, pos_label=1))
-  misses = list(set(misses)).sort()
+  misses = list(set(misses))
+  misses.sort()
   p, r, f1, std = np.mean(ps), np.mean(rs), np.mean(f1s), np.std(np.array(f1s))
   memo[kf_hash]['p'] = p
   memo[kf_hash]['r'] = r
@@ -360,7 +360,7 @@ def main():
   fin_msg = 'Operation complete for experiment #%d. Started %s and ended %s.' % (ex_num, s_time, e_time)
   writeLog(fin_msg)
   slack_post(fin_msg, '@aphillips')
+  commit_me(dataDir + 'tracking.json')
 
 if __name__ == "__main__":
   main()
-commit_me(dataDir + 'tracking.json')
