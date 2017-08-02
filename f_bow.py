@@ -19,26 +19,31 @@ numCalls = 300  # number of calls; TODO: facilitate passing call num to called f
 gSParams = [
   {'methods': ['gSGenericRunner']},
   [
-    'anc_notes_trim_v3_cuis',
-    #'anc_notes_trim',
-    'anc_notes_trim_v2_cuis',
-    #'anc_notes'
-    #'anc_notes_v2_cuis'
+    #'anc_notes',  # complete notes
+    #'anc_notes_trim',  # peel.py applied
+    #'anc_notes_cuis',  # cuis w/out dict fix
+    #'anc_notes_trim_cuis',
+    #'anc_notes_v2_cuis',  # cuis w/ dict fix
+    #'anc_notes_trim_v2_cuis',  # trim cuis
+    'anc_bac-yn',  # BAC y/n values, from anc but no notes
+    #'anc_notes_trim_v3',  # trim with BAC
+    #'anc_notes_trim_v3_cuis',
+    #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
   ],  # data dirs
   [
-    #'LinearSVC',
-    #'BernoulliNB',
-    #'SVC',
-    #'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
+    'LinearSVC',
+    'BernoulliNB',
+    'SVC',
+    'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
     'SGDClassifier',
     'LogisticRegression',
-    #'PassiveAggressiveClassifier',
-    #'NearestCentroid',
-    #'KNeighborsClassifier',
-    #'MultinomialNB',
-    #'GaussianNB'
-    #'PassiveAggressiveRegressor',
-    #'SGDRegressor',
+    'PassiveAggressiveClassifier',
+    'NearestCentroid',
+    'KNeighborsClassifier',
+    'MultinomialNB',
+    'GaussianNB'
+    'PassiveAggressiveRegressor',
+    'SGDRegressor',
   ],  # classifiers
   [10],  # for n-folds CV
   [
@@ -348,7 +353,7 @@ def main():
 
       else:
         writeLog('%s: %s' % (currentTime(), results[idx]))
-        results[idx] = 'Error in #%d: %s.' % (idx, str(e))
+        results[idx] = 'Exception in #%d: %s.' % (idx, repr(e))
       #if not DEBUG: raise
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
