@@ -50,7 +50,7 @@ def get_top_results(critr, path):
         with open(mf_name, 'w') as fo:
             fo.write('\n'.join(top['mis']))
         top['mis'] = mf_name
-    writeLog('Top results for "%s" with criteria "%s" hash "%s":\n%s' % (path, critr, cr_hash, top))
+    writeLog('\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s' % (currentTime(), path, critr, cr_hash, top))
     return top
 
 def str_to_dict(s, main_sep, map_sep):
