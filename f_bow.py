@@ -25,16 +25,15 @@ gSParams = [
     #'anc_notes_trim_cuis',
     #'anc_notes_v2_cuis',  # cuis w/ dict fix
     #'anc_notes_trim_v2_cuis',  # trim cuis
-    'anc_bac-yn',  # BAC y/n values, from anc but no notes
-    #'anc_notes_trim_v3',  # trim with BAC
-    #'anc_notes_trim_v3_cuis',
-    #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
+    #'anc_bac-yn',  # BAC y/n values, from anc but no notes
+    'anc_notes_trim_v3',  # trim with BAC
+    'anc_notes_trim_v3_cuis',  # trim cuis with BAC
   ],  # data dirs
   [
     'LinearSVC',
     'BernoulliNB',
     'SVC',
-    'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
+    ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
     'SGDClassifier',
     'LogisticRegression',
     'PassiveAggressiveClassifier',
@@ -48,7 +47,7 @@ gSParams = [
   [10],  # for n-folds CV
   [
     (1,1),
-    #(1,2),
+    (1,2),
     #(1,3),
     #(2,2),
     #(2,3)
@@ -61,7 +60,7 @@ gSParams = [
   [
     #None,
     'l1',
-    #'l2',
+    'l2',
     #'elasticnet',
     #'none'
   ],  # penalty
@@ -69,15 +68,15 @@ gSParams = [
     #0.0000001,
     #0.000001,
     #0.00001,
-    #0.0001,
-    #0.001,
-    #0.01,
-    #0.1,
+    0.0001,
+    0.001,
+    0.01,
+    0.1,
     1,
-    #10,
-    #100,
-    #1000,
-    #10000,
+    10,
+    100,
+    1000,
+    10000,
     #100000,
     #1000000,
     #10000000,
@@ -89,14 +88,14 @@ gSParams = [
   ],  # validation method
   [0],  # TTS random state
   [
-    #'hinge',
+    'hinge',
     #'log',
-    #'modified_huber',
+    'modified_huber',
     #'squared_hinge',
     #'perceptron',
     #'squared_loss',
     'huber',
-    #'epsilon_insensitive',
+    'epsilon_insensitive',
     #'squared_epsilon_insensitive',
   ],  # loss
   [5], # n_neighbors
@@ -105,9 +104,9 @@ gSParams = [
     #'distance'
   ], # KNN weights
   [
-    #'constant',
+    'constant',
     'optimal',
-    #'invscaling'
+    'invscaling'
   ],  # SGD learning rate
   [
     #'rbf',
@@ -117,7 +116,7 @@ gSParams = [
   ],  # kernel
   [
     'word',
-    #'char_wb',
+    'char_wb',
   ],  # CVec analyzer
   [
     True,
@@ -309,11 +308,11 @@ def GetMisses(y_test, pred, names):
 
 def main():
   s_time = currentTime()
+  global memo, gSParams
   g_size = 1
   sess_hash = hash_sum(str(gSParams))
   curr_sess = '%sf_bow_session_%s.pkl' % (dataDir, sess_hash)  # current session
   resume = 0
-  global memo, gSParams
   for p in gSParams: g_size *= len(p)
   writeLog('%s: Generating call grid of size %d...' % (currentTime(), g_size))
 
@@ -345,15 +344,15 @@ def main():
 
     except Exception as e:
       if DEBUG:
-        results[idx] = 'Error in #%d: %s.\nSaving progress...' % (idx, str(e))
+        results[idx] = 'Error in #%d: %s.\nSaving progress...' % (idx, repr(e))
         writeLog('%s: %s' % (currentTime(), results[idx]))
         sess = {'results': results, 'gsparams': gSParams, 'memo': memo, 'last_idx': idx}
         savePickle(sess, curr_sess)
         writeLog('%s: Successfully saved to %s' % (currentTime(), curr_sess))
 
       else:
-        writeLog('%s: %s' % (currentTime(), results[idx]))
         results[idx] = 'Exception in #%d: %s.' % (idx, repr(e))
+        writeLog('%s: %s' % (currentTime(), results[idx]))
       #if not DEBUG: raise
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
