@@ -10,7 +10,6 @@ BAC_POS = 64
 
 def mod(name, content):
     mrn = name.split('.')[0].lstrip('0')
-    content = ''
 
     for row in holder['tfc']:
 
