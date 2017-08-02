@@ -63,6 +63,7 @@ def str_to_dict(s, main_sep, map_sep):
     return final
 
 def main():
+    print('Working...')
     args = sys.argv
 
     if len(args) == 1:
