@@ -16,7 +16,7 @@ def mod(name, content):
 
         #if not len(row[3]) == 7: raise Exception('Invalid MRN size. Fix needed')
         if not row[3] == mrn: continue
-        pdb.set_trace()
+        #pdb.set_trace()
 
         if row[BAC_POS].lower() == 'no' or row[BAC_POS] == '0':
             content += ' BAC_NO'
@@ -34,7 +34,7 @@ def main(s_path, d_path):
     files = list(getFileList(s_path))
     ensureDirs(d_path)
     tf_csv = baseDir + 'Trauma_Final_20170614.csv'
-    holder['tfc'] = csv.reader(open(tf_csv), delimiter=',')
+    holder['tfc'] = [row for row in csv.reader(open(tf_csv), delimiter=',')]
     holder['mods'] = 0
 
     for name in files:
