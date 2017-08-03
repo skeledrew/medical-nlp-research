@@ -11,6 +11,7 @@ from sklearn.metrics import f1_score
 from sklearn import svm, naive_bayes, linear_model, neighbors
 
 from common import *
+import custom_clfs
 
 
 DEBUG = False
@@ -26,8 +27,9 @@ gSParams = [
     #'anc_notes_v2_cuis',  # cuis w/ dict fix
     #'anc_notes_trim_v2_cuis',  # trim cuis
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
-    'anc_notes_trim_v3',  # trim with BAC
+    #'anc_notes_trim_v3',  # trim with BAC
     'anc_notes_trim_v3_cuis',  # trim cuis with BAC
+    #'anc_notes_trim_bac-all'
   ],  # data dirs
   [
     'LinearSVC',
@@ -43,6 +45,7 @@ gSParams = [
     'GaussianNB'
     'PassiveAggressiveRegressor',
     'SGDRegressor',
+    'RulesBasedClassifier',  # custom
   ],  # classifiers
   [10],  # for n-folds CV
   [
@@ -132,7 +135,7 @@ gSParams = [
   ],  # n jobs
 ]  # grid search params
 memo = {}  # for memoization
-clfMods = [svm, naive_bayes, linear_model, neighbors]
+clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs]
 
 def gSGenericRunner(
     notesDirName,
@@ -269,6 +272,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash):
     y_test = bunch.target[test_indices]
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
+    pdb.set_trace()
     misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
     ps.append(precision_score(y_test, pred, pos_label=1))
     rs.append(recall_score(y_test, pred, pos_label=1))
