@@ -26,44 +26,44 @@ gSParams = [
     #'anc_notes_trim_cuis',
     #'anc_notes_v2_cuis',  # cuis w/ dict fix
     #'anc_notes_trim_v2_cuis',  # trim cuis
-    #'anc_bac-yn',  # BAC y/n values, from anc but no notes
+    'anc_bac-yn',  # BAC y/n values, from anc but no notes
     #'anc_notes_trim_v3',  # trim with BAC
-    'anc_notes_trim_v3_cuis',  # trim cuis with BAC
+    #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     #'anc_notes_trim_bac-all'
   ],  # data dirs
   [
-    'LinearSVC',
-    'BernoulliNB',
-    'SVC',
+    #'LinearSVC',
+    #'BernoulliNB',
+    #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
     'SGDClassifier',
-    'LogisticRegression',
-    'PassiveAggressiveClassifier',
-    'NearestCentroid',
-    'KNeighborsClassifier',
-    'MultinomialNB',
-    'GaussianNB'
-    'PassiveAggressiveRegressor',
-    'SGDRegressor',
+    #'LogisticRegression',
+    #'PassiveAggressiveClassifier',
+    #'NearestCentroid',
+    #'KNeighborsClassifier',
+    #'MultinomialNB',
+    #'GaussianNB'
+    #'PassiveAggressiveRegressor',
+    #'SGDRegressor',
     'RulesBasedClassifier',  # custom
   ],  # classifiers
   [10],  # for n-folds CV
   [
     (1,1),
-    (1,2),
+    #(1,2),
     #(1,3),
     #(2,2),
     #(2,3)
   ],  # n-grams
   [
     0,
-    10,
+    #10,
     #50
   ],  # minDF
   [
     #None,
     'l1',
-    'l2',
+    #'l2',
     #'elasticnet',
     #'none'
   ],  # penalty
@@ -71,15 +71,15 @@ gSParams = [
     #0.0000001,
     #0.000001,
     #0.00001,
-    0.0001,
-    0.001,
-    0.01,
-    0.1,
+    #0.0001,
+    #0.001,
+    #0.01,
+    #0.1,
     1,
-    10,
-    100,
-    1000,
-    10000,
+    #10,
+    #100,
+    #1000,
+    #10000,
     #100000,
     #1000000,
     #10000000,
@@ -91,14 +91,14 @@ gSParams = [
   ],  # validation method
   [0],  # TTS random state
   [
-    'hinge',
+    #'hinge',
     #'log',
-    'modified_huber',
+    #'modified_huber',
     #'squared_hinge',
     #'perceptron',
     #'squared_loss',
     'huber',
-    'epsilon_insensitive',
+    #'epsilon_insensitive',
     #'squared_epsilon_insensitive',
   ],  # loss
   [5], # n_neighbors
@@ -107,9 +107,9 @@ gSParams = [
     #'distance'
   ], # KNN weights
   [
-    'constant',
+    #'constant',
     'optimal',
-    'invscaling'
+    #'invscaling'
   ],  # SGD learning rate
   [
     #'rbf',
@@ -119,16 +119,17 @@ gSParams = [
   ],  # kernel
   [
     'word',
-    'char_wb',
+    #'char_wb',
   ],  # CVec analyzer
   [
-    True,
+    #True,
     False
   ],  # CVec binary
   [
-    True,
-    False
-  ],  # use tf-idf
+    'text',
+    #'count',
+    'tfidf',
+  ],  # preprocessing task
   [
     -1,  # all CPUs
     #1,
@@ -155,7 +156,7 @@ def gSGenericRunner(
     kernel,
     analyzer,
     binary,
-    tfidf,
+    preTask,
     nJobs,
 ):
   result = {}  # holds all the created objects, etc
@@ -163,7 +164,7 @@ def gSGenericRunner(
   args, _, _, values = getargvalues(frame)
   result['options'] = allArgs = {arg: values[arg] for arg in args}
   preproc_hash = hash_sum('%s%s%d%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary))
-  tfidf_matrix, bunch, result['features'] = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, tfidf, preproc_hash)
+  matrix, bunch, result['features'] = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
   hyParams = {
     'penalty': penalty,
     'C': C,
@@ -182,7 +183,7 @@ def gSGenericRunner(
 
   try:
     p = r = f1 = std = 0
-    p, r, f1, std, mis = CrossVal(numFolds, classifier, tfidf_matrix, bunch, preproc_hash, clf_hash) if modSel == 'kf' else TTS(randState, classifier, tfidf_matrix, bunch, preproc_hash, clf_hash)
+    p, r, f1, std, mis = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash) if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
     result['f1'] = f1
@@ -198,7 +199,7 @@ def gSGenericRunner(
   if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s' % (currentTime(), result['classifier'], str(result['options']), result['precision'], result['recall'], result['f1'], result['std']))
   return result
 
-def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, tfidf, param_hash):
+def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
   # 17-07-07 preprocessing with memoization for better speed and efficient memory use
   if param_hash in memo: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features']
   memo[param_hash] = {}
@@ -206,6 +207,11 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, tfidf, param_hash
   b_hash = hash_sum(notesRoot)
   bunch = memo[b_hash] if b_hash in memo else load_files(notesRoot)
   if not b_hash in memo: memo[b_hash] = bunch
+
+  if pre_task == 'text':
+    text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
+    memo[param_hash]['matrix'] = text_matrix
+    return text_matrix, bunch, []  # no features
 
   # raw occurences
   vectorizer = CountVectorizer(
@@ -226,7 +232,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, tfidf, param_hash
     features.append(feature)
   memo[param_hash]['features'] = features
 
-  if not tfidf:
+  if pre_task == 'count':
     memo[param_hash]['matrix'] = count_matrix
     return count_matrix, bunch, features
 
