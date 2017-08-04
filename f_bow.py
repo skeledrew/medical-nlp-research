@@ -137,7 +137,7 @@ gSParams = [
   ],  # n jobs
 ]  # grid search params
 memo = {}  # for memoization
-clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs]
+clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble]
 
 def gSGenericRunner(
     notesDirName,
