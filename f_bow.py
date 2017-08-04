@@ -207,6 +207,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   b_hash = hash_sum(notesRoot)
   bunch = memo[b_hash] if b_hash in memo else load_files(notesRoot)
   if not b_hash in memo: memo[b_hash] = bunch
+  memo[param_hash]['bunch'] = bunch
 
   if pre_task == 'text':
     text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
@@ -223,7 +224,6 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
     token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)',  # enable neg capture
     analyzer=analyzer,
   )
-  memo[param_hash]['bunch'] = bunch
   count_matrix = vectorizer.fit_transform(bunch.data)
 
   # save features
