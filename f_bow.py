@@ -362,8 +362,8 @@ def main():
 
       else:
         results[idx] = 'Exception in #%d: %s.' % (idx, repr(e))
-        writeLog('%s: %s' % (currentTime(), results[idx]))
-      #if not DEBUG: raise
+        writeLog('%s: %s' % (currentTime(), results[idx] + 1))
+        raise
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
   rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)
