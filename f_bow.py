@@ -273,7 +273,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
-  feats = np.array(feats)
+  #feats = np.array(feats)
 
   for train_indices, test_indices in folds.split(matrix):
     x_train = matrix[train_indices]
@@ -282,6 +282,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
     y_test = bunch.target[test_indices]
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
+    weights = {feat: weight for feat, weight in zip(feats, classifier.coef_[0])}
     if DEBUG: pdb.set_trace()
     misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
     ps.append(precision_score(y_test, pred, pos_label=1))
