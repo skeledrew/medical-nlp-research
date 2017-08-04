@@ -14,7 +14,7 @@ from common import *
 import custom_clfs
 
 
-DEBUG = False
+DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 gSParams = [
@@ -36,7 +36,7 @@ gSParams = [
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    #'SGDClassifier',
+    'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -46,7 +46,7 @@ gSParams = [
     #'PassiveAggressiveRegressor',
     #'SGDRegressor',
     #'RulesBasedClassifier',  # custom
-    'RandomForestClassifier',
+    #'RandomForestClassifier',
   ],  # classifiers
   [10],  # for n-folds CV
   [
@@ -184,7 +184,7 @@ def gSGenericRunner(
 
   try:
     p = r = f1 = std = 0
-    p, r, f1, std, mis = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash) if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
+    p, r, f1, std, mis = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features']) if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
     result['f1'] = f1
@@ -262,7 +262,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
   classifier = eval('clf(%s)' % (params))
   return classifier
 
-def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash):
+def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   # KFold
   kf_hash = hash_sum('%d%s%s' % (numFolds, pp_hash, clf_hash))
   if kf_hash in memo: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis']
@@ -272,6 +272,8 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash):
   f1s = []
   folds = KFold(n_splits=numFolds)
   misses = []
+  wghts_read = False
+  feats = np.array(feats)
 
   for train_indices, test_indices in folds.split(matrix):
     x_train = matrix[train_indices]
