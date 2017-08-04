@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split, KFold
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
-from sklearn import svm, naive_bayes, linear_model, neighbors
+from sklearn import svm, naive_bayes, linear_model, neighbors, ensemble
 
 from common import *
 import custom_clfs
@@ -28,7 +28,7 @@ gSParams = [
     #'anc_notes_trim_v2_cuis',  # trim cuis
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
     'anc_notes_trim_v3',  # trim with BAC
-    #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
+    'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     #'anc_notes_trim_bac-all'
   ],  # data dirs
   [
@@ -36,7 +36,7 @@ gSParams = [
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    'SGDClassifier',
+    #'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -45,7 +45,8 @@ gSParams = [
     #'GaussianNB'
     #'PassiveAggressiveRegressor',
     #'SGDRegressor',
-    'RulesBasedClassifier',  # custom
+    #'RulesBasedClassifier',  # custom
+    'RandomForestClassifier',
   ],  # classifiers
   [10],  # for n-folds CV
   [
@@ -126,8 +127,8 @@ gSParams = [
     False
   ],  # CVec binary
   [
-    'text',
-    #'count',
+    #'text',
+    'count',
     'tfidf',
   ],  # preprocessing task
   [
