@@ -212,6 +212,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   if pre_task == 'text':
     text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
     memo[param_hash]['matrix'] = text_matrix
+    memo[param_hash]['features'] = []
     return text_matrix, bunch, []  # no features
 
   # raw occurences
