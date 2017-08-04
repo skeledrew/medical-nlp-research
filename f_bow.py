@@ -361,8 +361,8 @@ def main():
         writeLog('%s: Successfully saved to %s' % (currentTime(), curr_sess))
 
       else:
-        results[idx] = 'Exception in #%d: %s.' % (idx, repr(e))
-        writeLog('%s: %s' % (currentTime(), results[idx] + 1))
+        results[idx] = 'Exception in #%d: %s.' % (idx+1, repr(e))
+        writeLog('%s: %s' % (currentTime(), results[idx]))
         raise
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
