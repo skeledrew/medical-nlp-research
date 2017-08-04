@@ -279,7 +279,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash):
     y_test = bunch.target[test_indices]
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
-    pdb.set_trace()
+    if DEBUG: pdb.set_trace()
     misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
     ps.append(precision_score(y_test, pred, pos_label=1))
     rs.append(recall_score(y_test, pred, pos_label=1))
