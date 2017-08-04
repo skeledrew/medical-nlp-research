@@ -69,14 +69,14 @@ calls = 0
 
 ### For pickling operations
 
-def pickleLoad(fName):
+def loadPickle(fName):
     obj = None
 
     with open(fName, 'rb') as fo:
         obj = pickle.load(fo)
     return obj
 
-def pickleSave(obj, fName):
+def savePickle(obj, fName):
 
     with open(fName, 'wb') as fo:
         pickle.dump(obj, fo)
@@ -179,7 +179,7 @@ def getFileList(path, recurse=False):
         for filename in filenames:
             print(os.path.join(dirname, filename))
 
-def gridSearchAOR(p=None, construct='', results=[], doEval=False):
+def gridSearchAOR(p=None, construct='', results=[], doEval=False, funcList=[], resume=[]):
     # params is a list of dicts/lists of lists
     params = [{'methods': ['method1', 'method2']}, ['pos1arg1', 'pos1arg2'], ['pos2arg1', 'pos2arg2'],
               {'key1': ['a1-1', 'a1-2']}, {'key2': ['a2-1', 'a2-2']}] if p == None else p[:]
@@ -187,6 +187,7 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
     if not params == []:
         # grab and process the first param
         param = params.pop(0)
+        last_idx = 0
 
         if type(param) == type({}):
             # process dictionary
@@ -194,35 +195,47 @@ def gridSearchAOR(p=None, construct='', results=[], doEval=False):
             for key in param:
                 kName = key
 
-            for item in param[kName]:
+            for idx in range(len(param[kName])):
                 result = None
+                if idx < last_idx: idx = last_idx
+                item = param[kName][idx]
 
-                if kName == 'methods':
-                    # processing the methods
-                    result = gridSearchAOR(params, item + '(', results)  # start constructing method call
+                try:
+                    if kName == 'methods':
+                        # processing the methods
+                        result = gridSearchAOR(params, item + '(', results, resume=resume)  # start constructing method call
 
-                else:
-                    # processing named args
+                    else:
+                        # processing named args
 
-                    if type(item) == type('') and not item == 'False' and not item == 'True' and not item == 'None':
-                        item = '\"%s\"' % item
-                    result = gridSearchAOR(params, '%s %s=%s,' % (construct, kName, item), results)
-                    #if result[-1] == ')' and not construct == '': return result
+                        if type(item) == type('') and not item == 'False' and not item == 'True' and not item == 'None':
+                            item = '\"%s\"' % item
+                        result = gridSearchAOR(params, '%s %s=%s,' % (construct, kName, item), results, resume=resume)
+                        #if result[-1] == ')' and not construct == '': return result
 
-                if construct == '' and not result == []:
-                    # back on top
-                    #results.append(result)
-                    pass
+                    if construct == '' and not result == []:
+                        # back on top
+                        #results.append(result)
+                        pass
+
+                except KeyboardInterrupt:
+                    raise
 
         elif type(param) == type([]):
             # process list, ie positional args
 
-            for item in param:
+            for idx in range(len(param)):
                 # processing positional args
+                if idx < last_idx: idx = last_idx
+                item = param[idx]
 
-                if type(item) == type('') and not item == 'False' and not item == 'True' and not item == 'None':
-                    item = '\"%s\"' % item
-                result = gridSearchAOR(params, '%s %s,' % (construct, item), results)
+                try:
+                    if type(item) == type('') and not item == 'False' and not item == 'True' and not item == 'None':
+                        item = '\"%s\"' % item
+                    result = gridSearchAOR(params, '%s %s,' % (construct, item), results, resume=resume)
+
+                except KeyboardInterrupt:
+                    raise
 
     else:
         # no more params to process
@@ -292,15 +305,15 @@ def loadJson(fName):
     obj = None
 
     with open(fName) as fo:
-        #obj = json.load(fo)
-        obj = jsonpickle.decode(fo.read())
+        obj = json.load(fo)
+        #obj = jsonpickle.decode(fo.read())
     return obj
 
 def saveJson(obj, fName):
 
     with open(fName, 'w') as fo:
-        #json.dump(obj, fo)
-        fo.write(jsonpickle.encode(obj))
+        json.dump(obj, fo)
+        #fo.write(jsonpickle.encode(obj))
     return
 
 def pesh(cmd, out=sys.stdout, shell='/bin/bash', debug=False):
@@ -468,5 +481,54 @@ def members(itm, print_=True):
         mems.append(mem)
     return mems
 
+def slack_post(text='', channel='', botName='', botIcon=''):
+    # 17-07-31
+    text = 'Testing webhook' if text == '' else text
+    botName = 'lnlp-bot' if botName == '' else botName
+    channel = '#general' if channel == '' else channel
+    botIcon = ':robot_face:' if botIcon == '' else botIcon
+    payload = {'text': text, 'username': botName, 'channel': channel}
+
+    if '://' in botIcon:
+        payload['icon_url'] = botIcon
+
+    else:
+        payload['icon_emoji'] = botIcon
+    payload = json.dumps(payload)
+    print('Posting to Slack...')
+    cmd = 'curl -X POST --data-urlencode \'payload=%s\' %s' % (payload, os.environ['LNLP_SLACK_HOOK'])
+    pesh(cmd)
+    return
+
+def commit_me(tracker='', path=''):
+    # 17-08-01 Commit after each change
+    name = sys.argv[0]
+    if not name: return  # prob running pure interactive session
+    if name.startswith('./'): name = name[2:]
+    if not path: path = '%s/%s' % (os.getcwd(), name)
+    last_dir = os.getcwd()
+    os.chdir(os.path.dirname(path))
+    p_hash = hash_sum(path)
+    f_hash = hash_sum(loadText(path))
+    t_name = 'commit_me_%s' % (p_hash)
+    tracking = loadJson(tracker) if os.path.exists(tracker) else {t_name: f_hash}
+    if t_name in tracking and tracking[t_name] == f_hash: return
+    c_msg = '%s: auto-commit %s with hash %s' % (currentTime(), path, f_hash)
+    pesh('git add %s' % (name))
+    pesh('git commit -m "%s"' % (c_msg))
+    os.chdir(last_dir)
+    tracking[t_name] = f_hash
+    saveJson(tracking, tracker)
+    return f_hash
+
+def get_path_from_func(func):
+    # 17-08-01
+    return func.__globals__['__file__']
+
+def path_name_prefix(pref, path):
+    # 17-08-01
+    return '%s/%s%s' % (os.path.dirname(path), pref, path.split('/')[-1])
+
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
+commit_me(dataDir + 'tracking.json', get_path_from_func(commit_me))
