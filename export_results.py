@@ -82,6 +82,9 @@ def main():
         if args[3].endswith('.json'): get_top_results(args[2], args[3])
         return
 
+    if args[1].replace('-', '', 1).isdigit():
+        pass
+
 if __name__ == '__main__':
     try:
         main()
