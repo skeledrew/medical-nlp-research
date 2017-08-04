@@ -26,8 +26,8 @@ gSParams = [
     #'anc_notes_trim_cuis',
     #'anc_notes_v2_cuis',  # cuis w/ dict fix
     #'anc_notes_trim_v2_cuis',  # trim cuis
-    'anc_bac-yn',  # BAC y/n values, from anc but no notes
-    #'anc_notes_trim_v3',  # trim with BAC
+    #'anc_bac-yn',  # BAC y/n values, from anc but no notes
+    'anc_notes_trim_v3',  # trim with BAC
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     #'anc_notes_trim_bac-all'
   ],  # data dirs
@@ -192,7 +192,7 @@ def gSGenericRunner(
     result['error'] = None
 
   except Exception as e:
-    writeLog('%s: Error in classification. Skipping... %s' % (currentTime(), str(e.args)))
+    writeLog('%s: Error in classification: %s. Skipping...' % (currentTime(), repr(e)))
     result = {'classifier': result['classifier'], 'options': result['options']}
     result['error'] = e.args
     result['f1'] = result['precision'] = result['recall'] = result['std'] = None
