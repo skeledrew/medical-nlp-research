@@ -28,7 +28,7 @@ gSParams = [
     #'anc_notes_trim_v2_cuis',  # trim cuis
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
     'anc_notes_trim_v3',  # trim with BAC
-    'anc_notes_trim_v3_cuis',  # trim cuis with BAC
+    #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     #'anc_notes_trim_bac-all'
   ],  # data dirs
   [
@@ -276,7 +276,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   #feats = np.array(feats)
 
   for idx in range(len(feats)):
-    feats[idx] = [feats[idx]]
+    feats[idx] = [feats[idx][0], feats[idx][1]]
   f_idx = 0
 
   for train_indices, test_indices in folds.split(matrix):
