@@ -35,12 +35,14 @@ def get_top_results(critr, path):
         if targ['f1'] <= top['f1']: continue
         top = targ
 
-    if 'features' in top:
+    if 'features' in top and top['features']:
         # write features to a file
         ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.txt')
 
         with open(ff_name, 'w') as fo:
-            fo.write(str(top['features'])) #('\n'.join(top['features']))
+
+            for feat in top['features']:
+                fo.write(str(feat) + '\n')
         top['features'] = ff_name
 
     if 'mis' in top:
