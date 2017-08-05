@@ -14,7 +14,7 @@ from common import *
 import custom_clfs
 
 
-DEBUG = True
+DEBUG = False
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 gSParams = [
