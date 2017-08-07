@@ -20,7 +20,7 @@ numCalls = 300  # number of calls; TODO: facilitate passing call num to called f
 gSParams = [
   {'methods': ['gSGenericRunner']},
   [
-    'anc_notes',  # complete notes
+    #'anc_notes',  # complete notes
     #'anc_notes_trim',  # peel.py applied
     #'anc_notes_cuis',  # cuis w/out dict fix
     #'anc_notes_trim_cuis',
@@ -29,14 +29,15 @@ gSParams = [
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
     #'anc_notes_trim_v3',  # trim with BAC
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
-    #'anc_notes_trim_bac-all'
+    'anc_notes_trim_bac-all',  # all BAC data
+    'anc_notes_trim_cuis_bac-all',  # v2 cuis
   ],  # data dirs
   [
     #'LinearSVC',
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    #'SGDClassifier',
+    'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -47,20 +48,20 @@ gSParams = [
     #'SGDRegressor',
     #'RulesBasedClassifier',  # custom
     #'RandomForestClassifier',
-    'DummyClassifier',  # for the baseline
+    #'DummyClassifier',  # for the baseline
   ],  # classifiers
   [10],  # for n-folds CV
   [
     (1,1),
-    #(1,2),
-    #(1,3),
+    (1,2),
+    (1,3),
     #(2,2),
     #(2,3)
   ],  # n-grams
   [
     0,
-    #10,
-    #50
+    10,
+    50
   ],  # minDF
   [
     #None,
@@ -109,9 +110,9 @@ gSParams = [
     #'distance'
   ], # KNN weights
   [
-    #'constant',
+    'constant',
     'optimal',
-    #'invscaling'
+    'invscaling'
   ],  # SGD learning rate
   [
     #'rbf',
@@ -125,11 +126,11 @@ gSParams = [
   ],  # CVec analyzer
   [
     True,
-    #False
+    False
   ],  # CVec binary
   [
     #'text',
-    #'count',
+    'count',
     'tfidf',
   ],  # preprocessing task
   [
