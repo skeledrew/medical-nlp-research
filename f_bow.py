@@ -205,7 +205,7 @@ def gSGenericRunner(
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
   # 17-07-07 preprocessing with memoization for better speed and efficient memory use
-  if param_hash in memo and memo[param_hash]['matrix']: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features']
+  if param_hash in memo and not memo[param_hash]['matrix'] == None: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features']
   memo[param_hash] = {}
   memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features'] = None, None, []
   notesRoot = dataDir + notesDirName
