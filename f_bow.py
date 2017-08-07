@@ -291,7 +291,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
     pred = classifier.predict(x_test)
     #weights = {feat: weight for feat, weight in zip(feats, classifier.coef_[0])}
     if hasattr(classifier, 'coef_'): [feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))]
-    if DEBUG: pdb.set_trace()
+    #if DEBUG: pdb.set_trace()
     misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
     ps.append(precision_score(y_test, pred, pos_label=1))
     rs.append(recall_score(y_test, pred, pos_label=1))
