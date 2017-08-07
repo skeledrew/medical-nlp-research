@@ -14,7 +14,7 @@ from common import *
 import custom_clfs
 
 
-ERROR_IGNORE = 'ValueError..eta0'
+ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence'
 DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
@@ -205,8 +205,9 @@ def gSGenericRunner(
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
   # 17-07-07 preprocessing with memoization for better speed and efficient memory use
-  if param_hash in memo: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features']
+  if param_hash in memo and memo[param_hash]['matrix']: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features']
   memo[param_hash] = {}
+  memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features'] = None, None, []
   notesRoot = dataDir + notesDirName
   b_hash = hash_sum(notesRoot)
   bunch = memo[b_hash] if b_hash in memo else load_files(notesRoot)
@@ -216,7 +217,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   if pre_task == 'text':
     text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
     memo[param_hash]['matrix'] = text_matrix
-    memo[param_hash]['features'] = []
+    #memo[param_hash]['features'] = []
     return text_matrix, bunch, []  # no features
 
   # raw occurences
@@ -374,7 +375,7 @@ def main():
         break
 
       if DEBUG and not ignore:
-        results[idx] = 'Error in #%d: %s.\nSaving progress...' % (idx, repr(e))
+        results[idx] = 'Error in #%d: %s.\nSaving progress...' % (idx+1, repr(e))
         writeLog('%s: %s' % (currentTime(), results[idx]))
         sess = {'results': results, 'gsparams': gSParams, 'memo': memo, 'last_idx': idx}
         savePickle(sess, curr_sess)
