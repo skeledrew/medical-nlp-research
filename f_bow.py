@@ -377,7 +377,7 @@ def main():
       pdb.set_trace()
 
       for err_pat in ERROR_IGNORE.split('||'):
-        if re.search(err_pat, repr(e)): continue
+        if not re.search(err_pat, repr(e)): continue
         ignore = False
         break
 
