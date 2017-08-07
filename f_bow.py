@@ -166,7 +166,7 @@ def gSGenericRunner(
   frame = currentframe()
   args, _, _, values = getargvalues(frame)
   result['options'] = allArgs = {arg: values[arg] for arg in args}
-  preproc_hash = hash_sum('%s%s%d%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary))
+  preproc_hash = hash_sum('%s%s%d%s%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary, preTask))
   matrix, bunch, result['features'] = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
   hyParams = {
     'penalty': penalty,
