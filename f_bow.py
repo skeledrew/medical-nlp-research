@@ -373,13 +373,10 @@ def main():
       return
 
     except Exception as e:
-      ignore = True
-      pdb.set_trace()
+      ignore = False
 
       for err_pat in ERROR_IGNORE.split('||'):
-        if not re.search(err_pat, repr(e)): continue
-        ignore = False
-        break
+        if re.search(err_pat, repr(e)): ignore = True
 
       if DEBUG and not ignore:
         results[idx] = 'Error in #%d: %s.\nSaving progress...' % (idx+1, repr(e))
