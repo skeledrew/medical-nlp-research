@@ -14,7 +14,7 @@ from common import *
 import custom_clfs
 
 
-ERROR_IGNORE = 'ValueError..eta0||.*TypeError..sequence.*'
+ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create'
 DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
