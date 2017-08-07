@@ -14,7 +14,7 @@ from common import *
 import custom_clfs
 
 
-ERROR_IGNORE = '.*ValueError..eta0.*||.*TypeError..sequence.*'
+ERROR_IGNORE = 'ValueError..eta0||.*TypeError..sequence.*'
 DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
@@ -252,6 +252,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
   # create classifier and add relevant hyperparameters
   clf = None
   mod = None
+  classifier = None
 
   for m in clf_mods:
     # get the module containing the classifier
@@ -263,7 +264,12 @@ def MakeClf(clf_name, hyparams, clf_mods):
   clf = getattr(mod, clf_name)
   clf_str = str(clf())
   params = ', '.join(['%s=%s' % (p, hyparams[p] if not isinstance(hyparams[p], str) else hyparams[p].__repr__()) for p in hyparams if p + '=' in clf_str and not hyparams[p] == IGNORE])  # make parameter string
-  classifier = eval('clf(%s)' % (params))
+
+  try:
+    classifier = eval('clf(%s)' % (params))
+
+  except Exception as e:
+    raise Exception('%s: Failed to create %s(%s); %s' % (currentTime(), clf_name, params, repr(e)))
   return classifier
 
 def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
