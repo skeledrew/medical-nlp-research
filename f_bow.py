@@ -374,6 +374,7 @@ def main():
 
     except Exception as e:
       ignore = True
+      pdb.set_trace()
 
       for err_pat in ERROR_IGNORE.split('||'):
         if re.search(err_pat, repr(e)): continue
