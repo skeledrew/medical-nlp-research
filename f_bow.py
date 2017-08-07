@@ -14,7 +14,8 @@ from common import *
 import custom_clfs
 
 
-DEBUG = False
+ERROR_IGNORE = 'ValueError..eta0'
+DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 gSParams = [
@@ -365,17 +366,25 @@ def main():
       return
 
     except Exception as e:
-      if DEBUG:
+      ignore = True
+
+      for err_pat in ERROR_IGNORE.split('||'):
+        if re.search(err_pat, repr(e)): continue
+        ignore = False
+        break
+
+      if DEBUG and not ignore:
         results[idx] = 'Error in #%d: %s.\nSaving progress...' % (idx, repr(e))
         writeLog('%s: %s' % (currentTime(), results[idx]))
         sess = {'results': results, 'gsparams': gSParams, 'memo': memo, 'last_idx': idx}
         savePickle(sess, curr_sess)
         writeLog('%s: Successfully saved to %s' % (currentTime(), curr_sess))
+        pdb.post_mortem()
 
       else:
         results[idx] = 'Exception in #%d: %s.' % (idx+1, repr(e))
         writeLog('%s: %s' % (currentTime(), results[idx]))
-        #raise
+        raise
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
   rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)
