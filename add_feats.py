@@ -75,6 +75,7 @@ def race_add(content, row):
     return content
 
 def bac_all_add(content, row):
+        #pdb.set_trace()
         return bac_val_add(bac_yn_add(content, row), row)
 
 def mod(name, content, mod_func):
