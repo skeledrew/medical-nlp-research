@@ -344,7 +344,7 @@ def main():
     sess = loadPickle(curr_sess)
     results = sess['results']
     memo = sess['memo']
-    resume = sess['last_idx']
+    resume = sess['last_idx'] + 1
     writeLog('Continuing session saved at %s from index %d' % (curr_sess, resume))
 
   else:
