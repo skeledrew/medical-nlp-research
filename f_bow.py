@@ -54,15 +54,15 @@ gSParams = [
   [10],  # for n-folds CV
   [
     (1,1),
-    (1,2),
-    (1,3),
+    #(1,2),
+    #(1,3),
     #(2,2),
     #(2,3)
   ],  # n-grams
   [
     0,
-    10,
-    50
+    #10,
+    #50
   ],  # minDF
   [
     #None,
@@ -113,7 +113,7 @@ gSParams = [
   [
     'constant',
     'optimal',
-    'invscaling'
+    #'invscaling'
   ],  # SGD learning rate
   [
     #'rbf',
