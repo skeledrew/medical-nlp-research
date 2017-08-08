@@ -33,14 +33,14 @@ gSParams = [
     #'anc_notes_trim_bac-all',  # all BAC data
     #'anc_notes_trim_cuis_bac-all',  # v2 cuis
     'anc_notes_trim_bac-all_gender_race',
-    'anc_notes_trim_cuis_bac-all_gender_race',
+    #'anc_notes_trim_cuis_bac-all_gender_race',
   ],  # data dirs
   [
     #'LinearSVC',
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    'SGDClassifier',
+    #'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -52,6 +52,7 @@ gSParams = [
     #'RulesBasedClassifier',  # custom
     #'RandomForestClassifier',
     #'DummyClassifier',  # for the baseline
+    'OptimizedRulesSeaker'
   ],  # classifiers
   [10],  # for n-folds CV
   [
@@ -113,7 +114,7 @@ gSParams = [
     #'distance'
   ], # KNN weights
   [
-    'constant',
+    #'constant',
     'optimal',
     #'invscaling'
   ],  # SGD learning rate
@@ -129,11 +130,11 @@ gSParams = [
   ],  # CVec analyzer
   [
     True,
-    False
+    #False
   ],  # CVec binary
   [
     #'text',
-    'count',
+    #'count',
     'tfidf',
   ],  # preprocessing task
   [
