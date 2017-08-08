@@ -30,8 +30,10 @@ gSParams = [
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
     #'anc_notes_trim_v3',  # trim with BAC
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
-    'anc_notes_trim_bac-all',  # all BAC data
-    'anc_notes_trim_cuis_bac-all',  # v2 cuis
+    #'anc_notes_trim_bac-all',  # all BAC data
+    #'anc_notes_trim_cuis_bac-all',  # v2 cuis
+    'anc_notes_trim_bac-all_gender_race',
+    'anc_notes_trim_cuis_bac-all_gender_race',
   ],  # data dirs
   [
     #'LinearSVC',
@@ -217,7 +219,6 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   if pre_task == 'text':
     text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
     memo[param_hash]['matrix'] = text_matrix
-    #memo[param_hash]['features'] = []
     return text_matrix, bunch, []  # no features
 
   # raw occurences
@@ -227,7 +228,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
     min_df=minDF,
     vocabulary=None,
     binary=binary,
-    token_pattern=r'(-?[Cc]\d+\b)|(\b[a-zA-Z0-9_]{2,}\b)|((?u)\b\w\w+\b)',  # enable neg capture
+    token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture, underscores
     analyzer=analyzer,
   )
   count_matrix = vectorizer.fit_transform(bunch.data)
