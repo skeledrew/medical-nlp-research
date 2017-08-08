@@ -227,7 +227,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
     min_df=minDF,
     vocabulary=None,
     binary=binary,
-    token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture
+    token_pattern=r'(-?[Cc]\d+\b)|(\b[a-zA-Z0-9_]{2,}\b)|((?u)\b\w\w+\b)',  # enable neg capture
     analyzer=analyzer,
   )
   count_matrix = vectorizer.fit_transform(bunch.data)
