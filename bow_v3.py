@@ -1,4 +1,4 @@
-#! /NLPShare/nlpenv/bin/python3
+#! /home/aphillips5/envs/nlpenv/bin/python3
 
 import numpy as np
 from sklearn.datasets import load_files
@@ -18,7 +18,7 @@ from common import *
 #ngram_range = (1, 2)
 #min_df = 50
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
-gSParams = [{'methods': ['gSGenericRunner']}, ['anc_notes_trim'], [5],
+gSParams = [{'methods': ['gSGenericRunner']}, ['anc_notes', 'anc_notes_cuis'], [5],
             [(1,1), (1,2), (1,3), (2,2), (2,3)], [5, 10, 50], [1, 10, 100, 1000],
             ['rbf', 'poly'], [2, 3], ['balanced'], ['LinearSVC', 'SVC']]  # grid search params
 
@@ -87,5 +87,5 @@ if __name__ == "__main__":
 
     except Exception as e:
       results[idx] = [results[idx], 'Error in #%d: %s' % (idx, str(e))]
-  pickleSave(results, '%sanc_notes_trim_SVC_GS_exp%s_results.lst' % (dataDir, getExpNum(dataDir + 'tracking.dct')))
+  saveJson(results, '%sexp%s_anc_notes_SVC_GS_results.json' % (dataDir, getExpNum(dataDir + 'tracking.json')))
   print('Operation complete.')

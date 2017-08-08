@@ -227,7 +227,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
     min_df=minDF,
     vocabulary=None,
     binary=binary,
-    token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)',  # enable neg capture
+    token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture
     analyzer=analyzer,
   )
   count_matrix = vectorizer.fit_transform(bunch.data)
@@ -269,7 +269,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
     classifier = eval('clf(%s)' % (params))
 
   except Exception as e:
-    raise Exception('%s: Failed to create %s(%s); %s' % (currentTime(), clf_name, params, repr(e)))
+    raise Exception('Failed to create %s with params %s; %s' % (clf_name, params, repr(e)))
   return classifier
 
 def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
