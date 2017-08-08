@@ -133,9 +133,9 @@ gSParams = [
     #False
   ],  # CVec binary
   [
-    #'text',
+    'text',
     #'count',
-    'tfidf',
+    #'tfidf',
   ],  # preprocessing task
   [
     -1,  # all CPUs
