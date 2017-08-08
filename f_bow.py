@@ -52,7 +52,7 @@ gSParams = [
     #'RulesBasedClassifier',  # custom
     #'RandomForestClassifier',
     #'DummyClassifier',  # for the baseline
-    'OptimizedRulesSeaker'
+    'OptimizedRulesSeeker'
   ],  # classifiers
   [10],  # for n-folds CV
   [
