@@ -6,7 +6,7 @@ from common import *
 
 oldDir = dataDir + 'anc_notes/'
 newDir = dataDir + 'anc_notes_trim/'
-substances = ['alcohol', 'beer', 'wine', 'liquor', 'scotch', 'bourbon']
+substances = ['alcohol', 'beer', 'wine', 'liquor', 'scotch', 'bourbon', 'cognac']
 posTriggers = ['etoh', 'disorient', 'syncope', 'impair', 'decrease', 'drink', 'deficit', 'thc', 'intoxicat', 'banana bag', 'lorazepam', 'ativan', ' b1', ' b6', 'thiamine', 'pyridoxine', 'multivitamin', 'bac ', 'bal ', 'dependence', 'heavy', 'admits']
 genTriggers = ['fall', 'fell', 'dizz', 'nausea', 'vomit', 'lethargic', 'drowsy', 'shot', 'sluggish', 'male', 'groggy', ]
 negTriggers = ['denies', 'none detected', 'sober']

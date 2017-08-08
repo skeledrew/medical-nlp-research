@@ -16,6 +16,7 @@ class RulesBasedClassifier(BaseEstimator, ClassifierMixin):
     def __init__(self, rules=None, thresh_cnt=1):
         # takes a list of regexes or function, threshold
         self._thresh_cnt = thresh_cnt
+        if isinstance(rules, str) and os.path.exists(rules): rules = self._rules_from_file(rules)
         self._rules = rules if rules else self._default_rules()
         return
 
@@ -24,6 +25,20 @@ class RulesBasedClassifier(BaseEstimator, ClassifierMixin):
 
     def _default_rules(self):
         rules = ['intoxicat\w+\b', 'banana bag', '(alcohol|etoh).+(dependence|withdrawal)', 'drink.{1,45}(every|per|each|/).*(day|night)', 'drunk', 'alcoholic', 'heavy (etoh|alcohol)']
+        return rules
+
+    def _rules_from_file(self, path):
+        # get from text or json file
+        rules = None
+
+        if path.endswith('.json'):
+            content = loadJson(path)
+
+            if isinstance(content, list):
+                rules = content
+
+        if path.endswith('.txt'):
+            rules = loadText(path).split('\n')
         return rules
 
     def fit(self, X, y):

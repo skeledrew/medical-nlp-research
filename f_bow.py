@@ -8,13 +8,14 @@ from sklearn.model_selection import train_test_split, KFold
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
-from sklearn import svm, naive_bayes, linear_model, neighbors
+from sklearn import svm, naive_bayes, linear_model, neighbors, ensemble, dummy
 
 from common import *
 import custom_clfs
 
 
-DEBUG = False
+ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create'
+DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 gSParams = [
@@ -27,9 +28,10 @@ gSParams = [
     #'anc_notes_v2_cuis',  # cuis w/ dict fix
     #'anc_notes_trim_v2_cuis',  # trim cuis
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
-    'anc_notes_trim_v3',  # trim with BAC
+    #'anc_notes_trim_v3',  # trim with BAC
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
-    #'anc_notes_trim_bac-all'
+    'anc_notes_trim_bac-all',  # all BAC data
+    'anc_notes_trim_cuis_bac-all',  # v2 cuis
   ],  # data dirs
   [
     #'LinearSVC',
@@ -45,20 +47,22 @@ gSParams = [
     #'GaussianNB'
     #'PassiveAggressiveRegressor',
     #'SGDRegressor',
-    'RulesBasedClassifier',  # custom
+    #'RulesBasedClassifier',  # custom
+    #'RandomForestClassifier',
+    #'DummyClassifier',  # for the baseline
   ],  # classifiers
   [10],  # for n-folds CV
   [
     (1,1),
-    #(1,2),
-    #(1,3),
+    (1,2),
+    (1,3),
     #(2,2),
     #(2,3)
   ],  # n-grams
   [
     0,
-    #10,
-    #50
+    10,
+    50
   ],  # minDF
   [
     #None,
@@ -107,9 +111,9 @@ gSParams = [
     #'distance'
   ], # KNN weights
   [
-    #'constant',
+    'constant',
     'optimal',
-    #'invscaling'
+    'invscaling'
   ],  # SGD learning rate
   [
     #'rbf',
@@ -122,12 +126,12 @@ gSParams = [
     #'char_wb',
   ],  # CVec analyzer
   [
-    #True,
+    True,
     False
   ],  # CVec binary
   [
-    'text',
-    #'count',
+    #'text',
+    'count',
     'tfidf',
   ],  # preprocessing task
   [
@@ -136,7 +140,7 @@ gSParams = [
   ],  # n jobs
 ]  # grid search params
 memo = {}  # for memoization
-clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs]
+clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
 
 def gSGenericRunner(
     notesDirName,
@@ -163,7 +167,7 @@ def gSGenericRunner(
   frame = currentframe()
   args, _, _, values = getargvalues(frame)
   result['options'] = allArgs = {arg: values[arg] for arg in args}
-  preproc_hash = hash_sum('%s%s%d%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary))
+  preproc_hash = hash_sum('%s%s%d%s%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary, preTask))
   matrix, bunch, result['features'] = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
   hyParams = {
     'penalty': penalty,
@@ -183,7 +187,7 @@ def gSGenericRunner(
 
   try:
     p = r = f1 = std = 0
-    p, r, f1, std, mis = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash) if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
+    p, r, f1, std, mis = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features']) if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
     result['f1'] = f1
@@ -201,8 +205,9 @@ def gSGenericRunner(
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
   # 17-07-07 preprocessing with memoization for better speed and efficient memory use
-  if param_hash in memo: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features']
+  if param_hash in memo and not memo[param_hash]['matrix'] == None: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features']
   memo[param_hash] = {}
+  memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features'] = None, None, []
   notesRoot = dataDir + notesDirName
   b_hash = hash_sum(notesRoot)
   bunch = memo[b_hash] if b_hash in memo else load_files(notesRoot)
@@ -212,7 +217,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   if pre_task == 'text':
     text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
     memo[param_hash]['matrix'] = text_matrix
-    memo[param_hash]['features'] = []
+    #memo[param_hash]['features'] = []
     return text_matrix, bunch, []  # no features
 
   # raw occurences
@@ -222,7 +227,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
     min_df=minDF,
     vocabulary=None,
     binary=binary,
-    token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)',  # enable neg capture
+    token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture
     analyzer=analyzer,
   )
   count_matrix = vectorizer.fit_transform(bunch.data)
@@ -247,6 +252,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
   # create classifier and add relevant hyperparameters
   clf = None
   mod = None
+  classifier = None
 
   for m in clf_mods:
     # get the module containing the classifier
@@ -258,10 +264,15 @@ def MakeClf(clf_name, hyparams, clf_mods):
   clf = getattr(mod, clf_name)
   clf_str = str(clf())
   params = ', '.join(['%s=%s' % (p, hyparams[p] if not isinstance(hyparams[p], str) else hyparams[p].__repr__()) for p in hyparams if p + '=' in clf_str and not hyparams[p] == IGNORE])  # make parameter string
-  classifier = eval('clf(%s)' % (params))
+
+  try:
+    classifier = eval('clf(%s)' % (params))
+
+  except Exception as e:
+    raise Exception('Failed to create %s with params %s; %s' % (clf_name, params, repr(e)))
   return classifier
 
-def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash):
+def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   # KFold
   kf_hash = hash_sum('%d%s%s' % (numFolds, pp_hash, clf_hash))
   if kf_hash in memo: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis']
@@ -271,6 +282,12 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash):
   f1s = []
   folds = KFold(n_splits=numFolds)
   misses = []
+  wghts_read = False
+  #feats = np.array(feats)
+
+  for idx in range(len(feats)):
+    feats[idx] = [feats[idx][0], feats[idx][1]]
+  f_idx = 0
 
   for train_indices, test_indices in folds.split(matrix):
     x_train = matrix[train_indices]
@@ -279,7 +296,9 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash):
     y_test = bunch.target[test_indices]
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
-    if DEBUG: pdb.set_trace()
+    #weights = {feat: weight for feat, weight in zip(feats, classifier.coef_[0])}
+    if hasattr(classifier, 'coef_'): [feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))]
+    #if DEBUG: pdb.set_trace()
     misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
     ps.append(precision_score(y_test, pred, pos_label=1))
     rs.append(recall_score(y_test, pred, pos_label=1))
@@ -331,7 +350,7 @@ def main():
     sess = loadPickle(curr_sess)
     results = sess['results']
     memo = sess['memo']
-    resume = sess['last_idx']
+    resume = sess['last_idx'] + 1
     writeLog('Continuing session saved at %s from index %d' % (curr_sess, resume))
 
   else:
@@ -354,17 +373,23 @@ def main():
       return
 
     except Exception as e:
-      if DEBUG:
-        results[idx] = 'Error in #%d: %s.\nSaving progress...' % (idx, repr(e))
+      ignore = False
+
+      for err_pat in ERROR_IGNORE.split('||'):
+        if re.search(err_pat, repr(e)): ignore = True
+
+      if DEBUG and not ignore:
+        results[idx] = 'Error in #%d: %s.\nSaving progress...' % (idx+1, repr(e))
         writeLog('%s: %s' % (currentTime(), results[idx]))
         sess = {'results': results, 'gsparams': gSParams, 'memo': memo, 'last_idx': idx}
         savePickle(sess, curr_sess)
         writeLog('%s: Successfully saved to %s' % (currentTime(), curr_sess))
+        pdb.post_mortem()
 
       else:
         results[idx] = 'Exception in #%d: %s.' % (idx+1, repr(e))
         writeLog('%s: %s' % (currentTime(), results[idx]))
-        raise
+        #raise
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
   rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)

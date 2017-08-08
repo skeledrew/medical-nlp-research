@@ -20,14 +20,12 @@ def bac_yn_add(content, row):
 
         if row[BAC_C].lower() == 'no':
             content += ' BAC_NO'
-            holder['mods'] += 1
-            break
-        if row[BAC_POS] == '': break
+            holder['cnt'] += 1
+        #if row[BAC_POS] == '': break
 
         if row[BAC_C].lower() == 'yes':
             content += ' BAC_YES'
-            holder['mods'] += 1
-            break
+            holder['cnt'] += 1
         return content
 
 def bac_yn_only(content, row):
@@ -35,24 +33,24 @@ def bac_yn_only(content, row):
 
         if row[BAC_C].lower() == 'no':
             content = 'BAC_NO'
-            break
-        if row[BAC_POS] == '': break
+        #if row[BAC_POS] == '': break
 
         if row[BAC_C].lower() == 'yes':
             content = 'BAC_YES'
-            break
         return content
 
 def bac_val_add(content, row):
     # add BAC value buckets to content
-    b_size = 15  # bucket size
+    b_size = 50  # bucket size
     b_size = int(b_size)
     if b_size <= 0: raise Exception('Bucket size must be greater than zero.')
 
     if row[BAC_VAL].isdigit():
         # only modifiy if it's an unsigned integer
-        buck = int(row[BAC_VAL]) / b_size
-        content += ' BAC_%d_%d' % (b_size, buck)
+        bac_val = int(row[BAC_VAL])
+        buck = bac_val / b_size
+        content += ' BAC_%d_%d BAC_VAL_%s' % (b_size, buck, bac_val)
+        if bac_val > 175: content += ' CRITICAL_BAC'
     return content
 
 def gender_add(content, row):
@@ -76,6 +74,10 @@ def race_add(content, row):
         content += ' UNKNOWN_RACE'
     return content
 
+def bac_all_add(content, row):
+        #pdb.set_trace()
+        return bac_val_add(bac_yn_add(content, row), row)
+
 def mod(name, content, mod_func):
     mrn = name.split('.')[0].lstrip('0')
 
@@ -95,7 +97,7 @@ def main(s_path, d_path, mod_func):
     mod_funcs = ['bac_yn_add', 'bac_yn_only', 'bac_all_add', 'gender_add']
     if not isinstance(mod_func, str): mod_funcs.append(mod_func)
     holder['tfc'] = [row for row in csv.reader(open(tf_csv), delimiter=',')]
-    holder['mods'] = 0
+    holder['cnt'] = 0
     holder['mod_funcs'] = mod_funcs
 
     for name in files:
@@ -103,7 +105,7 @@ def main(s_path, d_path, mod_func):
 
         with open(s_path + name) as sfo, open(d_path + name, 'w') as dfo:
             dfo.write(mod(name, sfo.read(), mod_func))
-    print('%d files modified' % holder['mods'])
+    print('%d files modified' % holder['cnt'])
 
 if __name__ == '__main__':
     try:
