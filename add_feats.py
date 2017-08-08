@@ -94,7 +94,7 @@ def main(s_path, d_path, mod_func):
     files = list(getFileList(s_path))
     ensureDirs(d_path)
     tf_csv = baseDir + 'Trauma_Final_20170614.csv'
-    mod_funcs = ['bac_yn_add', 'bac_yn_only', 'bac_all_add', 'gender_add']
+    mod_funcs = ['bac_yn_add', 'bac_yn_only', 'bac_all_add', 'gender_add', 'race_add']
     if not isinstance(mod_func, str): mod_funcs.append(mod_func)
     holder['tfc'] = [row for row in csv.reader(open(tf_csv), delimiter=',')]
     holder['cnt'] = 0
@@ -104,7 +104,12 @@ def main(s_path, d_path, mod_func):
         name = name.split('/')[-1]
 
         with open(s_path + name) as sfo, open(d_path + name, 'w') as dfo:
-            dfo.write(mod(name, sfo.read(), mod_func))
+            funcs = mod_func.split('&')
+            content = sfo.read()
+
+            for func in funcs:
+                content = mod(name, content, func)
+            dfo.write(content)
     print('%d files modified' % holder['cnt'])
 
 if __name__ == '__main__':
