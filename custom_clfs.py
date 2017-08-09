@@ -125,7 +125,7 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
         self._rand_state = rand_state  # seed to randomize search
         self._optimum = optimum  # score to optimize for
 
-    def __str__():
+    def __str__(self):
         return 'OptimizedRulesSeeker(search=%d, rand_state=%d, optimum=%s)' % (self._search, self._rand_state, self._optimum)
 
     def fit(self, X, y):
