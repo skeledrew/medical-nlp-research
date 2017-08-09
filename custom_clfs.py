@@ -146,6 +146,7 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
         sent_sep = re.compile(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s")
         regexes = []
         targ_samps = self._set_targs(self._y, self._rand_state, self._search)
+        writeLog('%s: Generating regexes from %d samples' % (currentTime(), len(targ_samps)))
 
         for idx in targ_samps:
             samp = self._X[idx]
@@ -156,7 +157,7 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
                 words = word_sep.split(sent)
                 regexes += self._res_from_words(words, word_tok)
         regexes =  list(set(regexes))
-        writeLog('%s: %d regexes generated from %d samples!' % (currentTime(), len(regexes), len(targ_samps)))
+        writeLog('%s: %d regexes generated!' % (currentTime(), len(regexes), len(targ_samps)))
         return regexes
 
     def _res_from_words(self, words, tok):
