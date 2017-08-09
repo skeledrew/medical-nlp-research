@@ -120,10 +120,13 @@ class RulesBasedClassifier(BaseEstimator, ClassifierMixin):
 
 class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
 
-    def __init__(self, rand_state=0, search=10, optimum='f1'):
-        self._rand_state = rand_state  # seed to randomize search
+    def __init__(self, search=1, rand_state=0, optimum='f1'):
         self._search = search  # %age of samples to get rules from
+        self._rand_state = rand_state  # seed to randomize search
         self._optimum = optimum  # score to optimize for
+
+    def __str__():
+        return 'OptimizedRulesSeeker(search=%d, rand_state=%d, optimum=%s)' % (self._search, self._rand_state, self._optimum)
 
     def fit(self, X, y):
         try:
@@ -131,7 +134,6 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
             self._y = y
             regexes = self._generate_regexes()
             self._clf = RulesBasedClassifier(regexes).fit(X, y)
-            pdb.set_trace()
 
         except Exception as e:
             print(repr(e))
@@ -143,7 +145,7 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
         word_sep = re.compile(r'[\s;.]')
         sent_sep = re.compile(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s")
         regexes = []
-        targ_samps = range(len(self._X)) ##self._set_targs(len(self._X), self._rand_state, self._search)
+        targ_samps = self._set_targs(self._y, self._rand_state, self._search)
 
         for idx in targ_samps:
             samp = self._X[idx]
@@ -153,7 +155,9 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
             for sent in sents:
                 words = word_sep.split(sent)
                 regexes += self._res_from_words(words, word_tok)
-        return list(set(regexes))
+        regexes =  list(set(regexes))
+        writeLog('%s: %d regexes generated from %d samples!' % (currentTime(), len(regexes), len(targ_samps)))
+        return regexes
 
     def _res_from_words(self, words, tok):
         targ_len = len(words) - 2
@@ -176,12 +180,23 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
             res.append(btwn_re.join(combs[idx]))
         return res
 
-    def _set_targs(self, targ_size, rand, search):
-        size = int(search / targ_size * 100)
-        rng = range(targ_size)
-        if rand == 0: return rng[:size]
-        random.seed(rand)
-        return random.sample(rng, size)
+    def _set_targs(self, targ, rand, search):
+        f_label = targ[0]
+        s_label = None
+        split_pos = None
+        if not isinstance(rand, int): rand = 0
+
+        for idx in range(len(targ)):
+            if targ[idx] == f_label: continue
+            s_label = targ[idx]
+            split_pos = idx
+        f_size = int(search / 100 * len(targ[:split_pos]))
+        s_size = int(search / 100 * len(targ[split_pos:]))
+        f_rng = list(range(f_size))
+        s_rng = list(range(split_pos, split_pos + s_size))
+        if rand == 0: return f_rng + s_rng
+        random.seed(rand)  # deterministic random state
+        return random.sample(range(split_pos), f_size) + random.sample(range(split_pos, len(targ)), s_size)
 
     def predict(self, X):
         return self._clf.predict(X)
@@ -189,4 +204,4 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
 if __name__ == '__main__':
     print('This module contains importable classifiers')
 pdb.set_trace()
-commit_me(dataDir + 'tracking.json')
+commit_me(dataDir + 'tracking.json', 'custom_clfs.py')
