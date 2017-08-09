@@ -50,7 +50,7 @@ def bac_val_add(content, row):
         bac_val = int(row[BAC_VAL])
         buck = bac_val / b_size
         content += ' BAC_%d_%d BAC_VAL_%s' % (b_size, buck, bac_val)
-        if bac_val > 175: content += ' CRITICAL_BAC'
+        if bac_val > 130: content += ' CRITICAL_BAC'
     return content
 
 def gender_add(content, row):
