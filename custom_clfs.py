@@ -203,5 +203,5 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
 
 if __name__ == '__main__':
     print('This module contains importable classifiers')
-pdb.set_trace()
+#pdb.set_trace()
 commit_me(dataDir + 'tracking.json', 'custom_clfs.py')
