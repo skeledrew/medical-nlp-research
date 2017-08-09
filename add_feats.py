@@ -104,7 +104,7 @@ def main(s_path, d_path, mod_func):
         name = name.split('/')[-1]
 
         with open(s_path + name) as sfo, open(d_path + name, 'w') as dfo:
-            funcs = mod_func.split('&')
+            funcs = mod_func.split('+')
             content = sfo.read()
 
             for func in funcs:
