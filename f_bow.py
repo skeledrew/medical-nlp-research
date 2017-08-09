@@ -33,14 +33,14 @@ gSParams = [
     #'anc_notes_trim_bac-all',  # all BAC data
     #'anc_notes_trim_cuis_bac-all',  # v2 cuis
     'anc_notes_trim_bac-all_gender_race',
-    #'anc_notes_trim_cuis_bac-all_gender_race',
+    'anc_notes_trim_cuis_bac-all_gender_race',
   ],  # data dirs
   [
     #'LinearSVC',
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    #'SGDClassifier',
+    'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -49,12 +49,15 @@ gSParams = [
     #'GaussianNB'
     #'PassiveAggressiveRegressor',
     #'SGDRegressor',
-    'RulesBasedClassifier',  # custom
+    #'RulesBasedClassifier',  # custom
     #'RandomForestClassifier',
     #'DummyClassifier',  # for the baseline
-    'OptimizedRulesSeeker',  # custom
+    #'OptimizedRulesSeeker',  # custom
   ],  # classifiers
-  [10],  # for n-folds CV
+  [
+    5,
+    10,
+  ],  # for n-folds CV
   [
     (1,1),
     #(1,2),
@@ -133,9 +136,9 @@ gSParams = [
     #False
   ],  # CVec binary
   [
-    'text',
+    #'text',
     #'count',
-    #'tfidf',
+    'tfidf',
   ],  # preprocessing task
   [
     -1,  # all CPUs
@@ -352,7 +355,7 @@ def main():
     sess = loadPickle(curr_sess)
     results = sess['results']
     memo = sess['memo']
-    resume = sess['last_idx'] + 1
+    resume = sess['last_idx']
     writeLog('Continuing session saved at %s from index %d' % (curr_sess, resume))
 
   else:
