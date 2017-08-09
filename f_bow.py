@@ -49,10 +49,10 @@ gSParams = [
     #'GaussianNB'
     #'PassiveAggressiveRegressor',
     #'SGDRegressor',
-    #'RulesBasedClassifier',  # custom
+    'RulesBasedClassifier',  # custom
     #'RandomForestClassifier',
     #'DummyClassifier',  # for the baseline
-    'OptimizedRulesSeeker'
+    #'OptimizedRulesSeeker',  # custom
   ],  # classifiers
   [10],  # for n-folds CV
   [
