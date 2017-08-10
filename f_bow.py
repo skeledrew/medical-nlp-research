@@ -119,9 +119,9 @@ gSParams = [
   ], # KNN weights
   [
     #'constant',
-    'optimal',
+    #'optimal',
     #'invscaling',
-    #IGNORE,
+    IGNORE,
   ],  # SGD learning rate
   [
     #'rbf',
