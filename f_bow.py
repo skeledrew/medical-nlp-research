@@ -109,9 +109,10 @@ gSParams = [
     #'squared_hinge',
     #'perceptron',
     #'squared_loss',
-    'huber',
+    #'huber',
     #'epsilon_insensitive',
     #'squared_epsilon_insensitive',
+    IGNORE,
   ],  # loss
   [5], # n_neighbors
   [
