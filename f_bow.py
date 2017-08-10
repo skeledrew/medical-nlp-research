@@ -32,7 +32,7 @@ gSParams = [
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     #'anc_notes_trim_bac-all',  # all BAC data
     #'anc_notes_trim_cuis_bac-all',  # v2 cuis
-    'anc_notes_trim_bac-all_gender_race',
+    #'anc_notes_trim_bac-all_gender_race',
     'anc_notes_trim_cuis_bac-all_gender_race',
   ],  # data dirs
   [
@@ -121,7 +121,7 @@ gSParams = [
     #'constant',
     'optimal',
     #'invscaling',
-    IGNORE,
+    #IGNORE,
   ],  # SGD learning rate
   [
     #'rbf',
@@ -344,7 +344,7 @@ def GetMisses(y_test, pred, names):
   return misses
 
 def main(args):
-  if len(args) > 1 and args[1] == 'test': return test_eval(args[:2])
+  if len(args) > 2 and args[1] == 'test': return test_eval(args[:2])
   s_time = currentTime()
   global memo, gSParams
   g_size = 1
@@ -409,6 +409,12 @@ def main(args):
   writeLog(fin_msg)
   slack_post(fin_msg, '@aphillips')
 
+def test_eval(args):
+  if not os.path.exists(arg[0]): raise Exception('Invalid result file: %s' % arg[0])
+  results = loadJson(arg[0])
+  if not isinstance(results, list): raise ValueError('Invalid result format; must be a list.')
+  if not arg[1].isdigit() or int(arg[1]) < 0 or int(arg[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
+  result = results[int(arg[1])]
 if __name__ == "__main__":
   try:
     main(sys.argv)
