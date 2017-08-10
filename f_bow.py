@@ -9,6 +9,7 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 from sklearn import svm, naive_bayes, linear_model, neighbors, ensemble, dummy
+from sklearn.pipeline import Pipeline
 
 from common import *
 import custom_clfs
@@ -418,8 +419,14 @@ def test_eval(args):
   writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
+  classifier = MakeClf(params['clfName'], params, clfMods)
   train_matrix, train_bunch, feats = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
   test_matrix, test_bunch, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
+  clf_pipe = Pipeline([
+    ('vect', CountVectorizer()),
+    ('tfidf', TfidfTransformer()),
+    ('clf', classifier)
+  ])
   '''hyParams = {
     'penalty': params['penalty'],
     'C': params['C'],
@@ -431,17 +438,16 @@ def test_eval(args):
     'kernel': kernel,
     'n_jobs': nJobs,
   }'''
-  classifier = MakeClf(params['clfName'], params, clfMods)
 
   for idx in range(len(feats)):
     feats[idx] = [feats[idx][0], feats[idx][1]]
-  x_train = train_matrix
+  x_train = train_bunch.data
   y_train = train_bunch.target
   x_test = test_bunch.data #test_matrix
   y_test = test_bunch.target
-  model = classifier.fit(x_train, y_train)
-  pred = classifier.predict(x_test)
-  if hasattr(classifier, 'coef_'): [feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))]
+  model = clf_pipe.fit(x_train, y_train)
+  pred = clf_pipe.predict(x_test)
+  if hasattr(clf_pipe, 'coef_'): [feats[idx].append(clf_pipe.coef_[0][idx]) for idx in range(len(feats))]
   misses = GetMisses(y_test, pred, bunch.filenames[test_indices])
   p =precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
