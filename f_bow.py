@@ -341,7 +341,7 @@ def GetMisses(y_test, pred, names):
   return misses
 
 def main(args):
-  if len(args) > 2 and args[1] == 'test': return test_eval(args[:2])
+  if len(args) > 2 and args[1] == 'test': return test_eval(args[2:])
   s_time = currentTime()
   global memo, gSParams
   g_size = 1
@@ -431,7 +431,7 @@ def test_eval(args):
     'kernel': kernel,
     'n_jobs': nJobs,
   }'''
-  classifier = MakeClf(result['clfName'], params, clfMods)
+  classifier = MakeClf(params['clfName'], params, clfMods)
 
   for idx in range(len(feats)):
     feats[idx] = [feats[idx][0], feats[idx][1]]
