@@ -446,7 +446,7 @@ def test_eval(args):
   f1 = f1_score(y_test, pred, pos_label=1)
   saveText('\n'.join(misses), dataDir + 'miscats-test_temp.txt')
   saveText('\n'.join(', '.join(f) for f in feats), dataDir + 'feats-test_temp.txt')
-  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), re.sub('\n +', ' ', str(clf_pipe)), str(params), test_set, p, r, f1))
+  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), re.sub('\n +', ' ', str(clf_pipe.steps[-1][-1])), str(params), test_set, p, r, f1))
 
 if __name__ == "__main__":
   try:
