@@ -437,7 +437,7 @@ def test_eval(args):
     feats[idx] = [feats[idx][0], feats[idx][1]]
   x_train = train_matrix
   y_train = train_bunch.target
-  x_test = test_matrix
+  x_test = test_bunch.data #test_matrix
   y_test = test_bunch.target
   model = classifier.fit(x_train, y_train)
   pred = classifier.predict(x_test)
