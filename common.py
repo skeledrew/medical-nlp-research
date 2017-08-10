@@ -500,9 +500,9 @@ def slack_post(text='', channel='', botName='', botIcon=''):
     pesh(cmd)
     return
 
-def commit_me(tracker='', path=''):
+def commit_me(tracker='', name='', path=''):
     # 17-08-01 Commit after each change
-    name = sys.argv[0]
+    if not name: name = sys.argv[0]
     if not name: return  # prob running pure interactive session
     if name.startswith('./'): name = name[2:]
     if not path: path = '%s/%s' % (os.getcwd(), name)
@@ -531,4 +531,4 @@ def path_name_prefix(pref, path):
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
-commit_me(dataDir + 'tracking.json', get_path_from_func(commit_me))
+commit_me(dataDir + 'tracking.json', 'common.py')
