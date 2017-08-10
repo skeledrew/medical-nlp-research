@@ -37,11 +37,11 @@ gSParams = [
     'anc_notes_trim_cuis_bac-all_gender_race',
   ],  # data dirs
   [
-    'LinearSVC',
+    #'LinearSVC',
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    #'SGDClassifier',
+    'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -440,7 +440,6 @@ def test_eval(args):
   y_train = train_bunch.target
   x_test = test_bunch.data
   y_test = test_bunch.target
-  pdb.set_trace()
   model = clf_pipe.fit(x_train, y_train)
   pred = clf_pipe.predict(x_test)
   if hasattr(clf_pipe, 'coef_'): [feats[idx].append(clf_pipe.coef_[0][idx]) for idx in range(len(feats))]
