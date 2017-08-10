@@ -30,8 +30,8 @@ gSParams = [
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
     #'anc_notes_trim_v3',  # trim with BAC
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
-    #'anc_notes_trim_bac-all',  # all BAC data
-    #'anc_notes_trim_cuis_bac-all',  # v2 cuis
+    'anc_notes_trim_bac-all',  # all BAC data
+    'anc_notes_trim_cuis_bac-all',  # v2 cuis
     'anc_notes_trim_bac-all_gender_race',
     'anc_notes_trim_cuis_bac-all_gender_race',
   ],  # data dirs
@@ -40,7 +40,7 @@ gSParams = [
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    'SGDClassifier',
+    #'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -53,6 +53,7 @@ gSParams = [
     #'RandomForestClassifier',
     #'DummyClassifier',  # for the baseline
     #'OptimizedRulesSeeker',  # custom
+    'AdaBoostClassifier',
   ],  # classifiers
   [
     5,
@@ -119,7 +120,8 @@ gSParams = [
   [
     #'constant',
     'optimal',
-    #'invscaling'
+    #'invscaling',
+    #IGNORE,
   ],  # SGD learning rate
   [
     #'rbf',
@@ -341,7 +343,8 @@ def GetMisses(y_test, pred, names):
     if not y_test[idx] == pred[idx]: misses.append(names[idx])
   return misses
 
-def main():
+def main(args):
+  if len(args) > 1 and args[1] == 'test': return test_eval(args[:2])
   s_time = currentTime()
   global memo, gSParams
   g_size = 1
@@ -405,7 +408,12 @@ def main():
   fin_msg = 'Operation complete for experiment #%d. Started %s and ended %s.' % (ex_num, s_time, e_time)
   writeLog(fin_msg)
   slack_post(fin_msg, '@aphillips')
-  commit_me(dataDir + 'tracking.json')
 
 if __name__ == "__main__":
-  main()
+  try:
+    main(sys.argv)
+
+  except Exception as e:
+    print('Exception: %s' % (repr(e)))
+    pdb.post_mortem()
+commit_me(dataDir + 'tracking.json', 'f_bow.py')
