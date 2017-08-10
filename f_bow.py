@@ -422,22 +422,18 @@ def test_eval(args):
   classifier = MakeClf(params['clfName'], params, clfMods)
   train_matrix, train_bunch, feats = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
   test_matrix, test_bunch, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
+  vectorizer = CountVectorizer(
+    stop_words='english',
+    min_df=0,
+    vocabulary=None,
+    binary=True,
+    token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture, underscores
+  )
   clf_pipe = Pipeline([
-    ('vect', CountVectorizer()),
+    ('vect', vectorizer),
     ('tfidf', TfidfTransformer()),
     ('clf', classifier)
   ])
-  '''hyParams = {
-    'penalty': params['penalty'],
-    'C': params['C'],
-    'class_weight': classWeight,
-    'loss': loss,
-    'n_neighbors': nNei,
-    'weights': kNWeights,
-    'learning_rate': learnRate,
-    'kernel': kernel,
-    'n_jobs': nJobs,
-  }'''
 
   for idx in range(len(feats)):
     feats[idx] = [feats[idx][0], feats[idx][1]]
@@ -452,7 +448,7 @@ def test_eval(args):
   p =precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
   f1 = f1_score(y_test, pred, pos_label=1)
-  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), clf_pipe, str(params), test_set, p, r, f1))
+  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), str(clf_pipe), str(params), test_set, p, r, f1))
 
 if __name__ == "__main__":
   try:
