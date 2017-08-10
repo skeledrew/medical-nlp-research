@@ -177,7 +177,7 @@ def gSGenericRunner(
   args, _, _, values = getargvalues(frame)
   result['options'] = allArgs = {arg: values[arg] for arg in args}
   preproc_hash = hash_sum('%s%s%d%s%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary, preTask))
-  matrix, bunch, result['features'] = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
+  matrix, bunch, result['features'], _ = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
   hyParams = {
     'penalty': penalty,
     'C': C,
@@ -223,6 +223,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   bunch = memo[b_hash] if b_hash in memo else load_files(notesRoot)
   if not b_hash in memo: memo[b_hash] = bunch
   memo[param_hash]['bunch'] = bunch
+  pipe = []  # hold transformer objects
 
   if pre_task == 'text':
     text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
@@ -239,6 +240,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
     token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture, underscores
     analyzer=analyzer,
   )
+  pipe.append(('vect', vectorizer))
   count_matrix = vectorizer.fit_transform(bunch.data)
 
   # save features
@@ -249,13 +251,14 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
 
   if pre_task == 'count':
     memo[param_hash]['matrix'] = count_matrix
-    return count_matrix, bunch, features
+    return count_matrix, bunch, features, pipe
 
   # tf-idf
   tf = TfidfTransformer()
+  pipe.append(('tfidf', tf))
   tfidf_matrix = tf.fit_transform(count_matrix)
   memo[param_hash]['matrix'] = tfidf_matrix
-  return tfidf_matrix, bunch, features
+  return tfidf_matrix, bunch, features, pipe
 
 def MakeClf(clf_name, hyparams, clf_mods):
   # create classifier and add relevant hyperparameters
@@ -421,26 +424,19 @@ def test_eval(args):
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
   classifier = MakeClf(params['clfName'], params, clfMods)
-  train_matrix, train_bunch, feats = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
-  test_matrix, test_bunch, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
-  vectorizer = CountVectorizer(
-    #stop_words='english',
-    #vocabulary=None,
-    #binary=True,
-    #token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture, underscores
-  )
-  clf_pipe = Pipeline([
-    ('vect', vectorizer),
-    ('tfidf', TfidfTransformer()),
-    ('clf', classifier)
-  ])
+  train_matrix, train_bunch, feats, pipe = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
+  test_matrix, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
+  pipe.append(('clf', classifier))
+  clf_pipe = Pipeline(pipe)
 
   for idx in range(len(feats)):
+    # make features holder into a list of lists
     feats[idx] = [feats[idx][0], feats[idx][1]]
   x_train = train_bunch.data
   y_train = train_bunch.target
   x_test = test_bunch.data
   y_test = test_bunch.target
+  pdb.set_trace()
   model = clf_pipe.fit(x_train, y_train)
   pred = clf_pipe.predict(x_test)
   if hasattr(clf_pipe, 'coef_'): [feats[idx].append(clf_pipe.coef_[0][idx]) for idx in range(len(feats))]
@@ -448,6 +444,8 @@ def test_eval(args):
   p =precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
   f1 = f1_score(y_test, pred, pos_label=1)
+  saveText('\n'.join(misses), dataDir + 'miscats-test_temp.txt')
+  saveText('\n'.join(', '.join(f) for f in feats), dataDir + 'feats-test_temp.txt')
   writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), re.sub('\n +', ' ', str(clf_pipe)), str(params), test_set, p, r, f1))
 
 if __name__ == "__main__":
