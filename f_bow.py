@@ -77,7 +77,8 @@ gSParams = [
     'l1',
     #'l2',
     #'elasticnet',
-    #'none'
+    #'none',
+    IGNORE
   ],  # penalty
   [
     #0.0000001,
@@ -109,7 +110,7 @@ gSParams = [
     #'squared_hinge',
     #'perceptron',
     #'squared_loss',
-    #'huber',
+    'huber',
     #'epsilon_insensitive',
     #'squared_epsilon_insensitive',
     IGNORE,
