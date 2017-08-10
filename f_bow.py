@@ -188,6 +188,7 @@ def gSGenericRunner(
     'learning_rate': learnRate,
     'kernel': kernel,
     'n_jobs': nJobs,
+    'random_state': 1,  # make deterministic
   }
   classifier = MakeClf(clfName, hyParams, clfMods)
   result['classifier'] = str(classifier).replace('\n', '')
@@ -438,7 +439,7 @@ def test_eval(args):
     feats[idx] = [feats[idx][0], feats[idx][1]]
   x_train = train_bunch.data
   y_train = train_bunch.target
-  x_test = test_bunch.data #test_matrix
+  x_test = test_bunch.data
   y_test = test_bunch.target
   model = clf_pipe.fit(x_train, y_train)
   pred = clf_pipe.predict(x_test)
