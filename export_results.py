@@ -52,7 +52,10 @@ def get_top_results(critr, path):
         with open(mf_name, 'w') as fo:
             fo.write('\n'.join(top['mis']))
         top['mis'] = mf_name
-    writeLog('\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s' % (currentTime(), path, critr, cr_hash, top))
+    if not isinstance(top, list): top = [top]
+    rf_name = path_name_prefix('top-res-%s' % cr_hash, path)
+    saveJson(top, rf_name)
+    writeLog('\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name))
     return top
 
 def str_to_dict(s, main_sep, map_sep):
@@ -64,9 +67,8 @@ def str_to_dict(s, main_sep, map_sep):
         final[item[0]] = item[1]
     return final
 
-def main():
+def main(args):
     print('Working...')
-    args = sys.argv
 
     if len(args) == 1:
         print('No args given. Terminating...')
@@ -89,8 +91,8 @@ def main():
 
 if __name__ == '__main__':
     try:
-        main()
-        commit_me(dataDir + 'tracking.json')
+        main(sys.argv)
+        commit_me(dataDir + 'tracking.json', name='export_results.py')
 
     except Exception as e:
         pdb.post_mortem()
