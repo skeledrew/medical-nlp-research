@@ -53,7 +53,7 @@ def get_top_results(critr, path):
             fo.write('\n'.join(top['mis']))
         top['mis'] = mf_name
     if not isinstance(top, list): top = [top]
-    rf_name = path_name_prefix('top-res-%s' % cr_hash, path)
+    rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
     saveJson(top, rf_name)
     writeLog('\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name))
     return top
