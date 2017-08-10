@@ -92,7 +92,7 @@ def main(args):
 if __name__ == '__main__':
     try:
         main(sys.argv)
-        commit_me(dataDir + 'tracking.json', name='export_results.py')
+        commit_me(dataDir + 'tracking.json', 'export_results.py')
 
     except Exception as e:
         pdb.post_mortem()
