@@ -290,7 +290,6 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
-  #feats = np.array(feats)
 
   for idx in range(len(feats)):
     feats[idx] = [feats[idx][0], feats[idx][1]]
@@ -303,9 +302,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
     y_test = bunch.target[test_indices]
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
-    #weights = {feat: weight for feat, weight in zip(feats, classifier.coef_[0])}
     if hasattr(classifier, 'coef_'): [feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))]
-    #if DEBUG: pdb.set_trace()
     misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
     ps.append(precision_score(y_test, pred, pos_label=1))
     rs.append(recall_score(y_test, pred, pos_label=1))
@@ -410,11 +407,47 @@ def main(args):
   slack_post(fin_msg, '@aphillips')
 
 def test_eval(args):
-  if not os.path.exists(arg[0]): raise Exception('Invalid result file: %s' % arg[0])
-  results = loadJson(arg[0])
+  # takes results file, result index, test dir
+  if not os.path.exists(args[0]): raise Exception('Invalid result file: %s' % args[0])
+  results = loadJson(args[0])
+  if isinstance(results, dict): results = [results]
   if not isinstance(results, list): raise ValueError('Invalid result format; must be a list.')
-  if not arg[1].isdigit() or int(arg[1]) < 0 or int(arg[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
-  result = results[int(arg[1])]
+  if not args[1].isdigit() or int(args[1]) < 0 or int(args[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
+  result = results[int(args[1])]
+  if not os.path.exists(args[2]): raise Exception('Invalid path for test set')
+  writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
+  test_set = args[2].rstrip('/').split('/')[-1]
+  params = result['options']
+  train_matrix, train_bunch, feats = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
+  test_matrix, test_bunch, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
+  '''hyParams = {
+    'penalty': params['penalty'],
+    'C': params['C'],
+    'class_weight': classWeight,
+    'loss': loss,
+    'n_neighbors': nNei,
+    'weights': kNWeights,
+    'learning_rate': learnRate,
+    'kernel': kernel,
+    'n_jobs': nJobs,
+  }'''
+  classifier = MakeClf(result['clfName'], params, clfMods)
+
+  for idx in range(len(feats)):
+    feats[idx] = [feats[idx][0], feats[idx][1]]
+  x_train = train_matrix
+  y_train = train_bunch.target
+  x_test = test_matrix
+  y_test = test_bunch.target
+  model = classifier.fit(x_train, y_train)
+  pred = classifier.predict(x_test)
+  if hasattr(classifier, 'coef_'): [feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))]
+  misses = GetMisses(y_test, pred, bunch.filenames[test_indices])
+  p =precision_score(y_test, pred, pos_label=1)
+  r = recall_score(y_test, pred, pos_label=1)
+  f1 = f1_score(y_test, pred, pos_label=1)
+  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params), test_set, p, r, f1))
+
 if __name__ == "__main__":
   try:
     main(sys.argv)
