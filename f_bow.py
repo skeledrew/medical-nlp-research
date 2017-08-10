@@ -28,8 +28,8 @@ gSParams = [
     #'anc_notes_v2_cuis',  # cuis w/ dict fix
     #'anc_notes_trim_v2_cuis',  # trim cuis
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
-    #'anc_notes_trim_v3',  # trim with BAC
-    #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
+    'anc_notes_trim_v3',  # trim with BAC
+    'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     'anc_notes_trim_bac-all',  # all BAC data
     'anc_notes_trim_cuis_bac-all',  # v2 cuis
     'anc_notes_trim_bac-all_gender_race',
@@ -40,7 +40,7 @@ gSParams = [
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    #'SGDClassifier',
+    'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -53,7 +53,7 @@ gSParams = [
     #'RandomForestClassifier',
     #'DummyClassifier',  # for the baseline
     #'OptimizedRulesSeeker',  # custom
-    'AdaBoostClassifier',
+    #'AdaBoostClassifier',
   ],  # classifiers
   [
     5,
@@ -119,7 +119,7 @@ gSParams = [
   ], # KNN weights
   [
     #'constant',
-    #'optimal',
+    'optimal',
     #'invscaling',
     IGNORE,
   ],  # SGD learning rate
