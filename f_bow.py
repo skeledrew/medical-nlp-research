@@ -448,11 +448,11 @@ def test_eval(args):
   model = clf_pipe.fit(x_train, y_train)
   pred = clf_pipe.predict(x_test)
   if hasattr(clf_pipe, 'coef_'): [feats[idx].append(clf_pipe.coef_[0][idx]) for idx in range(len(feats))]
-  misses = GetMisses(y_test, pred, bunch.filenames[test_indices])
+  misses = GetMisses(y_test, pred, test_bunch.filenames)
   p =precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
   f1 = f1_score(y_test, pred, pos_label=1)
-  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params), test_set, p, r, f1))
+  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), clf_pipe, str(params), test_set, p, r, f1))
 
 if __name__ == "__main__":
   try:
