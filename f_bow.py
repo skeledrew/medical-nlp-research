@@ -423,10 +423,10 @@ def test_eval(args):
   train_matrix, train_bunch, feats = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
   test_matrix, test_bunch, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
   vectorizer = CountVectorizer(
-    stop_words='english',
-    vocabulary=None,
-    binary=True,
-    token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture, underscores
+    #stop_words='english',
+    #vocabulary=None,
+    #binary=True,
+    #token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture, underscores
   )
   clf_pipe = Pipeline([
     ('vect', vectorizer),
