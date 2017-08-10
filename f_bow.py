@@ -424,7 +424,6 @@ def test_eval(args):
   test_matrix, test_bunch, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
   vectorizer = CountVectorizer(
     stop_words='english',
-    min_df=0,
     vocabulary=None,
     binary=True,
     token_pattern=r'(-?[Cc]\d+\b)|((?u)\b\w\w+\b)|(\b[a-zA-Z0-9_]{1,}\b)',  # enable neg capture, underscores
