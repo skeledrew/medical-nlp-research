@@ -37,11 +37,11 @@ gSParams = [
     'anc_notes_trim_cuis_bac-all_gender_race',
   ],  # data dirs
   [
-    #'LinearSVC',
+    'LinearSVC',
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    'SGDClassifier',
+    #'SGDClassifier',
     #'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
@@ -177,7 +177,9 @@ def gSGenericRunner(
   args, _, _, values = getargvalues(frame)
   result['options'] = allArgs = {arg: values[arg] for arg in args}
   preproc_hash = hash_sum('%s%s%d%s%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary, preTask))
-  matrix, bunch, result['features'], _ = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
+  #matrix, bunch, result['features'], _
+  vals = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
+  pdb.set_trace()
   hyParams = {
     'penalty': penalty,
     'C': C,
@@ -228,7 +230,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   if pre_task == 'text':
     text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
     memo[param_hash]['matrix'] = text_matrix
-    return text_matrix, bunch, []  # no features
+    return text_matrix, bunch, [], pipe  # no features
 
   # raw occurences
   vectorizer = CountVectorizer(
