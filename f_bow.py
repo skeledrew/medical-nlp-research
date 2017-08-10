@@ -448,7 +448,7 @@ def test_eval(args):
   p =precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
   f1 = f1_score(y_test, pred, pos_label=1)
-  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), str(clf_pipe), str(params), test_set, p, r, f1))
+  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), re.sub('\n +', str(clf_pipe), ' '), str(params), test_set, p, r, f1))
 
 if __name__ == "__main__":
   try:
