@@ -6,15 +6,16 @@ from common import *
 
 oldDir = dataDir + 'anc_notes/'
 newDir = dataDir + 'anc_notes_trim/'
-substances = ['alcohol', 'beer', 'wine', 'liquor', 'scotch', 'bourbon', 'cognac']
+substances = ['alcohol', 'beer', 'wine', 'liquor', 'scotch', 'bourbon', 'cognac', 'vodka']
 posTriggers = ['etoh', 'disorient', 'syncope', 'impair', 'decrease', 'drink', 'deficit', 'thc', 'intoxicat', 'banana bag', 'lorazepam', 'ativan', ' b1', ' b6', 'thiamine', 'pyridoxine', 'multivitamin', 'bac ', 'bal ', 'dependence', 'heavy', 'admits']
 genTriggers = ['fall', 'fell', 'dizz', 'nausea', 'vomit', 'lethargic', 'drowsy', 'shot', 'sluggish', 'male', 'groggy', ]
 negTriggers = ['denies', 'none detected', 'sober']
 triggers = substances + posTriggers + genTriggers + negTriggers
 
 
-def grabTriggerSections():
+def grabTriggerSections(args):
     subDirs = ['yes/', 'no/']
+    if len(args) > 1: global oldDir, newDir; oldDir = args[1]; newDir = args[2]
     ensureDirs(newDir + subDirs[0], newDir + subDirs[1])
 
     for subDir in subDirs:
@@ -107,5 +108,12 @@ def makeStruct(content):
     return lines
 
 if __name__ == '__main__':
-    grabTriggerSections()
-    print('Operation complete.')
+    try:
+        print('%s: Working...' % currentTime())
+        grabTriggerSections(sys.argv)
+        print('%s: Trimming operation complete.' % currentTime())
+
+    except Exception as e:
+        print('Exception: %s' % repr(e))
+        pdb.post_mortem()
+commit_me(dataDir + 'tracking.json', 'peel.py')
