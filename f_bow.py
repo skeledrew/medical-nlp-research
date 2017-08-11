@@ -296,7 +296,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   ps = []
   rs = []
   f1s = []
-  folds = StratifiedKFold(n_splits=numFolds)
+  folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
 
@@ -427,6 +427,7 @@ def test_eval(args):
   writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
+  params['class_weight'] = 'balanced'  # quick fix
   classifier = MakeClf(params['clfName'], params, clfMods)
   train_matrix, train_bunch, feats, pipe = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
   test_matrix, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
