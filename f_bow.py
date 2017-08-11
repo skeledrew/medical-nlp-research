@@ -42,8 +42,8 @@ gSParams = [
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
     #'SGDClassifier',
-    'LogisticRegression',
-    'PassiveAggressiveClassifier',
+    #'LogisticRegression',
+    #'PassiveAggressiveClassifier',
     #'NearestCentroid',
     #'KNeighborsClassifier',
     #'MultinomialNB',
@@ -113,7 +113,7 @@ gSParams = [
     'huber',
     #'epsilon_insensitive',
     #'squared_epsilon_insensitive',
-    IGNORE,
+    #IGNORE,
   ],  # loss
   [5], # n_neighbors
   [
@@ -142,7 +142,7 @@ gSParams = [
   ],  # CVec binary
   [
     #'text',
-    'count',
+    #'count',
     'tfidf',
   ],  # preprocessing task
   [
