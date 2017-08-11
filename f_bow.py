@@ -33,17 +33,17 @@ gSParams = [
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     #'anc_notes_trim_bac-all',  # all BAC data
     #'anc_notes_trim_cuis_bac-all',  # v2 cuis
-    #'anc_notes_trim_bac-all_gender_race',
+    'anc_notes_trim_bac-all_gender_race',
     'anc_notes_trim_cuis_bac-all_gender_race',
   ],  # data dirs
   [
-    #'LinearSVC',
+    'LinearSVC',
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    'SGDClassifier',
-    #'LogisticRegression',
-    #'PassiveAggressiveClassifier',
+    #'SGDClassifier',
+    'LogisticRegression',
+    'PassiveAggressiveClassifier',
     #'NearestCentroid',
     #'KNeighborsClassifier',
     #'MultinomialNB',
@@ -57,7 +57,7 @@ gSParams = [
     #'AdaBoostClassifier',
   ],  # classifiers
   [
-    5,
+    #5,
     10,
   ],  # for n-folds CV
   [
@@ -75,27 +75,27 @@ gSParams = [
   [
     #None,
     'l1',
-    #'l2',
+    'l2',
     #'elasticnet',
     #'none',
     IGNORE
   ],  # penalty
   [
-    #0.0000001,
-    #0.000001,
-    #0.00001,
-    #0.0001,
-    #0.001,
-    #0.01,
-    #0.1,
+    0.0000001,
+    0.000001,
+    0.00001,
+    0.0001,
+    0.001,
+    0.01,
+    0.1,
     1,
-    #10,
-    #100,
-    #1000,
-    #10000,
-    #100000,
-    #1000000,
-    #10000000,
+    10,
+    100,
+    1000,
+    10000,
+    100000,
+    1000000,
+    10000000,
   ],  # C
   ['balanced'],  # weight
   [
@@ -104,10 +104,10 @@ gSParams = [
   ],  # validation method
   [0],  # TTS random state
   [
-    #'hinge',
+    'hinge',
     #'log',
     #'modified_huber',
-    #'squared_hinge',
+    'squared_hinge',
     #'perceptron',
     #'squared_loss',
     'huber',
@@ -142,7 +142,7 @@ gSParams = [
   ],  # CVec binary
   [
     #'text',
-    #'count',
+    'count',
     'tfidf',
   ],  # preprocessing task
   [
