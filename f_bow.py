@@ -296,7 +296,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   ps = []
   rs = []
   f1s = []
-  folds = KFold(n_splits=numFolds)
+  folds = StratifiedKFold(n_splits=numFolds)
   misses = []
   wghts_read = False
 
