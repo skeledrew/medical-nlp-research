@@ -529,6 +529,20 @@ def path_name_prefix(pref, path):
     # 17-08-01
     return '%s/%s%s' % (os.path.dirname(path), pref, path.split('/')[-1])
 
+def cc_to_sc(name):
+    # 17-08-12 - convert camelCase to snake_case
+    s = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s).lower()
+
+def str_to_dict(s, main_sep, map_sep):
+    # 17-08-01
+    final = {}
+
+    for item in s.split(main_sep):
+        item = item.split(map_sep)
+        final[item[0]] = item[1]
+    return final
+
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
 commit_me(dataDir + 'tracking.json', 'common.py')
