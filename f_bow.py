@@ -214,7 +214,7 @@ def gSGenericRunner(
     result = {'classifier': result['classifier'], 'options': result['options']}
     result['error'] = e.args
     result['f1'] = result['precision'] = result['recall'] = result['std'] = None
-  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s' % (currentTime(), result['classifier'], str(result['options']), result['precision'], result['recall'], result['f1'], result['std']))
+  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s' % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std']))
   return result
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
@@ -427,10 +427,16 @@ def test_eval(args):
   writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
-  params['class_weight'] = 'balanced'  # quick fix
-  classifier = MakeClf(params['clfName'], params, clfMods)
-  train_matrix, train_bunch, feats, pipe = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
-  test_matrix, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
+  #hyparams = str_to_dict(re.split('\( *', result['classifier'])[-1][:-1], ', *', '=', True)
+  hyparams = {}
+
+  for ccp in params:
+    # fix bug caused by camelCase hyperparam names
+    scp = cc_to_sc(ccp)
+    hyparams[scp] = params[ccp]
+  classifier = MakeClf(params['clfName'], hyparams, clfMods)
+  _, train_bunch, feats, pipe = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
+  _, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
   pipe.append(('clf', classifier))
   clf_pipe = Pipeline(pipe)
 
@@ -450,7 +456,7 @@ def test_eval(args):
   f1 = f1_score(y_test, pred, pos_label=1)
   saveText('\n'.join(misses), dataDir + 'miscats-test_temp.txt')
   saveText('\n'.join(', '.join(f) for f in feats), dataDir + 'feats-test_temp.txt')
-  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), re.sub('\n +', ' ', str(clf_pipe.steps[-1][-1])), str(params), test_set, p, r, f1))
+  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), re.sub('\n *', ' ', str(clf_pipe.steps[-1][-1])), str(params), test_set, p, r, f1))
 
 if __name__ == "__main__":
   try:
