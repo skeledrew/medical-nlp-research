@@ -427,7 +427,8 @@ def test_eval(args):
   writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
-  #hyparams = str_to_dict(re.split('\( *', result['classifier'])[-1][:-1], ', *', '=', True)
+  hyparams = str_to_dict(re.split('\( *', result['classifier'])[-1][:-1], ', *', '=', True)  # get from clf string
+  hyparams = [hyparams[hp][1:-1] for hp in hyparams]  # zap extra quotes
   hyparams = {}
 
   for ccp in params:
