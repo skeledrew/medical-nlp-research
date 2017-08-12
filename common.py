@@ -534,12 +534,14 @@ def cc_to_sc(name):
     s = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s).lower()
 
-def str_to_dict(s, main_sep, map_sep):
-    # 17-08-01
+def str_to_dict(s, main_sep, map_sep, use_re=False):
+    # 17-08-01 - initial
+    # -12 - update to support regex
     final = {}
+    items = s.split(main_sep) if not use_re else re.split(main_sep, s)
 
-    for item in s.split(main_sep):
-        item = item.split(map_sep)
+    for item in items:
+        item = item.split(map_sep) if not use_re else re.split(map_sep, item)
         final[item[0]] = item[1]
     return final
 
