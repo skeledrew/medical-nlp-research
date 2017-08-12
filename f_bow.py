@@ -434,6 +434,7 @@ def test_eval(args):
     # fix bug caused by camelCase hyperparam names
     scp = cc_to_sc(ccp)
     hyparams[scp] = params[ccp]
+  hyparams['random_state'] = 1
   classifier = MakeClf(params['clfName'], hyparams, clfMods)
   _, train_bunch, feats, pipe = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
   _, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
