@@ -6,9 +6,9 @@ from common import *
 
 oldDir = dataDir + 'anc_notes/'
 newDir = dataDir + 'anc_notes_trim/'
-substances = ['alcohol', 'beer', 'wine', 'liquor', 'scotch', 'bourbon', 'cognac', 'vodka']
-posTriggers = ['etoh', 'disorient', 'syncope', 'impair', 'decrease', 'drink', 'deficit', 'thc', 'intoxicat', 'banana bag', 'lorazepam', 'ativan', ' b1', ' b6', 'thiamine', 'pyridoxine', 'multivitamin', 'bac ', 'bal ', 'dependence', 'heavy', 'admits']
-genTriggers = ['fall', 'fell', 'dizz', 'nausea', 'vomit', 'lethargic', 'drowsy', 'shot', 'sluggish', 'male', 'groggy', ]
+substances = ['alcohol', 'beer', 'wine', 'liquor', 'scotch', 'bourbon', 'cognac', 'vodka', 'gin', 'jack daniels', 'brandy', 'hennessy', 'remy', 'alcoholic beverage', 'jagermeister']
+posTriggers = ['etoh', 'disorient', 'syncope', 'impair', 'decrease', 'drink', 'deficit', 'thc', 'intoxicat', 'banana bag', 'lorazepam', 'ativan', ' b1', ' b6', 'thiamine', 'pyridoxine', 'multivitamin', 'bac ', 'bal ', 'dependence', 'heavy', 'admits', 'pint', 'shots', 'fifth', 'pack', 'binge drink']
+genTriggers = ['fall', 'fell', 'dizz', 'nausea', 'vomit', 'lethargic', 'drowsy', 'shot', 'sluggish', 'male', 'groggy', 'cans?', '\b.{,3}\d.{,3}oz', 'day', 'week', 'daily', 'weekly', 'bottle', 'glass(es)?', 'gallon', ]
 negTriggers = ['denies', 'none detected', 'sober']
 triggers = substances + posTriggers + genTriggers + negTriggers
 
@@ -74,8 +74,9 @@ def grabTriggerSections(args):
                 for trigger in triggers:
                     # search the words of interest
 
-                    if trigger in line:
+                    if re.search(trigger, line):
                         # add lines with the target word
+                        # -08-12 - change to regex search
                         meat.append(line)
                         #print(line)
                         continue
