@@ -82,7 +82,7 @@ def bac_all_add(content, row):
         #pdb.set_trace()
         return bac_val_add(bac_yn_add(content, row), row)
 
-def mean_cons_add(content, row):
+def week_cons_add(content, row):
     # calculate and add a mean alcohol consumption (https://en.wikipedia.org/wiki/Blood_alcohol_content)
     # https://www.drugabuse.gov/sites/default/files/files/AUDIT.pdf
     freqs = {
@@ -135,7 +135,7 @@ def mean_cons_add(content, row):
         #line = [line]
         [use_ref_lines.extend(line) for line in split_multiple(line, ref_ctr)]
     drinks = []
-    pdb.set_trace()
+    if use_ref_lines: pdb.set_trace()
 
     for line in use_ref_lines:
         # calculate drink amounts and frequencies
@@ -148,7 +148,8 @@ def mean_cons_add(content, row):
     gender = 'm' if row[5] == 0 else 'f'
     bod_wat = 0.58 if gender == 'm' else 0.49  # body water constant m v f
     wt_def = 60  # give an 'idealized' weight as default
-    wt, wt_unit = row[33], row[34]
+    wt  = int(row[33]) if row[33].isdigit() else 0
+    wt_unit = row[34]
     weight = wt if 'kg' in wt_unit else wt * 0.45 if 'lb' in wt_unit else wt_def
     metabol = 0.017 if gender == 'f' else 0.015
     drink_perd = 2  # throw an average
@@ -209,7 +210,7 @@ def main(s_path, d_path, mod_func):
     files = list(getFileList(s_path))
     ensureDirs(d_path)
     tf_csv = baseDir + 'Trauma_Final_20170614.csv'
-    mod_funcs = ['bac_yn_add', 'bac_yn_only', 'bac_all_add', 'gender_add', 'race_add']
+    mod_funcs = ['bac_yn_add', 'gender_add', 'race_add', 'week_cons_add', 'lower_zap']
     if not isinstance(mod_func, str): mod_funcs.append(mod_func)
     holder['tfc'] = [row for row in csv.reader(open(tf_csv), delimiter=',')]
     holder['cnt'] = 0
