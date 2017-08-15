@@ -110,10 +110,11 @@ def week_cons_add(content, row):
             'liquor': 'hard',
     }
     sizes = {  # drink volume in oz
-            'can': 12,
-            'drink': 12,
+            'oz': 1,
+            '[^a-z]cans?[^a-z]': 12,
+            #'drink': 12,
             #'cup?': 8.5,  # malt qty
-            'glass': 5,
+            '[^a-z]glass': 5,
             'bottle': 25,
             'shot': 1.5,
             'pint': 16,
@@ -127,20 +128,20 @@ def week_cons_add(content, row):
     freqs_re = r'|'.join('(%s)' % fq for fq in freqs)
     subs_re = r'|'.join('(%s)' % sb for sb in subs)
 
-    for line in content:
+    for line in content.split('\n'):
         # get lines with relevant usage references
-        ref_ctr = len(re.findall(sizes_re, line) + re.findall(freqs_re, line) + re.findall(subs_re, line))
+        ref_ctr = len(re_findall(sizes_re, line) + re_findall(freqs_re, line) + re_findall(subs_re, line))
         if ref_ctr < 2: continue  # not enough use references in line
         ## <check for multiple refs>
         #line = [line]
-        [use_ref_lines.extend(line) for line in split_multiple(line, ref_ctr)]
+        [use_ref_lines.append(line) for line in split_multiple(line, ref_ctr)]
     drinks = []
     if use_ref_lines: pdb.set_trace()
 
     for line in use_ref_lines:
         # calculate drink amounts and frequencies
         quan = get_quan(line, sizes_re, subs_re, sizes, subs)  # get consumption in oz
-        conc = types[subs[re.find(subs_re, line)]]  # ~ % of alcohol
+        conc = types[subs[''.join(re.findall(subs_re, line)[0])]]  # ~ % of alcohol
         freq = get_freq(line, freqs_re)  # times per week
         drink = quan * (conc / 100) / 0.6  # oz * %age / 0.6
         drinks.append([drink, freq[0], freq[1]])
@@ -170,22 +171,22 @@ def split_multiple(line, ref_ctr):
         return [line]
 
 def get_quan(line, szre, sbre, sizes, subs):
-    amt = re.find('\d+((\-|/|\.)\d+)?.{,3}((%s)|(%s))' % (szre, sbre), line)   # find range or fraction
-    if amt: amt = re.find('\d+((\-|/|\.)\d+)?', amt)  # extract
+    amt = re_findall('\d+((\-|/|\.)\d+)?.{,3}((%s)|(%s))' % (szre, sbre), line)[0]   # find range or fraction
+    if amt: amt = re.findall('\d+((\-|/|\.)\d+)?', amt)[0]  # extract
     if '-' in amt: amt = (int(amt.split('-')[1]) + int(amt.split('-')[0])) / 2
     if '/' in amt: amt = float(amt.split('/')[0]) / float(amt.split('/')[1])
     if isinstance(amt, str) and '.' in amt: amt = float(amt)
-    size = sizes[re.find(szre, line)] if re.search(szre, line) else 1
+    size = sizes[''.join(re.findall(szre, line)[0])] if re.search(szre, line) else 1
     if size: amt *= size
-    #bevr = subs[re.find(sbre, line)]
+    #bevr = subs[re.findall(sbre, line)[0]]
     return amt
 
 def get_freq(line, fqre):
-    amt = re.find('\d+(\-\d)?.{,3}(\w+.{,3}){,5}(%s)' % fqre, line)
-    if amt: amt = re.find('\d+(\-\d)?', amt)
+    amt = ''.join(re.findall('\d+(\-\d)?.{,3}(\w+.{,3}){,5}(%s)' % fqre, line)[0])
+    if amt: amt = re.findall('\d+(\-\d)?', amt)[0]
     if '-' in amt: amt = (int(amt.split('-')[1]) + int(amt.split('-')[0])) / 2
     if not amt: amt = 2.5  # guess if nothing found
-    f_unit = re.find(fqre, line)
+    f_unit = ''.join(re.findall(fqre, line)[0])
     return amt, f_unit
 
 def lower_zap(content, row):
