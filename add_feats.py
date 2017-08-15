@@ -127,7 +127,7 @@ def week_cons_add(content, row):
     sizes_re = r'|'.join('(%s)' % sz for sz in sizes)
     freqs_re = r'|'.join('(%s)' % fq for fq in freqs)
     subs_re = r'|'.join('(%s)' % sb for sb in subs)
-    if not re.search(subs_re, content) or re.search(freqs_re, content): return content
+    if not re.search(subs_re, content) or not re.search(freqs_re, content): return content
 
     for line in content.split('\n'):
         # get lines with relevant usage references
