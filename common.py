@@ -556,6 +556,7 @@ def re_findall(pat, s):
         rnge = match.span()
         res.append(s[rnge[0]:rnge[1]])
         pos = rnge[1]
+    pdb.set_trace()
     return res
 
 if __name__ == '__main__':
