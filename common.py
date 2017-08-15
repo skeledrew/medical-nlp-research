@@ -552,11 +552,12 @@ def re_findall(pat, s):
     pdb.set_trace()
 
     while True:
-        match = re.search(pat, s[pos:])
+        match = re.search(pat, s)
         if not match: break
         rnge = match.span()
-        res.append(s[pos:][rnge[0]:rnge[1]])
+        res.append(s[rnge[0]:rnge[1]])
         pos = rnge[1]
+        s = s[pos:]
     return res
 
 if __name__ == '__main__':
