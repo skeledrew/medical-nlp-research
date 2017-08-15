@@ -549,7 +549,6 @@ def re_findall(pat, s):
     # 17-08-15 - re.findall replacement that does what's expected
     res = []
     pos = 0
-    pdb.set_trace()
 
     while True:
         match = re.search(pat, s)
