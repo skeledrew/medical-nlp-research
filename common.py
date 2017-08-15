@@ -555,7 +555,7 @@ def re_findall(pat, s):
         match = re.search(pat, s[pos:])
         if not match: break
         rnge = match.span()
-        res.append(s[rnge[0]:rnge[1]])
+        res.append(s[:pos][rnge[0]:rnge[1]])
         pos = rnge[1]
     return res
 
