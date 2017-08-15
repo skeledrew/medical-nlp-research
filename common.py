@@ -545,6 +545,19 @@ def str_to_dict(s, main_sep, map_sep, use_re=False):
         final[item[0]] = item[1]
     return final
 
+def re_findall(pat, s):
+    # 17-08-15 - re.findall replacement that does what's expected
+    res = []
+    pos = 0
+
+    while True:
+        match = re.search(pat, s[pos])
+        if not match: break
+        rnge = match.span()
+        res.append(s[rnge[0]:rnge[1]])
+        pos = rnge[1]
+    return res
+
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
 commit_me(dataDir + 'tracking.json', 'common.py')
