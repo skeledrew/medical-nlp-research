@@ -557,7 +557,8 @@ def re_findall(pat, s_, idx=None):
         res.append(s_[rnge[0]:rnge[1]])
         pos = rnge[1]
         s_ = s_[pos:]
-    return res if not idx or not res else res[idx]
+    if len(res) >= 1 and idx: return res[idx]
+    return res
 
 def re_index(match, s_):
     # 17-08-17 -
