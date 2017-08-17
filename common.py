@@ -559,6 +559,19 @@ def re_findall(pat, s):
         s = s[pos:]
     return res
 
+def re_index(match, s):
+    # 17-08-17 -
+
+    if isinstance(s, dict):
+        for pat in s:
+            if not re.search(pat, match): continue
+            return s[pat]
+
+    if isinstance(s, list):
+        for idx in range(len(s)):
+            if not re.match(s[idx], match): continue
+            return s[idx]
+
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
 commit_me(dataDir + 'tracking.json', 'common.py')
