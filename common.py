@@ -565,7 +565,7 @@ def re_index(match, s_):
 
     if isinstance(s_, dict):
         for pat in s_:
-            if not re.search(pat, match): continue
+            if not re.match(pat, match): continue
             return s_[pat]
 
     if isinstance(s_, list):
