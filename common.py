@@ -557,7 +557,7 @@ def re_findall(pat, s_, idx=None):
         res.append(s_[rnge[0]:rnge[1]])
         pos = rnge[1]
         s_ = s_[pos:]
-    if len(res) >= 1 and idx: return res[idx]
+    if len(res) >= 1 and isinstance(idx, int): return res[idx]
     return res
 
 def re_index(match, s_):
