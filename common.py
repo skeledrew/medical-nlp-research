@@ -545,7 +545,7 @@ def str_to_dict(s, main_sep, map_sep, use_re=False):
         final[item[0]] = item[1]
     return final
 
-def re_findall(pat, s_):
+def re_findall(pat, s_, idx=None):
     # 17-08-15 - re.findall replacement that does what's expected
     res = []
     pos = 0
@@ -557,7 +557,7 @@ def re_findall(pat, s_):
         res.append(s_[rnge[0]:rnge[1]])
         pos = rnge[1]
         s_ = s_[pos:]
-    return res
+    return res if not idx or not res else res[idx]
 
 def re_index(match, s_):
     # 17-08-17 -
