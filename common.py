@@ -545,32 +545,32 @@ def str_to_dict(s, main_sep, map_sep, use_re=False):
         final[item[0]] = item[1]
     return final
 
-def re_findall(pat, s):
+def re_findall(pat, s_):
     # 17-08-15 - re.findall replacement that does what's expected
     res = []
     pos = 0
 
     while True:
-        match = re.search(pat, s)
+        match = re.search(pat, s_)
         if not match: break
         rnge = match.span()
-        res.append(s[rnge[0]:rnge[1]])
+        res.append(s_[rnge[0]:rnge[1]])
         pos = rnge[1]
-        s = s[pos:]
+        s_ = s_[pos:]
     return res
 
-def re_index(match, s):
+def re_index(match, s_):
     # 17-08-17 -
 
-    if isinstance(s, dict):
-        for pat in s:
+    if isinstance(s_, dict):
+        for pat in s_:
             if not re.search(pat, match): continue
-            return s[pat]
+            return s_[pat]
 
-    if isinstance(s, list):
-        for idx in range(len(s)):
-            if not re.match(s[idx], match): continue
-            return s[idx]
+    if isinstance(s_, list):
+        for idx in range(len(s_)):
+            if not re.match(s_[idx], match): continue
+            return s_[idx]
     return None
 
 if __name__ == '__main__':
