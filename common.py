@@ -80,6 +80,7 @@ class UMLSClient():
         if not cache_path: cache_path = os.environ['HOME'] + '/umls_cache.json'
         self.cache_path = cache_path
         self.cache = {} if not os.path.exists(cache_path) else loadJson(cache_path)
+        self.access_cnt = 0
 
     def save_cache(self):
         saveJson(self.cache, self.cache_path)
@@ -114,6 +115,8 @@ class UMLSClient():
         items  = json.loads(r.text)
         jsonData = items["result"]
         if not 'cuis' in self.cache: self.cache['cuis'] = {}
+        self.access_cnt += 1
+        if self.access_cnt >= 15: self.save_cache(); self.access_cnt = 0
         return jsonData
 
     def find_cui(self, identifier):
