@@ -5,6 +5,7 @@
 from common import *
 
 
+DEBUG = True
 usage = 'Usage: %s top na /path/to/exp_results.json' % (sys.argv[0])
 
 
@@ -32,7 +33,7 @@ def get_top_results(critr, path):
     cr_hash = hash_sum(critr)
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
-    pdb.set_trace()
+    #pdb.set_trace()
     umls_key = re_findall('%s.+%s' % (s_pat, e_pat), loadText(os.environ['HOME'] + '/CREDS'), 0)[len(s_pat):] #(len(e_pat) * -1)]
     umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
     umls_clt.gettgt()
@@ -53,6 +54,7 @@ def get_top_results(critr, path):
 
             for feat in top['features']:
                 name = feat[0] + feat[1]  # assume one is always empty
+                #if DEBUG and name: pdb.set_trace()
 
                 if re.match('-?[Cc]\d{7,7}', name):
                     # found a cui
