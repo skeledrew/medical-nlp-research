@@ -58,15 +58,6 @@ def get_top_results(critr, path):
     writeLog('\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name))
     return top
 
-def str_to_dict(s, main_sep, map_sep):
-    # 17-08-01
-    final = {}
-
-    for item in s.split(main_sep):
-        item = item.split(map_sep)
-        final[item[0]] = item[1]
-    return final
-
 def main(args):
     print('Working...')
 
