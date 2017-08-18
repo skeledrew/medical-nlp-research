@@ -114,7 +114,6 @@ class UMLSClient():
         items  = json.loads(r.text)
         jsonData = items["result"]
         if not 'cuis' in self.cache: self.cache['cuis'] = {}
-        print(json.dumps(jsonData, indent=2, sort_keys=True))
         return jsonData
 
     def find_cui(self, identifier):
