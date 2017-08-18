@@ -34,15 +34,16 @@ gSParams = [
     #'anc_notes_trim_bac-all',  # all BAC data
     #'anc_notes_trim_cuis_bac-all',  # v2 cuis
     'anc_notes_trim_bac-all_gender_race',
-    'anc_notes_trim_cuis_bac-all_gender_race',
+    #'anc_notes_trim_cuis_bac-all_gender_race',
+    'anc_notes_trim_bac-all_gender_race_w-cons',
   ],  # data dirs
   [
     'LinearSVC',
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    #'SGDClassifier',
-    #'LogisticRegression',
+    'SGDClassifier',
+    'LogisticRegression',
     #'PassiveAggressiveClassifier',
     #'NearestCentroid',
     #'KNeighborsClassifier',
