@@ -92,6 +92,7 @@ class UMLSClient():
         r = requests.post(self.auth_uri+self.auth_endpoint,data=params,headers=h)
         #response = fromstring(r.text)
         tgt = re_findall('action=.+cas', r.text, 0)[8:]
+        if not tgt: raise Exception('UMLS authentication failed')
         self.tgt = tgt
         return tgt
 
