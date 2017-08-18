@@ -5,6 +5,9 @@
 from common import *
 
 
+usage = 'Usage: %s top na /path/to/exp_results.json' % (sys.argv[0])
+
+
 def get_fields_in_json(args):
     j_cont = loadJson(args[2])
     if not isinstance(j_cont, list): raise Exception('%s should be a list' % args[2])
@@ -29,11 +32,12 @@ def get_top_results(critr, path):
     cr_hash = hash_sum(critr)
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
-    umls_key = re_findall('%s%s.+%s' % (s_pat, loadJson(os.environ['HOME'] + '/CREDS'), e_pat), 0)[len(s_pat):(len(e_pat) * -1)]
+    umls_key = re_findall('%s.+%s' % (s_pat, e_pat), loadText(os.environ['HOME'] + '/CREDS'), 0)[len(s_pat):(len(e_pat) * -1)]
     umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
     umls_clt.gettgt()
 
     for idx in range(len(j_cont)):
+        # seek the max f1
         targ = j_cont[idx][1]
         if not 'f1' in targ or targ['f1'] == None: continue
         ##check given criteria here
@@ -53,7 +57,7 @@ def get_top_results(critr, path):
                     # found a cui
                     real_name = umls_clt.find_cui(name.lstrip('-'))['name']
                     name = '%s (%s)' % (name, real_name)
-                feat = '%s, %s\n' % (name, ', '.join(feat[2:]))
+                feat = '%s, %s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
         top['features'] = ff_name
 
@@ -98,4 +102,5 @@ if __name__ == '__main__':
         commit_me(dataDir + 'tracking.json', 'export_results.py')
 
     except Exception as e:
+        print('Exception: %s\n%s' % (repr(e), usage))
         pdb.post_mortem()
