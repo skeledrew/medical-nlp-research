@@ -51,6 +51,7 @@ def get_top_results(critr, path):
         ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.txt')
 
         with open(ff_name, 'w') as fo:
+            fo.write('cui/name,%s' % (''.join('fold_' + str(i) for i in range(len(top['features'])))))
 
             for feat in top['features']:
                 name = feat[0] + feat[1]  # assume one is always empty
@@ -61,7 +62,7 @@ def get_top_results(critr, path):
                     #pdb.set_trace()
                     real_name = umls_clt.find_cui(name.lstrip('-').upper())['name']
                     name = '%s (%s)' % (name, real_name)
-                feat = '%s, %s\n' % (name, ', '.join(str(f) for f in feat[2:]))
+                feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
         top['features'] = ff_name
 
