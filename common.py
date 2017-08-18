@@ -108,7 +108,7 @@ class UMLSClient():
         uri = "https://uts-ws.nlm.nih.gov"
         if not tgt: tgt = self.tgt
         content_endpoint = '/rest/content/%s/CUI/%s' % (version, identifier) if not source else '/rest/content/%s/source/%s/%s' % (str(version), str(source), identifier)
-        qry = {'ticket': self.getst(tgt)}
+        query = {'ticket': self.getst(tgt)}
         r = requests.get(uri+content_endpoint,params=query)
         r.encoding = 'utf-8'
         items  = json.loads(r.text)
