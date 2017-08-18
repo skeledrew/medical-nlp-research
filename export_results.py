@@ -32,7 +32,8 @@ def get_top_results(critr, path):
     cr_hash = hash_sum(critr)
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
-    umls_key = re_findall('%s.+%s' % (s_pat, e_pat), loadText(os.environ['HOME'] + '/CREDS'), 0)[len(s_pat):(len(e_pat) * -1)]
+    pdb.set_trace()
+    umls_key = re_findall('%s.+%s' % (s_pat, e_pat), loadText(os.environ['HOME'] + '/CREDS'), 0)[len(s_pat):] #(len(e_pat) * -1)]
     umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
     umls_clt.gettgt()
 
@@ -53,9 +54,10 @@ def get_top_results(critr, path):
             for feat in top['features']:
                 name = feat[0] + feat[1]  # assume one is always empty
 
-                if re.match('-?C\d{7,7}', name):
+                if re.match('-?[Cc]\d{7,7}', name):
                     # found a cui
-                    real_name = umls_clt.find_cui(name.lstrip('-'))['name']
+                    #pdb.set_trace()
+                    real_name = umls_clt.find_cui(name.lstrip('-').upper())['name']
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s, %s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
