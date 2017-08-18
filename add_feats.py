@@ -13,6 +13,7 @@ from common import *
 from peel import substances as subs
 
 
+DEBUG = False
 usage = 'Usage: %s /path/to/src/dir/ /path/to/dest/dir/ mod1+mod2+...+modN' % (sys.argv[0])
 holder = {}
 BAC_C = 64
@@ -89,13 +90,14 @@ def week_cons_add(content, row):
             'day[^s]': 7,
             'daily': 7,
             'night': 7,
-            'weekday': 5,
+            'week ?days?': 5,
             'weekend': 2,
-            'week[^s]': 1,
+            'week[^sed]': 1,
             'weekly': 1,
             'wk': 1,
             'month': 0.25,
             'monthly': 0.25,
+            'None': 0,
     }
     types = {  # alcohol conc in %
             'beer': 5,
@@ -105,16 +107,19 @@ def week_cons_add(content, row):
     }
     subs = {  # beverage names as may appear in corpus
             'drink': 'beer',
+            'beer': 'beer',
             'wine': 'wine',
             'milwaukee best ice': 'beer',
             'liquor': 'hard',
+            'hennessy': 'hard',
+            'remy': 'hard',
     }
     sizes = {  # drink volume in oz
-            'oz': 1,
+            #'oz': 1,
             '[^a-z]cans?[^a-z]': 12,
             #'drink': 12,
             #'cup?': 8.5,  # malt qty
-            '[^a-z]glass': 5,
+            '[^a-z]glass(es)?': 5,
             'bottle': 25,
             'shot': 1.5,
             'pint': 16,
@@ -129,7 +134,7 @@ def week_cons_add(content, row):
     subs_re = r'|'.join('(%s)' % sb for sb in subs)
     if not re.search(subs_re, content) or not re.search(freqs_re, content): return content
 
-    for line in content.split('\n'):
+    for line in list(set(content.split('\n'))):
         # get lines with relevant usage references
         ref_ctr = len(re_findall(sizes_re, line) + re_findall(freqs_re, line) + re_findall(subs_re, line))
         if ref_ctr < 2: continue  # not enough use references in line
@@ -137,15 +142,17 @@ def week_cons_add(content, row):
         #line = [line]
         [use_ref_lines.append(line) for line in split_multiple(line, ref_ctr)]
     drinks = []
-    if use_ref_lines: pdb.set_trace()
+    #if use_ref_lines: pdb.set_trace()
 
     for line in use_ref_lines:
         # calculate drink amounts and frequencies
         quan = get_quan(line, sizes_re, subs_re, sizes, subs)  # get consumption in oz
-        conc = types[subs[''.join(re.findall(subs_re, line)[0])]]  # ~ % of alcohol
+        conc = types[subs[re_findall(subs_re, line, 0)]] if re.search(subs_re, line) else 0  # ~ % of alcohol
         freq = get_freq(line, freqs_re)  # times per week
-        drink = quan * (conc / 100) / 0.6  # oz * %age / 0.6
-        drinks.append([drink, freq[0], freq[1]])
+        drink = int(quan * (conc / 100) / 0.6)  # oz * %age / 0.6
+        drinks.append([drink, int(freq[0]), freq[1]])
+    tmp = set(['|'.join(str(i) for i in d) for d in drinks])  # remove dups
+    drinks = [[int(i) if i.isdigit() else i for i in d.split('|')] for d in tmp]  # split out
     #std_drinks = sum(drinks)  # num std drinks per week
     gender = 'm' if row[5] == 0 else 'f'
     bod_wat = 0.58 if gender == 'm' else 0.49  # body water constant m v f
@@ -153,41 +160,51 @@ def week_cons_add(content, row):
     wt  = int(row[33]) if row[33].isdigit() else 0
     wt_unit = row[34]
     weight = wt if 'kg' in wt_unit else wt * 0.45 if 'lb' in wt_unit else wt_def
+    if weight < 30 and re.search('(kg)|(lb)', wt_unit): weight = wt_def
     metabol = 0.017 if gender == 'f' else 0.015
     drink_perd = 2  # throw an average
     tot_cons = []
 
     for drink in drinks:
         # weekly drinking estimate
-        est_bac = ((0.806 * drink[0] * 1.2) / (bod_wat * weight) - (metabol * drink_perd)) * 10 * 1000  # final g/dL -> mg/dL
-        tot_cons.sppend(est_bac * drink[1] * drink[2])  # in a week
-    tot_cons = sum(tot_cons)
+        if drink[0] <= 0 or drink[1] <= 0 or drink[2] == 'None': continue
+        est_bac = ((0.806 * drink[0] * 1.2) / (bod_wat * weight) - (metabol * drink_perd)) * 10 * 100  # final g/dL -> mg/dL?
+        tot_cons.append(est_bac * drink[1] * re_index(drink[2], freqs))  # in a week
+    tot_cons = int(sum(tot_cons))
     b_size = 50
-    buck = tot_cons / b_size
+    buck = int(tot_cons / b_size)
     content += ' W_CONS_%s_%s W_CONS_VAL_%s' % (b_size, buck, tot_cons)
     return content
 
 def split_multiple(line, ref_ctr):
+        # detect and try to split multiple drinking instances
         if ref_ctr < 4: return [line]
-        return [line]
+        lines = re.split('and|,| {3,}', line)  # simple split
+        return lines
 
 def get_quan(line, szre, sbre, sizes, subs):
-    amt = re_findall('\d+((\-|/|\.)\d+)?.{,3}((%s)|(%s))' % (szre, sbre), line)[0]   # find range or fraction
-    if amt: amt = re.findall('\d+((\-|/|\.)\d+)?', amt)[0]  # extract
+    # quantity in oz if possible
+    amt = re_findall('a|(\d+((\-|/|\.)\d+)?).{,3}((%s)|(%s))' % (szre, sbre), line, 0)   # find range or fraction
+    if not amt: return 0
+    amt = re_findall('a|(\d+((\-|/|\.)\d+)?)', amt, 0)  # extract
     if '-' in amt: amt = (int(amt.split('-')[1]) + int(amt.split('-')[0])) / 2
     if '/' in amt: amt = float(amt.split('/')[0]) / float(amt.split('/')[1])
-    if isinstance(amt, str) and '.' in amt: amt = float(amt)
-    size = sizes[''.join(re.findall(szre, line)[0])] if re.search(szre, line) else 1
+    if amt == 'a': amt = 1
+    if isinstance(amt, str): amt = float(amt) if  '.' in amt else int(amt)
+    size = re_index(re_findall(szre, line, 0), sizes) if re.search(szre, line) else 1
     if size: amt *= size
-    #bevr = subs[re.findall(sbre, line)[0]]
+    #bevr = subs[re_findall(sbre, line)
     return amt
 
 def get_freq(line, fqre):
-    amt = ''.join(re.findall('\d+(\-\d)?.{,3}(\w+.{,3}){,5}(%s)' % fqre, line)[0])
-    if amt: amt = re.findall('\d+(\-\d)?', amt)[0]
+    amt = re_findall('the|(\d+(\-\d)?).{,3}(\w+.{,3}){,5}(%s)' % fqre, line, 0)
+    if not amt: return 0, None
+    amt = re_findall('the|(\d+(\-\d)?)', amt, 0)
     if '-' in amt: amt = (int(amt.split('-')[1]) + int(amt.split('-')[0])) / 2
+    if amt == 'the': amt = 1
     if not amt: amt = 2.5  # guess if nothing found
-    f_unit = ''.join(re.findall(fqre, line)[0])
+    if isinstance(amt, str): amt = float(amt)
+    f_unit = re_findall(fqre, line, 0)
     return amt, f_unit
 
 def lower_zap(content, row):
@@ -226,7 +243,13 @@ def main(s_path, d_path, mod_func):
             content = sfo.read()
 
             for func in funcs:
-                content = mod(name, content, func)
+
+                try:
+                    content = mod(name, content, func)
+
+                except Exception as e:
+                    writeLog('%s: Exception in add_feats.py: %s' % (currentTime(), repr(e)))
+                    continue
             dfo.write(content)
     print('%d files modified' % holder['cnt'])
 
@@ -241,5 +264,5 @@ if __name__ == '__main__':
         commit_me(dataDir + 'tracking.json')
 
     except Exception as e:
-        print('Exception: %s\n%s' % (str(e), usage))
+        print('Exception: %s\n%s' % (repr(e), usage))
         pdb.post_mortem()
