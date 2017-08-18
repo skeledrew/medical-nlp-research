@@ -234,6 +234,7 @@ def main(s_path, d_path, mod_func):
     holder['tfc'] = [row for row in csv.reader(open(tf_csv), delimiter=',')]
     holder['cnt'] = 0
     holder['mod_funcs'] = mod_funcs
+    writeLog('%s: Adding new features "%s" to "%s" from source "%s"' % (currentTime(), mod_func, d_path, s_path))
 
     for name in files:
         name = name.split('/')[-1]
@@ -251,7 +252,7 @@ def main(s_path, d_path, mod_func):
                     writeLog('%s: Exception in add_feats.py: %s' % (currentTime(), repr(e)))
                     continue
             dfo.write(content)
-    print('%d files modified' % holder['cnt'])
+    writeLog('%s: Feature addition complete; new files in "%s"' % (currentTime(), d_path))
 
 if __name__ == '__main__':
     try:
