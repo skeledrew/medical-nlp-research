@@ -25,6 +25,8 @@ import jsonpickle.ext.numpy as jsonpickle_numpy
 jsonpickle_numpy.register_handlers()
 from zlib import adler32
 from inspect import getmembers, getargvalues, currentframe
+import requests
+
 
 
 STRING_TYPE = type('')
@@ -66,6 +68,58 @@ ripTest2 = '''>>> audits = []
 >>> len(audits)
 1508'''
 calls = 0
+
+
+class UMLSClient():
+
+    def __init__(self, api_key, cache_path=''):
+        self.api_key = api_key
+        self.auth_uri="https://utslogin.nlm.nih.gov"
+        self.auth_endpoint = "/cas/v1/api-key"
+        self.service="http://umlsks.nlm.nih.gov"
+        if not cache_path: cache_path = os.environ['HOME'] + '/umls_cache.json'
+        self.cache_path = cache_path
+        self.cache = {} if not os.path.exists(cache_path) else loadJson(cache_path)
+
+    def save_cache(self):
+        saveJson(self.cache, self.cache_path)
+        return
+
+    def gettgt(self):
+        params = {'apikey': self.apikey}
+        h = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain", "User-Agent":"python" }
+        r = requests.post(self.auth_uri+self.auth_endpoint,data=params,headers=h)
+        response = fromstring(r.text)
+        tgt = re_findall('action=.+cas', r.text, 0)[8:]
+        self.tgt = tgt
+        return tgt
+
+    def getst(self, tgt):
+        params = {'service': self.service}
+        h = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain", "User-Agent":"python" }
+        r = requests.post(tgt,data=params,headers=h)
+        st = r.text
+        self.st = st
+        return st
+
+    def query_umls(self, identifier, tgt=None, source=None, version='current'):
+        # get info from UMLS
+        uri = "https://uts-ws.nlm.nih.gov"
+        if not tgt: tgt = self.tgt
+        content_endpoint = '/rest/content/%s/CUI/%s' % (version, identifier) if not source else '/rest/content/%s/source/%s/%s' % (str(version), str(source), identifier)
+        qry = {'ticket': self.getst(tgt)}
+        r = requests.get(uri+content_endpoint,params=query)
+        r.encoding = 'utf-8'
+        items  = json.loads(r.text)
+        jsonData = items["result"]
+        if not 'cuis' in self.cache: self.cache['cuis'] = {}
+        print(json.dumps(jsonData, indent=2, sort_keys=True))
+        return jsonData
+
+    def find_cui(self, identifier):
+        # seek a cui in cache
+        if not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
+        return self.cache['cuis'][identifier]
 
 ### For pickling operations
 
