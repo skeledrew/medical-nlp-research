@@ -27,6 +27,11 @@ def get_top_results(critr, path):
     #critr = str_to_dict(critr, '&', '=')
     top = {'f1': 0.0}
     cr_hash = hash_sum(critr)
+    s_pat = 'UMLS_API_KEY='
+    e_pat = '$'
+    umls_key = re_findall('%s%s.+%s' % (s_pat, loadJson(os.environ['HOME'] + '/CREDS'), e_pat), 0)[len(s_pat):(len(e_pat) * -1)]
+    umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
+    umls_clt.gettgt()
 
     for idx in range(len(j_cont)):
         targ = j_cont[idx][1]
@@ -42,7 +47,14 @@ def get_top_results(critr, path):
         with open(ff_name, 'w') as fo:
 
             for feat in top['features']:
-                fo.write(str(feat) + '\n')
+                name = feat[0] + feat[1]  # assume one is always empty
+
+                if re.match('-?C\d{7,7}', name):
+                    # found a cui
+                    real_name = umls_clt.find_cui(name.lstrip('-'))['name']
+                    name = '%s (%s)' % (name, real_name)
+                feat = '%s, %s\n' % (name, ', '.join(feat[2:]))
+                fo.write(feat)
         top['features'] = ff_name
 
     if 'mis' in top:
