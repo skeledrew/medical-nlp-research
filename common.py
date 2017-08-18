@@ -86,7 +86,7 @@ class UMLSClient():
         return
 
     def gettgt(self):
-        params = {'apikey': self.apikey}
+        params = {'apikey': self.api_key}
         h = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain", "User-Agent":"python" }
         r = requests.post(self.auth_uri+self.auth_endpoint,data=params,headers=h)
         response = fromstring(r.text)
@@ -94,10 +94,11 @@ class UMLSClient():
         self.tgt = tgt
         return tgt
 
-    def getst(self, tgt):
+    def getst(self, tgt=''):
+        if not tgt: tgt = self.tgt
         params = {'service': self.service}
         h = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain", "User-Agent":"python" }
-        r = requests.post(tgt,data=params,headers=h)
+        r = requests.post(tgt, data=params,headers=h)
         st = r.text
         self.st = st
         return st
