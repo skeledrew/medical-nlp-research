@@ -171,7 +171,7 @@ def week_cons_add(content, row):
         est_bac = ((0.806 * drink[0] * 1.2) / (bod_wat * weight) - (metabol * drink_perd)) * 10 * 100  # final g/dL -> mg/dL?
         tot_cons.append(est_bac * drink[1] * re_index(drink[2], freqs))  # in a week
     tot_cons = int(sum(tot_cons))
-    b_size = 50
+    b_size = 250
     buck = int(tot_cons / b_size)
     content += ' W_CONS_%s_%s W_CONS_VAL_%s' % (b_size, buck, tot_cons)
     return content
