@@ -89,7 +89,7 @@ class UMLSClient():
         params = {'apikey': self.api_key}
         h = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain", "User-Agent":"python" }
         r = requests.post(self.auth_uri+self.auth_endpoint,data=params,headers=h)
-        response = fromstring(r.text)
+        #response = fromstring(r.text)
         tgt = re_findall('action=.+cas', r.text, 0)[8:]
         self.tgt = tgt
         return tgt
