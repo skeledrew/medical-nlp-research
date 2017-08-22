@@ -198,7 +198,7 @@ def gSGenericRunner(
     'random_state': 1,  # make deterministic
   }
   classifier = MakeClf(clfName, hyParams, clfMods)
-  result['classifier'] = str(classifier).replace('\n', '')
+  result['classifier'] = re.sub('\n *', ' ', str(classifier))
   clf_hash = hash_sum(result['classifier'])
   if not clf_hash in memo: memo[clf_hash] = classifier
 
@@ -447,7 +447,8 @@ def test_eval(args):
 
   for idx in range(len(feats)):
     # make features holder into a list of lists
-    feats[idx] = [feats[idx][0], feats[idx][1]]
+    if feats[idx][0] and feats[idx][1]: writeLog('Detected a double feature: "%s" and "%s"' % (feats[idx][0], feats[idx][1]))
+    feats[idx] = [feats[idx][0] + feats[idx][1]]
   x_train = train_bunch.data
   y_train = train_bunch.target
   x_test = test_bunch.data
