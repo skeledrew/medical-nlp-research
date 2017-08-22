@@ -14,6 +14,7 @@ from peel import substances as subs
 
 
 DEBUG = False
+mod_funcs = ['bac_yn_add', 'bac_val_add', 'gender_add', 'race_add', 'week_cons_add', 'lower_zap', 'merge']
 usage = 'Usage: %s /path/to/src/dir/ /path/to/dest/dir/ mod1+mod2+...+modN' % (sys.argv[0])
 holder = {}
 BAC_C = 64
@@ -208,18 +209,22 @@ def get_freq(line, fqre):
     return amt, f_unit
 
 def lower_zap(content, row):
-        pdb.set_trace()
+        #pdb.set_trace()
         #content = re.sub('\b.*[^A-Z]+.*\b', '', content)  # zap all w/o uppers
         words = content.split(' ')
 
         for idx in range(len(words)):
 
-            if not re.search('[A-Z]', words[idx]):
+            if not re.search('[A-Z]', words[idx]) or re.search('[a-z]', words[idx]):
                 # no upper
                 words[idx] = ''
-        content = ' '.join(content)
+        content = ' '.join(words)
         content = re.sub('\s{3,}', ' ', content)  # zap extra spaces
         return content
+
+def merge(content, row):
+    # dummy bypass
+    return content
 
 def mod(name, content, mod_func):
     mrn = name.split('.')[0].lstrip('0')
@@ -237,17 +242,18 @@ def main(s_path, d_path, mod_func):
     files = list(getFileList(s_path))
     ensureDirs(d_path)
     tf_csv = baseDir + 'Trauma_Final_20170614.csv'
-    mod_funcs = ['bac_yn_add', 'gender_add', 'race_add', 'week_cons_add', 'lower_zap']
+    global mod_funcs
     if not isinstance(mod_func, str): mod_funcs.append(mod_func)
     holder['tfc'] = [row for row in csv.reader(open(tf_csv), delimiter=',')]
     holder['cnt'] = 0
     holder['mod_funcs'] = mod_funcs
-    writeLog('%s: Adding new features "%s" to "%s" from source "%s"' % (currentTime(), mod_func, d_path, s_path))
+    writeLog('%s: Adding new features "%s" to "%s" from source "%s"' % (currentTime(), mod_func.replace('+', ', '), d_path, s_path))
 
     for name in files:
         name = name.split('/')[-1]
+        mode = 'a' if 'merge' in mod_func else 'w'
 
-        with open(s_path + name) as sfo, open(d_path + name, 'w') as dfo:
+        with open(s_path + name) as sfo, open(d_path + name, mode) as dfo:
             funcs = mod_func.split('+')
             content = sfo.read()
 
