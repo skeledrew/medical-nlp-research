@@ -209,7 +209,15 @@ def get_freq(line, fqre):
 
 def lower_zap(content, row):
         pdb.set_trace()
-        content = re.sub('\b.*[^A-Z]+.*\b', '', content)  # zap all w/o uppers
+        #content = re.sub('\b.*[^A-Z]+.*\b', '', content)  # zap all w/o uppers
+        words = content.split(' ')
+
+        for idx in range(len(words)):
+
+            if not re.search('[A-Z]', words[idx]):
+                # no upper
+                words[idx] = ''
+        content = ' '.join(content)
         content = re.sub('\s{3,}', ' ', content)  # zap extra spaces
         return content
 
