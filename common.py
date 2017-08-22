@@ -116,6 +116,7 @@ class UMLSClient():
         items  = json.loads(r.text)
         jsonData = items["result"]
         if not 'cuis' in self.cache: self.cache['cuis'] = {}
+        self.cache['cuis'][identifier] = jsonData
         self.access_cnt += 1
         if self.access_cnt >= 15: self.save_cache(); self.access_cnt = 0
         return jsonData
