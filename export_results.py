@@ -7,6 +7,7 @@ from common import *
 
 DEBUG = True
 usage = 'Usage: %s top na /path/to/exp_results.json' % (sys.argv[0])
+resolve_cuis = True
 
 
 def get_fields_in_json(args):
@@ -57,13 +58,16 @@ def get_top_results(critr, path):
                 name = feat[0] + feat[1]  # assume one is always empty
                 #if DEBUG and name: pdb.set_trace()
 
-                if re.match('-?[Cc]\d{7,7}', name):
+                if re.match('-?[Cc]\d{7,7}', name) and resolve_cuis:
                     # found a cui
                     #pdb.set_trace()
+                    if DEBUG: writeLog('%s: Found CUI: "%s". Attempting to resolve...' % (currentTime(), name))
                     real_name = umls_clt.find_cui(name.lstrip('-').upper())['name']
+                    if DEBUG: writeLog('%s: Resolved to "%s"!' % (currentTime(), real_name))
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
+            umls_clt.save_cache()
         top['features'] = ff_name
 
     if 'mis' in top:
@@ -76,7 +80,9 @@ def get_top_results(critr, path):
     if not isinstance(top, list): top = [top]
     rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
     saveJson(top, rf_name)
-    writeLog('\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name))
+    fin_msg = '\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name)
+    writeLog(fin_msg)
+    slack_post(fin_msg, '@aphillips')
     return top
 
 def main(args):
