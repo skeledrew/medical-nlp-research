@@ -13,7 +13,7 @@ from common import *
 from peel import substances as subs
 
 
-DEBUG = False
+DEBUG = True
 mod_funcs = ['bac_yn_add', 'bac_val_add', 'gender_add', 'race_add', 'week_cons_add', 'lower_zap', 'merge']
 usage = 'Usage: %s /path/to/src/dir/ /path/to/dest/dir/ mod1+mod2+...+modN' % (sys.argv[0])
 holder = {}
@@ -144,6 +144,7 @@ def week_cons_add(content, row):
         [use_ref_lines.append(line) for line in split_multiple(line, ref_ctr)]
     drinks = []
     #if use_ref_lines: pdb.set_trace()
+    if not use_ref_lines: return content
 
     for line in use_ref_lines:
         # calculate drink amounts and frequencies
@@ -170,7 +171,9 @@ def week_cons_add(content, row):
         # weekly drinking estimate
         if drink[0] <= 0 or drink[1] <= 0 or drink[2] == 'None': continue
         est_bac = ((0.806 * drink[0] * 1.2) / (bod_wat * weight) - (metabol * drink_perd)) * 10 * 100  # final g/dL -> mg/dL?
-        tot_cons.append(est_bac * drink[1] * re_index(drink[2], freqs))  # in a week
+        drink[2] = re_index(drink[2], freqs)
+        if not type(drink[2]) in [int, float]: drink[2] = 0
+        tot_cons.append(est_bac * drink[1] * drink[2])  # in a week
     tot_cons = int(sum(tot_cons))
     b_size = 250
     buck = int(tot_cons / b_size)
@@ -189,7 +192,7 @@ def get_quan(line, szre, sbre, sizes, subs):
     if not amt: return 0
     amt = re_findall('a|(\d+((\-|/|\.)\d+)?)', amt, 0)  # extract
     if '-' in amt: amt = (int(amt.split('-')[1]) + int(amt.split('-')[0])) / 2
-    if '/' in amt: amt = float(amt.split('/')[0]) / float(amt.split('/')[1])
+    if isinstance(amt, str) and '/' in amt: amt = float(amt.split('/')[0]) / float(amt.split('/')[1])
     if amt == 'a': amt = 1
     if isinstance(amt, str): amt = float(amt) if  '.' in amt else int(amt)
     size = re_index(re_findall(szre, line, 0), sizes) if re.search(szre, line) else 1
@@ -223,8 +226,8 @@ def lower_zap(content, row):
         return content
 
 def merge(content, row):
-    # dummy bypass
-    return content
+    # dummy bypass with just space pad
+    return ' %s ' % content
 
 def mod(name, content, mod_func):
     mrn = name.split('.')[0].lstrip('0')
@@ -264,9 +267,11 @@ def main(s_path, d_path, mod_func):
 
                 except Exception as e:
                     writeLog('%s: Exception in add_feats.py: %s' % (currentTime(), repr(e)))
+                    if DEBUG: pdb.post_mortem()
                     continue
             dfo.write(content)
-    writeLog('%s: Feature addition complete; new files in "%s"' % (currentTime(), d_path))
+        holder['cnt'] += 1
+    writeLog('%s: Feature addition complete; %d files modified, new files in "%s"' % (currentTime(), holder['cnt'], d_path))
 
 if __name__ == '__main__':
     try:
