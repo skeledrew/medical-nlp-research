@@ -26,12 +26,10 @@ def bac_yn_add(content, row):
 
         if row[BAC_C].lower() == 'no':
             content += ' BAC_NO'
-            holder['cnt'] += 1
         #if row[BAC_POS] == '': break
 
         if row[BAC_C].lower() == 'yes':
             content += ' BAC_YES'
-            holder['cnt'] += 1
         return content
 
 def bac_yn_only(content, row):
@@ -238,7 +236,6 @@ def mod(name, content, mod_func):
         #pdb.set_trace()
         if isinstance(mod_func, str): mod_func = mod.__globals__[mod_func]
         content = mod_func(content, row)
-        holder['cnt'] += 1
     return content
 
 def main(s_path, d_path, mod_func):
