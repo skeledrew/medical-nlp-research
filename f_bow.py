@@ -33,18 +33,19 @@ gSParams = [
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     #'anc_notes_trim_bac-all',  # all BAC data
     #'anc_notes_trim_cuis_bac-all',  # v2 cuis
-    'anc_notes_trim_bac-all_gender_race',
+    #'anc_notes_trim_bac-all_gender_race',
     #'anc_notes_trim_cuis_bac-all_gender_race',
-    'anc_notes_trim_bac-all_gender_race_w-cons',
+    #'anc_notes_trim_bac-all_gender_race_w-cons',
+    'anc_trim_w-cons',
   ],  # data dirs
   [
     'LinearSVC',
-    #'BernoulliNB',
+    'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
     'SGDClassifier',
     'LogisticRegression',
-    #'PassiveAggressiveClassifier',
+    'PassiveAggressiveClassifier',
     #'NearestCentroid',
     #'KNeighborsClassifier',
     #'MultinomialNB',
@@ -82,21 +83,21 @@ gSParams = [
     IGNORE
   ],  # penalty
   [
-    0.0000001,
-    0.000001,
-    0.00001,
-    0.0001,
-    0.001,
-    0.01,
-    0.1,
+    #0.0000001,
+    #0.000001,
+    #0.00001,
+    #0.0001,
+    #0.001,
+    #0.01,
+    #0.1,
     1,
-    10,
-    100,
-    1000,
-    10000,
-    100000,
-    1000000,
-    10000000,
+    #10,
+    #100,
+    #1000,
+    #10000,
+    #100000,
+    #1000000,
+    #10000000,
   ],  # C
   ['balanced'],  # weight
   [
@@ -454,12 +455,18 @@ def test_eval(args):
   pred = clf_pipe.predict(x_test)
   if hasattr(clf_pipe, 'coef_'): [feats[idx].append(clf_pipe.coef_[0][idx]) for idx in range(len(feats))]
   misses = GetMisses(y_test, pred, test_bunch.filenames)
+  misses = list(set(misses))
   p =precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
   f1 = f1_score(y_test, pred, pos_label=1)
-  saveText('\n'.join(misses), dataDir + 'miscats-test_temp.txt')
-  saveText('\n'.join(', '.join(f) for f in feats), dataDir + 'feats-test_temp.txt')
-  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), re.sub('\n *', ' ', str(clf_pipe.steps[-1][-1])), str(params), test_set, p, r, f1))
+  mf_name = path_name_prefix('miscat-test_', args[0].replace('.json', '.txt'))
+  saveText('\n'.join(misses), mf_name)
+  ff_name = path_name_prefix('feats-test_', args[0])
+  saveText('\n'.join(', '.join(f) for f in feats), ff_name)
+  classifier = re.sub('\n *', ' ', str(clf_pipe.steps[-1][-1]))
+  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params), test_set, p, r, f1))
+  rf_name = path_name_prefix('test-res_', args[0])
+  saveJson({'classifier': classifier, 'options': params, 'test_set': test_set, 'P': p, 'R': r, 'F1': f1}, rf_name)
 
 if __name__ == "__main__":
   try:
