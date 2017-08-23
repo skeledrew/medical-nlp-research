@@ -38,6 +38,7 @@ def get_top_results(critr, path):
     umls_key = re_findall('%s.+%s' % (s_pat, e_pat), loadText(os.environ['HOME'] + '/CREDS'), 0)[len(s_pat):] #(len(e_pat) * -1)]
     umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
     umls_clt.gettgt()
+    print('%s: Searching for best matching criteria...' % currentTime())
 
     for idx in range(len(j_cont)):
         # seek the max f1
@@ -49,21 +50,21 @@ def get_top_results(critr, path):
 
     if 'features' in top and top['features']:
         # write features to a file
+        print('%s: Writing features file...' % currentTime())
         ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.txt')
+        #if DEBUG: pdb.set_trace()
 
         with open(ff_name, 'w') as fo:
-            fo.write('cui/name,%s' % (''.join('fold_' + str(i) for i in range(len(top['features'])))))
+            fo.write('cui/name,%s' % (','.join('fold_' + str(i) for i in range(len(top['features'][0]) - 2))))
 
             for feat in top['features']:
                 name = feat[0] + feat[1]  # assume one is always empty
-                #if DEBUG and name: pdb.set_trace()
 
                 if re.match('-?[Cc]\d{7,7}', name) and resolve_cuis:
                     # found a cui
-                    #pdb.set_trace()
-                    if DEBUG: writeLog('%s: Found CUI: "%s". Attempting to resolve...' % (currentTime(), name))
+                    #if DEBUG: writeLog('%s: Found CUI: "%s". Attempting to resolve...' % (currentTime(), name))
                     real_name = umls_clt.find_cui(name.lstrip('-').upper())['name']
-                    if DEBUG: writeLog('%s: Resolved to "%s"!' % (currentTime(), real_name))
+                    #if DEBUG: writeLog('%s: Resolved to "%s"!' % (currentTime(), real_name))
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
@@ -72,6 +73,7 @@ def get_top_results(critr, path):
 
     if 'mis' in top:
         # write misclassifications to a file
+        print('%s: Writing misclassifications file...' % currentTime())
         mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
 
         with open(mf_name, 'w') as fo:
@@ -86,8 +88,7 @@ def get_top_results(critr, path):
     return top
 
 def main(args):
-    print('Working...')
-
+    
     if len(args) == 1:
         print('No args given. Terminating...')
         return
