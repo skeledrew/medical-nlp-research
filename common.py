@@ -20,20 +20,18 @@ import json
 import pexpect
 import time
 import pdb
-import jsonpickle
-import jsonpickle.ext.numpy as jsonpickle_numpy
-jsonpickle_numpy.register_handlers()
+#import jsonpickle
+#import jsonpickle.ext.numpy as jsonpickle_numpy
+#jsonpickle_numpy.register_handlers()
 from zlib import adler32
 from inspect import getmembers, getargvalues, currentframe
 import requests
 
 
-
-STRING_TYPE = type('')
-LIST_TYPE = type([])
-
 baseDir = '/NLPShare/Alcohol/'
 dataDir = baseDir + 'data/'
+adeBaseDir = '/NLPShare/ADE/'
+adeDataDir = '/NLPShare/ADE/data/'
 
 ancNoteTypes = dataDir + 'anc_note_types.txt'
 labNoteTypes = dataDir + 'lab_note_types.txt'
@@ -41,6 +39,10 @@ otherNoteTypes = dataDir + 'other_note_types.txt'
 allNotes = dataDir + 'all_notes.json'
 allDiags = dataDir + 'all_diags.json'
 allNotesWithDiags = dataDir + 'all_notes_with_diags.json'
+adeIrbNotes = adeBaseDir + 'irb_209962_note_08082017.txt'
+adeIrbPtList = adeBaseDir + 'irb_209962_pt_list_08082017.txt'
+adePtListCsv = adeBaseDir + 'PatientList_209962.csv'
+adeAllNotes = adeDataDir + 'all_notes.json'
 logFile = dataDir + 'logs.txt'
 ripTest = '''>>> fp = 6
 >>> fn = 10
@@ -81,6 +83,8 @@ class UMLSClient():
         self.cache_path = cache_path
         self.cache = {} if not os.path.exists(cache_path) else loadJson(cache_path)
         self.access_cnt = 0
+        self.tgt = None
+        self.st = None
 
     def save_cache(self):
         saveJson(self.cache, self.cache_path)
@@ -97,7 +101,7 @@ class UMLSClient():
         return tgt
 
     def getst(self, tgt=''):
-        if not tgt: tgt = self.tgt
+        if not tgt: tgt = self.tgt or self.gettgt()
         params = {'service': self.service}
         h = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain", "User-Agent":"python" }
         r = requests.post(tgt, data=params,headers=h)
@@ -108,7 +112,7 @@ class UMLSClient():
     def query_umls(self, identifier, tgt=None, source=None, version='current'):
         # get info from UMLS
         uri = "https://uts-ws.nlm.nih.gov"
-        if not tgt: tgt = self.tgt
+        if not tgt: tgt = self.tgt or self.gettgt()
         content_endpoint = '/rest/content/%s/CUI/%s' % (version, identifier) if not source else '/rest/content/%s/source/%s/%s' % (str(version), str(source), identifier)
         query = {'ticket': self.getst(tgt)}
         r = requests.get(uri+content_endpoint,params=query)
