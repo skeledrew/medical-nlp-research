@@ -9,7 +9,7 @@ from pexpect.replwrap import REPLWrapper
 from common import *
 
 
-class Distance(): #Distance(REPLWrapper):
+class Distance():
 
     def __init__(self, cmd='', prompt=None, rx=None):
         if not cmd: cmd = '{} {}'.format(dist, mimic_bin)
@@ -20,7 +20,6 @@ class Distance(): #Distance(REPLWrapper):
 
         else:
             self._repl = cmd
-        #super(Distance, self).__init__(cmd, prompt, None, prompt)
         self.nodes = []
         self.rx = rx if rx else '\s+(?P<Word>\S+)\t+.*'
 
@@ -29,11 +28,10 @@ class Distance(): #Distance(REPLWrapper):
         first = [re.match(self.rx, line).group('Word') for line in first]
 
         if level < max_levels:
-            self.nodes = [Distance(self._repl) for _ in range(len(first))]
-            rest = [self.nodes[idx].find(first[idx], num, max_levels, level=level+1) for idx in range(len(first))]
+            #self.nodes = [Distance(self._repl) for _ in range(len(first))]
+            rest = [Distance(self._repl).find(first[idx], num, max_levels, level=level+1) for idx in range(len(first))]
             first.extend(rest)
             first = [word for sublist in first if isinstance(sublist, list) for word in sublist]
-            #first = [word for word in first if len(word) > 1]
             if unique: first = list(set(first))
         if level == 0: print(first, len(first))
         return first
