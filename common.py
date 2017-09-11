@@ -628,7 +628,7 @@ def cc_to_sc(name):
     s = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s).lower()
 
-def str_to_dict(s, main_sep, map_sep, use_re=False):
+def str_to_dict(s, main_sep='&', map_sep='=', use_re=False):
     # 17-08-01 - initial
     # -12 - update to support regex
     # -09-11 - default if no value for a key
