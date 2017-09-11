@@ -631,12 +631,13 @@ def cc_to_sc(name):
 def str_to_dict(s, main_sep, map_sep, use_re=False):
     # 17-08-01 - initial
     # -12 - update to support regex
+    # -09-11 - default if no value for a key
     final = {}
     items = s.split(main_sep) if not use_re else re.split(main_sep, s)
 
     for item in items:
         item = item.split(map_sep) if not use_re else re.split(map_sep, item)
-        final[item[0]] = item[1]
+        final[item[0]] = item[1] if len(item) == 2 else None
     return final
 
 def re_findall(pat, s_, idx=None):
