@@ -34,7 +34,7 @@ class Distance(): #Distance(REPLWrapper):
             first.extend(rest)
             first = [word for sublist in first if isinstance(sublist, list) for word in sublist]
             #first = [word for word in first if len(word) > 1]
-            #if unique: first = list(set(first))
+            if unique: first = list(set(first))
         if level == 0: print(first, len(first))
         return first
 
