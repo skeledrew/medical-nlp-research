@@ -22,7 +22,7 @@ class Distance(): #Distance(REPLWrapper):
             self._repl = cmd
         #super(Distance, self).__init__(cmd, prompt, None, prompt)
         self.nodes = []
-        self.rx = rx if rx else '\s+(?P<Word>[\w-]+)\t+.*'
+        self.rx = rx if rx else '\s+(?P<Word>\S+)\t+.*'
 
     def find(self, words, num, max_levels=1, unique=True, level=0):
         first = self._repl.run_command(words, None).split('\n')[5:num+5]
