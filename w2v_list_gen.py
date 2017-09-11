@@ -32,7 +32,7 @@ class Distance(): #Distance(REPLWrapper):
             self.nodes = [Distance(self._repl) for _ in range(len(first))]
             rest = [self.nodes[idx].find(first[idx], num, max_levels, level=level+1) for idx in range(len(first))]
             first.extend(rest)
-            first = [word for sublist in first for word in sublist]
+            first = [word for sublist in first for word in sublist if isinstance(word, list)]
             #first = [word for word in first if len(word) > 1]
             #if unique: first = list(set(first))
         if level == 0: print(first, len(first))
