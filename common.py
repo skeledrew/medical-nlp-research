@@ -26,6 +26,7 @@ import pdb
 from zlib import adler32
 from inspect import getmembers, getargvalues, currentframe
 import requests
+from pexpect.replwrap import REPLWrapper
 
 
 baseDir = '/NLPShare/Alcohol/'
@@ -129,6 +130,7 @@ class UMLSClient():
         # seek a cui in cache
         if not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
         return self.cache['cuis'][identifier]
+
 
 ### For pickling operations
 
@@ -389,7 +391,7 @@ def pesh(cmd, out=sys.stdout, shell='/bin/bash', debug=False):
         if debug: print('DBG: running in separate process')
         proc = Process(target=launch, args=([cmd, shell])).start()
         return 1
-    child = pexpect.spawnu(shell, ['-c', cmd] if type(cmd) == type('') else cmd)
+    child = pexpect.spawnu(shell, ['-c', cmd] if isinstance(cmd, str) else cmd)
 
     if not out == sys.stdout:
         result = out
