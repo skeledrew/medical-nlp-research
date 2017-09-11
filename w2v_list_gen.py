@@ -28,12 +28,10 @@ class Distance():
         first = [re.match(self.rx, line).group('Word') for line in first]
 
         if level < max_levels:
-            #self.nodes = [Distance(self._repl) for _ in range(len(first))]
             rest = [Distance(self._repl).find(first[idx], num, max_levels, level=level+1) for idx in range(len(first))]
             first.extend(rest)
             first = [word for sublist in first if isinstance(sublist, list) for word in sublist]
             if unique: first = list(set(first))
-        if level == 0: print(first, len(first))
         return first
 
 def list_gen(seed, number, levels):
@@ -45,7 +43,6 @@ def list_gen(seed, number, levels):
 
     while words:
         distance.find(words.pop(0), number, levels)
-    #distance.finish()
 
 mimic_bin = '/NLPShare/Lib/Word2Vec/Models/mimic.bin'
 dist = '/NLPShare/Lib/Word2Vec/word2vec/distance'
