@@ -71,6 +71,8 @@ ripTest2 = '''>>> audits = []
 >>> len(audits)
 1508'''
 calls = 0
+mimic_bin = '/NLPShare/Lib/Word2Vec/Models/mimic.bin'
+dist = '/NLPShare/Lib/Word2Vec/word2vec/distance'
 
 
 class UMLSClient():
@@ -130,6 +132,33 @@ class UMLSClient():
         # seek a cui in cache
         if not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
         return self.cache['cuis'][identifier]
+
+
+class Distance():
+    # Word2Vec distance wrapper by default
+
+    def __init__(self, cmd='', prompt=None, rx=None):
+        if not cmd: cmd = '{} {}'.format(dist, mimic_bin)
+        if not prompt: prompt = 'Enter word or sentence (EXIT to break): '
+
+        if isinstance(cmd, str):
+            self._repl = REPLWrapper(cmd, prompt, None)
+
+        else:
+            self._repl = cmd
+        self.nodes = []
+        self.rx = rx if rx else '\s+(?P<Word>\S+)\t+.*'
+
+    def find(self, words, num, max_levels=1, unique=True, level=0):
+        first = self._repl.run_command(words, None).split('\n')[5:num+5]
+        first = [re.match(self.rx, line).group('Word') for line in first]
+
+        if level < max_levels:
+            rest = [Distance(self._repl).find(first[idx], num, max_levels, level=level+1) for idx in range(len(first))]
+            first.extend(rest)
+            first = [word for sublist in first if isinstance(sublist, list) for word in sublist]
+            if unique: first = list(set(first))
+        return first
 
 
 ### For pickling operations
