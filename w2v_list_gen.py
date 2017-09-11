@@ -35,14 +35,13 @@ class Distance():
         return first
 
 def list_gen(seed, number, levels):
-    words = [seed]
+    words = seed.split('|')
     curr_level = 0
-    distance = Distance()
     number = int(number)
     levels = int(levels)
 
     while words:
-        print(distance.find(words.pop(0), number, levels))
+        print(Distance().find(words.pop(0), number, levels))
 
 mimic_bin = '/NLPShare/Lib/Word2Vec/Models/mimic.bin'
 dist = '/NLPShare/Lib/Word2Vec/word2vec/distance'
