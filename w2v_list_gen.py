@@ -42,7 +42,7 @@ def list_gen(seed, number, levels):
     levels = int(levels)
 
     while words:
-        distance.find(words.pop(0), number, levels)
+        print(distance.find(words.pop(0), number, levels))
 
 mimic_bin = '/NLPShare/Lib/Word2Vec/Models/mimic.bin'
 dist = '/NLPShare/Lib/Word2Vec/word2vec/distance'
