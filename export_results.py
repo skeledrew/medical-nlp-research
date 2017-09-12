@@ -1,6 +1,7 @@
 #! /home/aphillips5/envs/nlpenv/bin/python3
 
 # regular imports
+from copy import deepcopy
 
 from common import *
 
@@ -47,15 +48,23 @@ def get_top_results(critr, path):
         ##check given criteria here
         if targ['f1'] <= top['f1']: continue
         top = targ
+    ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
+    mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
+    rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
+    if not isinstance(top, list): top = [top]
+    tmp_top = deepcopy(top)
+    del tmp_top[0]['features']
+    del tmp_top[0]['mis']
+    saveJson(tmp_top, rf_name)
+    print('Saved main results to file!')
 
     if 'features' in top and top['features']:
         # write features to a file
         print('%s: Writing features file...' % currentTime())
-        ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.txt')
         #if DEBUG: pdb.set_trace()
 
         with open(ff_name, 'w') as fo:
-            fo.write('cui/name,%s' % (','.join('fold_' + str(i) for i in range(len(top['features'][0]) - 2))))
+            fo.write('cui/name,%s' % (','.join('fold_' + str(i) for i in range(len(top['features'][0]) - 2))) + '\n')
 
             for feat in top['features']:
                 name = feat[0] + feat[1]  # assume one is always empty
@@ -74,13 +83,10 @@ def get_top_results(critr, path):
     if 'mis' in top:
         # write misclassifications to a file
         print('%s: Writing misclassifications file...' % currentTime())
-        mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
 
         with open(mf_name, 'w') as fo:
             fo.write('\n'.join(top['mis']))
         top['mis'] = mf_name
-    if not isinstance(top, list): top = [top]
-    rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
     saveJson(top, rf_name)
     fin_msg = '\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name)
     writeLog(fin_msg)
