@@ -8,7 +8,7 @@ from common import *
 
 DEBUG = True
 usage = 'Usage: %s top na /path/to/exp_results.json' % (sys.argv[0])
-resolve_cuis = True
+resolve_cuis = False
 
 
 def get_fields_in_json(args):
@@ -30,9 +30,9 @@ def get_top_results(critr, path):
     # 17-08-01
     j_cont = loadJson(path)
     if not isinstance(j_cont, list): raise Exception('%s should be a list' % args[2])
-    #critr = str_to_dict(critr, '&', '=')
-    top = {'f1': 0.0}
     cr_hash = hash_sum(critr)
+    critr = str_to_dict(critr, '&', '=')
+    top = {'f1': 0.0, 'recall': 0.0, 'precision': 0.0}
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
     #pdb.set_trace()
@@ -40,13 +40,14 @@ def get_top_results(critr, path):
     umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
     umls_clt.gettgt()
     print('%s: Searching for best matching criteria...' % currentTime())
+    optimize = critr['optimize'] if 'optimize' in critr and critr['optimize'] in 'precision|recall|f1' else 'f1'
 
     for idx in range(len(j_cont)):
-        # seek the max f1
+        # seek max specified score
         targ = j_cont[idx][1]
         if not 'f1' in targ or targ['f1'] == None: continue
         ##check given criteria here
-        if targ['f1'] <= top['f1']: continue
+        if targ[optimize] <= top[optimize]: continue
         top = targ
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
     mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
@@ -58,35 +59,33 @@ def get_top_results(critr, path):
     saveJson(tmp_top, rf_name)
     print('Saved main results to file!')
 
-    if 'features' in top and top['features']:
+    if 'features' in top[0] and top[0]['features']:
         # write features to a file
         print('%s: Writing features file...' % currentTime())
         #if DEBUG: pdb.set_trace()
 
         with open(ff_name, 'w') as fo:
-            fo.write('cui/name,%s' % (','.join('fold_' + str(i) for i in range(len(top['features'][0]) - 2))) + '\n')
+            fo.write('cui/name,%s' % (','.join('fold_' + str(i) for i in range(len(top[0]['features'][0]) - 2))) + '\n')
 
-            for feat in top['features']:
+            for feat in top[0]['features']:
                 name = feat[0] + feat[1]  # assume one is always empty
 
                 if re.match('-?[Cc]\d{7,7}', name) and resolve_cuis:
                     # found a cui
-                    #if DEBUG: writeLog('%s: Found CUI: "%s". Attempting to resolve...' % (currentTime(), name))
                     real_name = umls_clt.find_cui(name.lstrip('-').upper())['name']
-                    #if DEBUG: writeLog('%s: Resolved to "%s"!' % (currentTime(), real_name))
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
             umls_clt.save_cache()
-        top['features'] = ff_name
+        top[0]['features'] = ff_name
 
-    if 'mis' in top:
+    if 'mis' in top[0]:
         # write misclassifications to a file
         print('%s: Writing misclassifications file...' % currentTime())
 
         with open(mf_name, 'w') as fo:
-            fo.write('\n'.join(top['mis']))
-        top['mis'] = mf_name
+            fo.write('\n'.join(top[0]['mis']))
+        top[0]['mis'] = mf_name
     saveJson(top, rf_name)
     fin_msg = '\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name)
     writeLog(fin_msg)
