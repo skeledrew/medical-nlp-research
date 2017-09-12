@@ -33,20 +33,23 @@ gSParams = [
     #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
     #'anc_notes_trim_bac-all',  # all BAC data
     #'anc_notes_trim_cuis_bac-all',  # v2 cuis
-    'anc_notes_trim_bac-all_gender_race',
-    'anc_notes_trim_cuis_bac-all_gender_race',
-    'anc_notes_trim_bac-all_gender_race_w-cons',
-    'anc_notes_trim_cuis_bac-all_gender_race_w-cons',
+    #'anc_notes_trim_bac-all_gender_race',
+    #'anc_notes_trim_cuis_bac-all_gender_race',
+    #'anc_notes_trim_bac-all_gender_race_w-cons',
+    #'anc_notes_trim_cuis_bac-all_gender_race_w-cons',
     #'anc_trim_w-cons',
+    #'anc_notes_sent',
+    'anc_notes_sent_wv-trim',
+    #'anc_notes_sent_wv-trim_cuis',
   ],  # data dirs
   [
     'LinearSVC',
-    'BernoulliNB',
+    #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
     'SGDClassifier',
     'LogisticRegression',
-    'PassiveAggressiveClassifier',
+    #'PassiveAggressiveClassifier',
     #'NearestCentroid',
     #'KNeighborsClassifier',
     #'MultinomialNB',
@@ -65,8 +68,8 @@ gSParams = [
   ],  # for n-folds CV
   [
     (1,1),
-    #(1,2),
-    #(1,3),
+    (1,2),
+    (1,3),
     #(2,2),
     #(2,3)
   ],  # n-grams
