@@ -26,7 +26,7 @@ gSParams = [
     #'anc_notes_trim',  # peel.py applied
     #'anc_notes_cuis',  # cuis w/out dict fix
     #'anc_notes_trim_cuis',
-    #'anc_notes_v2_cuis',  # cuis w/ dict fix
+    'anc_notes_v2_cuis',  # cuis w/ dict fix
     #'anc_notes_trim_v2_cuis',  # trim cuis
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
     #'anc_notes_trim_v3',  # trim with BAC
@@ -37,10 +37,17 @@ gSParams = [
     #'anc_notes_trim_cuis_bac-all_gender_race',
     #'anc_notes_trim_bac-all_gender_race_w-cons',
     #'anc_notes_trim_cuis_bac-all_gender_race_w-cons',
-    #'anc_trim_w-cons',
+    'anc_trim_w-cons',
     #'anc_notes_sent',
     'anc_notes_sent_wv-trim',
-    #'anc_notes_sent_wv-trim_cuis',
+    'anc_notes_sent_wv-trim_cuis',
+    'anc_wv-trim_w-cons',
+    'anc_notes_sent_wv-trim_w-cons',
+    'anc_notes_sent_wv-trim_cuis_w-cons',
+    'anc_notes_sent_wv-trim_unique_gender_race',  # zapped dups
+    'anc_notes_sent_wv-trim_cuis_gender_race',
+    'anc_notes_sent_wv-trim_w-cons_unique_gender_race',
+    'anc_notes_sent_wv-trim_cuis_w-cons_gender_race',
   ],  # data dirs
   [
     'LinearSVC',
@@ -49,14 +56,14 @@ gSParams = [
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
     'SGDClassifier',
     'LogisticRegression',
-    #'PassiveAggressiveClassifier',
+    'PassiveAggressiveClassifier',
     #'NearestCentroid',
     #'KNeighborsClassifier',
     #'MultinomialNB',
     #'GaussianNB'
     #'PassiveAggressiveRegressor',
     #'SGDRegressor',
-    #'RulesBasedClassifier',  # custom
+    'RulesBasedClassifier',  # custom
     #'RandomForestClassifier',
     #'DummyClassifier',  # for the baseline
     #'OptimizedRulesSeeker',  # custom
@@ -147,7 +154,7 @@ gSParams = [
     #False
   ],  # CVec binary
   [
-    #'text',
+    'text',
     #'count',
     'tfidf',
   ],  # preprocessing task
@@ -216,7 +223,7 @@ def gSGenericRunner(
     result['error'] = None
 
   except Exception as e:
-    writeLog('%s: Error in classification: %s. Skipping...' % (currentTime(), repr(e)))
+    writeLog('%s: Error in classification: %s. Skipping...' % (currentTime(), repr(e)[:80]))
     result = {'classifier': result['classifier'], 'options': result['options']}
     result['error'] = e.args
     result['f1'] = result['precision'] = result['recall'] = result['std'] = None
