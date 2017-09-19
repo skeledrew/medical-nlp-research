@@ -14,7 +14,7 @@ from peel import substances as subs
 
 
 DEBUG = True
-mod_funcs = ['bac_yn_add', 'bac_val_add', 'gender_add', 'race_add', 'week_cons_add', 'lower_zap', 'merge']
+mod_funcs = ['bac_yn_add', 'bac_val_add', 'gender_add', 'race_add', 'week_cons_add', 'lower_zap', 'merge', 'unique']
 usage = 'Usage: %s /path/to/src/dir/ /path/to/dest/dir/ mod1+mod2+...+modN\nMods are: %s' % (sys.argv[0], str(mod_funcs))
 holder = {}
 BAC_C = 64
@@ -226,6 +226,16 @@ def lower_zap(content, row):
 def merge(content, row):
     # dummy bypass with just space pad
     return ' %s ' % content
+
+def unique(content, row):
+    lines = content.split('\n')
+    uniq_lines = []
+
+    for line in lines:
+        line = line.strip()
+        if line in uniq_lines: continue
+        uniq_lines.append(line)
+    return '\n'.join(uniq_lines)
 
 def mod(name, content, mod_func):
     mrn = name.split('.')[0].lstrip('0')
