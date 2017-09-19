@@ -247,7 +247,7 @@ def main(s_path, d_path, mod_func):
     holder['tfc'] = [row for row in csv.reader(open(tf_csv), delimiter=',')]
     holder['cnt'] = 0
     holder['mod_funcs'] = mod_funcs
-    writeLog('%s: Adding new features "%s" to "%s" from source "%s"' % (currentTime(), mod_func.replace('+', ', '), d_path, s_path))
+    writeLog('%s: Applying new feature(s) "%s" to "%s" from source "%s"' % (currentTime(), mod_func.replace('+', ', '), d_path, s_path))
 
     for name in files:
         name = name.split('/')[-1]
@@ -268,7 +268,7 @@ def main(s_path, d_path, mod_func):
                     continue
             dfo.write(content)
         holder['cnt'] += 1
-    writeLog('%s: Feature addition complete; %d files modified, new files in "%s"' % (currentTime(), holder['cnt'], d_path))
+    writeLog('%s: Feature application complete; %d files modified, new files in "%s"' % (currentTime(), holder['cnt'], d_path))
 
 if __name__ == '__main__':
     try:
