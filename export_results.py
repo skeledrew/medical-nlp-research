@@ -7,8 +7,8 @@ from common import *
 
 
 DEBUG = True
-usage = 'Usage: %s top na /path/to/exp_results.json' % (sys.argv[0])
-resolve_cuis = False
+usage = 'Usage: %s top {criteria} /path/to/exp_results.json' % (sys.argv[0])
+#resolve_cuis = False
 
 
 def get_fields_in_json(args):
@@ -37,10 +37,16 @@ def get_top_results(critr, path):
     e_pat = '$'
     #pdb.set_trace()
     umls_key = re_findall('%s.+%s' % (s_pat, e_pat), loadText(os.environ['HOME'] + '/CREDS'), 0)[len(s_pat):] #(len(e_pat) * -1)]
-    umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
-    umls_clt.gettgt()
+    umls_clt = None
+    try:
+        umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
+        umls_clt.gettgt()
+    except Exception as e:
+        writeLog('Unable to initialize UMLS client: {}'.format(repr(e)))
+        umls_clt = None
     print('%s: Searching for best matching criteria...' % currentTime())
     optimize = critr['optimize'] if 'optimize' in critr and critr['optimize'] in 'precision|recall|f1' else 'f1'
+    resolve_cuis = critr['resolve_cuis'] if 'resolve_cuis' in critr and critr['resolve_cuis'] in 'yes|no' else 'no'
 
     for idx in range(len(j_cont)):
         # seek max specified score
@@ -70,9 +76,12 @@ def get_top_results(critr, path):
             for feat in top[0]['features']:
                 name = feat[0] + feat[1]  # assume one is always empty
 
-                if re.match('-?[Cc]\d{7,7}', name) and resolve_cuis:
-                    # found a cui
-                    real_name = umls_clt.find_cui(name.lstrip('-').upper())['name']
+                if umls_clt and resolve_cuis == 'yes' and (re.match('-?[Cc]\d{7,7}', name) or re.match('(neg)?[Cc]\d{7,7}', name)):
+                    # found a cui to resolve
+                    cui_name = name.lstrip('-').upper()
+                    if cui_name.startswith('NEG'): cui_name = cui_name[3:]
+                    if not len(cui_Name) == 8: raise ValueError('CUI must be formatted C#######, got "%s"' % cui_name)
+                    real_name = umls_clt.find_cui(cui_name)['name']
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
