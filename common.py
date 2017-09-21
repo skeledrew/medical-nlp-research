@@ -669,6 +669,8 @@ def re_index(match, s_):
             return s_[idx]
     return None
 
+def get_env(key):
+    return os.environ[key]
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
 commit_me(dataDir + 'tracking.json', 'common.py')
