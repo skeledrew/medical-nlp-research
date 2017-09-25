@@ -27,6 +27,7 @@ from zlib import adler32
 from inspect import getmembers, getargvalues, currentframe
 import requests
 from pexpect.replwrap import REPLWrapper
+from threading import Timer
 
 
 baseDir = '/NLPShare/Alcohol/'
@@ -133,7 +134,6 @@ class UMLSClient():
         if not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
         return self.cache['cuis'][identifier]
 
-
 class Distance():
     # Word2Vec distance wrapper by default
 
@@ -159,6 +159,122 @@ class Distance():
             first = [word for sublist in first if isinstance(sublist, list) for word in sublist]
             if unique: first = list(set(first))
         return first
+
+class CrunchClient():
+
+    def __init__(self, user=''):
+        self.user = user  # default user name
+        self.servers = {}  # can connect to multiple servers
+        self.connections = {}  # single use to trigger forking
+        self.task_list = []
+        self.working_list = []
+        self.done_list = []
+        self.work_load = 0
+        self.complete = False
+
+    def add_server(self, host='localhost', port=9999, name='', user=''):
+        '''Add a connectable server to the server list.
+        Takes server host, port, a name and a valid user on the system.
+        Returns a string describing the result.'''
+        cpus = 0
+        try:
+            c = rpyc.connect(host, port)
+            cpus = c.root.cpu_count()
+            c.close()
+
+        except ConnectionRefusedError:
+            msg = 'No service found on host: "{}", port: {}'.format(host, port)
+            print(msg)
+            return msg
+
+        except Exception as e:
+            msg = 'Something broke: {}'.format(repr(e))
+            print(msg)
+            return(msg)
+        name = name or host + port
+        user = user or self.user or 'none'
+        self.servers[name] = {'host': host, 'port': port, 'user': user, 'cpus': cpus}
+        msg = 'Successfully created server "{}" on host: "{}", port: {}'.format(name, host, port)
+        msg += ' with user {}.'.format(user) if user else ' with default user'
+
+        for idx in cpus:
+            conn = '{}:{}:{}'.format(name, idx, user)
+            self.connections[conn] = None
+            res = self.make_link(conn)
+        return msg
+
+    def make_link(self, c_name):
+    # create a connection
+        try:
+            host = self.servers[c_name]['host']
+            port = self.servers[c_name]['port']
+            conn = rpyc.connect(host, port)
+            self.connections[c_cname] = conn
+
+        except Exception as e:
+            msg = 'Something broke: {}'.format(repr(e))
+            print(msg)
+            return False
+        return True
+
+    def add_task(self, func, args=[], kwargs={}):
+        self.task_list.append([func, args, kwargs])
+        self.done_list.append(None)
+        if not self.work_load: Timer(1, self.check_tasks).start()
+        self.work_load += 1
+        return True
+
+    def check_tasks(self):
+
+        for task in self.working_list:
+            # record and clean-up any completed tasks
+            if not task['result'].ready: continue
+            if self.done_list[task['idx']] is not None: raise ValueError('This should be empty!')
+            self.done_list[task['idx']] = task['idx'].value
+            self.task_list[task['idx']] = None
+            self.connections[task['conn']].close()
+            self.connections[task['conn']] = None
+            self.working_list.remove(task)
+            self.work_load -= 1
+
+        for conn in self.connections:
+            # find unused connection and...
+            if self.connections[conn]:
+                try:
+                    # make sure the connection is still live
+                    self.connections[conn].ping()
+                    continue
+
+                except Exception:
+                    res = self.make_link(conn)
+                    if not res: continue  # currently unusable
+            user = conn.split(':')[2]
+
+            for idx, pending in enumerate(self.task_list):
+                # ... run the next pending task
+                if not pending: continue
+                c_run = self.connections[conn].root.run
+                async_run = rpyc.async(c_run)
+                task = {}
+                task['result'] = async_run(user, pending[0], pending[1], pending[2])
+                task['idx'] = idx
+                task['conn'] = conn
+                self.working_list.append(task)
+                self.work_load += 1
+            if self.work_load: Timer(5, self.check_tasks).start()
+
+    def total_cpus(self, name='local'):
+        # use to get both CPUs and check availavility
+        cpus = 0
+
+        try:
+            cpus = self.servers[name][0].cpu_count()
+
+        except EOFError as e:
+            msg = 'Connection seems broken: {}'.format(str(e))
+            print(msg)
+            return 0
+        return cpus
 
 
 ### For pickling operations
