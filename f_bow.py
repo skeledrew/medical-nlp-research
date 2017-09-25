@@ -10,6 +10,7 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 from sklearn import svm, naive_bayes, linear_model, neighbors, ensemble, dummy
 from sklearn.pipeline import Pipeline
+from sklearn.metrics import confusion_matrix  # 17-09-25
 
 from common import *
 import custom_clfs
@@ -26,7 +27,7 @@ gSParams = [
     #'anc_notes_trim',  # peel.py applied
     #'anc_notes_cuis',  # cuis w/out dict fix
     #'anc_notes_trim_cuis',
-    'anc_notes_v2_cuis',  # cuis w/ dict fix
+    #'anc_notes_v2_cuis',  # cuis w/ dict fix
     #'anc_notes_trim_v2_cuis',  # trim cuis
     #'anc_bac-yn',  # BAC y/n values, from anc but no notes
     #'anc_notes_trim_v3',  # trim with BAC
@@ -50,7 +51,7 @@ gSParams = [
     'anc_notes_sent_wv-trim_cuis_w-cons_gender_race',
   ],  # data dirs
   [
-    'LinearSVC',
+    'LinearSVC',  # 17-09-25 - include in all results
     #'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
@@ -214,13 +215,14 @@ def gSGenericRunner(
 
   try:
     p = r = f1 = std = 0
-    p, r, f1, std, mis = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features']) if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
+    p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features']) #if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
     result['f1'] = f1
     result['std'] = std
     result['mis'] = mis
     result['error'] = None
+    result['raw'] = raw
 
   except Exception as e:
     writeLog('%s: Error in classification: %s. Skipping...' % (currentTime(), repr(e)[:80]))
@@ -308,7 +310,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   memo[kf_hash] = {}
   ps = []
   rs = []
-  f1s = []
+  raw_resuts = []  # holds tn, fp, fn, tp
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
@@ -329,15 +331,21 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
     ps.append(precision_score(y_test, pred, pos_label=1))
     rs.append(recall_score(y_test, pred, pos_label=1))
     f1s.append(f1_score(y_test, pred, pos_label=1))
+    raw = confusion_matrix(y_test, pred)
+    raw = {'tn': raw[0], 'fp': raw[1], 'fn': raw[2], 'tp': raw[3]}
+    raw_results.append(raw)
   misses = list(set(misses))
   misses.sort()
   p, r, f1, std = np.mean(ps), np.mean(rs), np.mean(f1s), np.std(np.array(f1s))
+  raw_means = {key: sum(map(lambda result: result[key], raw_results)) / len(raw_results) for key in ['tn', 'fp', 'fn', 'tp']}
+  raw_results.append(raw_means)
   memo[kf_hash]['p'] = p
   memo[kf_hash]['r'] = r
   memo[kf_hash]['f1'] = f1
   memo[kf_hash]['std'] = std
   memo[kf_hash]['mis'] = misses
-  return p, r, f1, std, misses
+  memo[kf_hash]['raw'] = raw_results
+  return p, r, f1, std, misses, raw_results
 
 
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
