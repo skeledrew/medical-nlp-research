@@ -1,7 +1,7 @@
 #! /home/aphillips5/envs/nlpenv/bin/python3
 
 
-import os, inspect, sys
+import os, inspect, sys, time
 
 import rpyc
 
@@ -15,11 +15,9 @@ class CrunchService(rpyc.Service):
         pass
 
     def invalid_user(self, user):
-        msg = 'Invalid user "%s" tried to connect!' % (user)
-        print(msg)
-
-        with open(os.environ['HOME'] + '/crunch_server.log', 'a') as fo:
-            fo.write(msg + '\n')
+        msg = '%s: Invalid user "%s" tried to connect!' % (current_time, user)
+        log_file = os.environ['HOME'] + '/crunch_server.log'
+        write_log(msg, log=log_file)
         return None
 
     def exposed_run(self, user, obj, args=[], kwargs={}):
@@ -31,6 +29,21 @@ class CrunchService(rpyc.Service):
 
     def exposed_cpu_count(self):
         return os.cpu_count()
+
+def current_time():
+    # from common
+    return time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+
+def write_log(msg, print_=True, log=None):
+    # from common
+    global logFile
+    if log: logFile = log
+
+    with open(logFile, 'a') as lf:
+        lf.write(msg + '\n')
+    if print_: print(msg)
+    return
+
 
 if __name__ == '__main__':
     port = 9999 if len(sys.argv) < 2 else sys.argv[1]
