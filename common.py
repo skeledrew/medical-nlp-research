@@ -196,7 +196,7 @@ class CrunchClient():
         try:
             c = rpyc.connect(host, port)
             cpus = c.root.cpu_count()
-            #c.close()
+            c.close()
 
         except ConnectionRefusedError:
             msg = 'No service found on host: "{}", port: {}'.format(host, port)
@@ -248,11 +248,11 @@ class CrunchClient():
         return True
 
     def _check_tasks(self, timer_called=True):
-        print('Nudged', self.complete, self._timers)
         if self.disabled or self.complete: return
         if timer_called: self._timers -= 1
         if self._timers > 0: return  # other timer(s) running
         print('Checking tasks...')
+        pdb.set_trace()
 
         for task in self.working_list:
             # record and clean-up any completed tasks
