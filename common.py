@@ -281,6 +281,7 @@ class CrunchClient():
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
+                print(idx, pending)
                 if not pending: continue
                 try:
                     c_run = self.connections[conn].root.run
