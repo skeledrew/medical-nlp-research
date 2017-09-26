@@ -275,7 +275,7 @@ class CrunchClient():
 
         for conn in self.connections:
             # find unused connection and...
-            if self.connections[conn][1] == 'busy':
+            if self.connections[conn][1] in ['busy', 'ready']:
                 try:
                     # make sure the connection is still live
                     self.connections[conn][0].ping()
@@ -286,8 +286,8 @@ class CrunchClient():
                     if not res == 'ready': continue  # currently unusable
             user = conn.split(':')[2]
             if self._aborting: continue
-            if self.connections[conn][1] == 'dead': self.make_link(conn)
-            if not self.connections[conn][1] == 'ready': continue
+            if self.connections[conn][1] is 'dead': self.make_link(conn)
+            if not self.connections[conn][1] is 'ready': continue
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
