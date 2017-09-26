@@ -222,7 +222,7 @@ class CrunchClient():
             host = self.servers[s_name]['host']
             port = self.servers[s_name]['port']
             conn = rpyc.connect(host, port)
-            self.connections[c_cname] = conn
+            self.connections[c_name] = conn
 
         except Exception as e:
             msg = 'Something broke: {}'.format(repr(e))
