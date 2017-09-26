@@ -224,19 +224,23 @@ class CrunchClient():
     def make_link(self, c_name):
         '''create a connection'''
         if self.disabled: return
+        status = 'unknown'
         try:
             s_name = c_name.split(':')[0]  # server name
             host = self.servers[s_name]['host']
             port = self.servers[s_name]['port']
             conn = rpyc.connect(host, port)
-            self.connections[c_name] = conn
+            self.connections[c_name] = [conn, 'ready']
+            status = 'ready'
 
         except Exception as e:
             msg = 'Something broke: {}'.format(repr(e))
+            self.connections[c_name] = [None, 'dead']
+            status = 'dead'
             print(msg)
             return False
         time.sleep(1.5)  # allow the new connection to settle
-        return True
+        return status
 
     def add_task(self, func, args=[], kwargs={}):
         if self.disabled: return
@@ -254,55 +258,56 @@ class CrunchClient():
         if timer_called: self._timers -= 1
         if self._timers > 0: return  # other timer(s) running
         print('Checking tasks...')
-        pdb.set_trace()
+        #pdb.set_trace()
 
         for task in self.working_list:
             # record and clean-up any completed tasks
             if not task['result'].ready: continue
             if self.done_list[task['idx']] is not None: raise ValueError('This should be empty!')
             self.done_list[task['idx']] = task['result'].value
-            self.task_list[task['idx']] = None
-            self.connections[task['conn']].close()
-            self.connections[task['conn']] = None
+            #self.task_list[task['idx']] = None
+            #self.connections[task['conn']].close()
+            self.connections[task['conn']][1] = 'ready'
             self.working_list.remove(task)
             self.work_load -= 1
         print('Checking for unused connections...')
 
         for conn in self.connections:
             # find unused connection and...
-            if self.connections[conn]:
+            if self.connections[conn][1] == 'busy':
                 try:
                     # make sure the connection is still live
-                    self.connections[conn].ping()
+                    self.connections[conn][0].ping()
                     continue
 
                 except Exception:
                     res = self.make_link(conn)
-                    if not res: continue  # currently unusable
+                    if not res == 'ready': continue  # currently unusable
             user = conn.split(':')[2]
             if self._aborting: continue
-            if not self.connections[conn]: self.make_link(conn)
-            if not self.connections[conn]: continue
+            if self.connections[conn][1] == 'dead': self.make_link(conn)
+            if not self.connections[conn][1] == 'ready': continue
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
                 print(idx, pending)
                 if not pending: continue
                 try:
-                    c_run = self.connections[conn].root.run
+                    c_run = self.connections[conn][0].root.run
                     async_run = rpyc.async(c_run)
                     task = {}
                     task['result'] = async_run(user, pending[0], pending[1], pending[2])
                     task['idx'] = idx
                     task['conn'] = conn
-                    task['detail'] = pending
+                    #task['detail'] = pending
                     self.working_list.append(task)
                     self.task_list[idx] = None
-                    #self.work_load += 1
+                    self.connections[conn][1] = 'busy'
                     print('Started task #%d on %s' % (task['idx'], task['conn']))
 
                 except Exception as e:
-                    print(repr(e))
+                    print('Something broke while trying to run: %s' % repr(e))
+                    self.connections[conn][1] = 'dead'
         Timer(5, self._check_tasks).start()
         print('Triggered timer for next check...')
         if not self.work_load: self.complete = True
