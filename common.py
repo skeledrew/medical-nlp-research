@@ -28,6 +28,7 @@ from inspect import getmembers, getargvalues, currentframe
 import requests
 from pexpect.replwrap import REPLWrapper
 from threading import Timer
+import yaml
 
 
 baseDir = '/NLPShare/Alcohol/'
