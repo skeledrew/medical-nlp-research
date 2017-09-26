@@ -412,7 +412,7 @@ def main(args):
       func = globals()[results[idx].split('(')[0]]
       args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
       print('To crunch', func, args)
-      crunch_client.add_task(func, **args)
+      crunch_client.add_task(func, *args)
 
     except KeyboardInterrupt:
       writeLog('%s: Process INTerrupted by user. Saving progress...' % (currentTime()))
@@ -440,7 +440,7 @@ def main(args):
         writeLog('%s: %s' % (currentTime(), results[idx]))
         #raise
   crunch_client.wait()
-  writeLog('%s: Crunching complete. Wrapping up...' % (currentTime))
+  writeLog('%s: Crunching complete. Wrapping up...' % (currentTime()))
   results = crunch_client.get_results()
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
