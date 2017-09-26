@@ -233,7 +233,7 @@ class CrunchClient():
     def add_task(self, func, args=[], kwargs={}):
         self.task_list.append([func, args, kwargs])
         self.done_list.append(None)
-        if not self.work_load: Timer(1, self._check_tasks).start()
+        if not self.work_load: Timer(5, self._check_tasks).start()
         self.work_load += 1
         self.complete = False
         return True
@@ -264,7 +264,6 @@ class CrunchClient():
                     if not res: continue  # currently unusable
             user = conn.split(':')[2]
             if self._aborting: continue
-            pdb.set_trace()
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
