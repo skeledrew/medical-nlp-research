@@ -206,7 +206,7 @@ class CrunchClient():
         user = user or self.user or 'none'
         self.servers[name] = {'host': host, 'port': port, 'user': user, 'cpus': cpus}
         msg = 'Successfully created server "{}" on host: "{}", port: {}'.format(name, host, port)
-        msg += ' with user {}.'.format(user) if user else ' with default user'
+        msg += ' with user "{}".'.format(user) if user else ' with default user'
 
         for idx in range(int(cpus * self.procs)):
             # initialize connections based on CPUs and process load
@@ -239,6 +239,7 @@ class CrunchClient():
         return True
 
     def _check_tasks(self):
+        pdb.set_trace()
 
         for task in self.working_list:
             # record and clean-up any completed tasks
@@ -296,7 +297,6 @@ class CrunchClient():
         # blocks until complete, set time elapsed or interrupted
         e_time = 0
         print('Entered wait phase.')
-        pdb.set_trace()
 
         try:
             while not self.complete:
