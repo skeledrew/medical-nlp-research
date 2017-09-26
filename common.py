@@ -31,6 +31,8 @@ from threading import Timer
 import yaml
 import rpyc
 
+sys.setrecursionlimit(10000)
+
 
 baseDir = '/NLPShare/Alcohol/'
 dataDir = baseDir + 'data/'
