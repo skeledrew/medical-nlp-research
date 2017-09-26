@@ -268,6 +268,7 @@ class CrunchClient():
             self.done_list[task['idx']] = task['result'].value
             #self.task_list[task['idx']] = None
             #self.connections[task['conn']].close()
+            print(task['result'].value)
             self.connections[task['conn']][1] = 'ready'
             print('Completed task #%d on %s' % (task['idx'], task['conn']))
             self.working_list.pop(idx)
@@ -276,7 +277,6 @@ class CrunchClient():
         for conn in self.connections:
             # find unused connection and...
             if self.connections[conn][1] is 'busy':
-                print('Status1', conn, self.connections[conn][1])
                 try:
                     # make sure the connection is still live
                     self.connections[conn][0].ping()
@@ -286,13 +286,10 @@ class CrunchClient():
                     print('Something\'s wrong with ', conn)
                     res = self.make_link(conn)
                     if not res == 'ready': continue  # currently unusable
-            print('Status2', conn, self.connections[conn][1])
             user = conn.split(':')[2]
             if self._aborting: continue
-            print('Status3', conn, self.connections[conn][1])
             if self.connections[conn][1] is 'dead': self.make_link(conn)
             if not self.connections[conn][1] is 'ready': continue
-            print('Free connection', conn)
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
