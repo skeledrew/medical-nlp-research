@@ -249,6 +249,7 @@ class CrunchClient():
         if self.disabled: return
         if timer_called: self._timers -= 1
         if self._timers: return  # other timer(s) running
+        print('Checking tasks...')
 
         for task in self.working_list:
             # record and clean-up any completed tasks
