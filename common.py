@@ -294,6 +294,7 @@ class CrunchClient():
         # blocks until complete, set time elapsed or interrupted
         e_time = 0
         print('Entered wait phase.')
+        pdb.set_trace()
 
         try:
             while not self.complete:
