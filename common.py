@@ -321,6 +321,7 @@ class CrunchClient():
                 time.sleep(interval)
                 e_time += interval
                 if secs > 0 and e_time >= secs: break
+                Timer(5, self._check_tasks).start()
 
         except Exception as e:
             print('Exception encountered while waiting: ' + repr(e))
