@@ -264,6 +264,7 @@ class CrunchClient():
                     if not res: continue  # currently unusable
             user = conn.split(':')[2]
             if self._aborting: continue
+            pdb.set_trace()
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
