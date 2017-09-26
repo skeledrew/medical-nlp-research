@@ -273,6 +273,7 @@ class CrunchClient():
             if self._aborting: continue
             if not self.connections[conn]: self.make_link(conn)
             if not self.connections[conn]: continue
+            pdb.set_trace()
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
