@@ -275,7 +275,6 @@ class CrunchClient():
 
         for conn in self.connections:
             # find unused connection and...
-            if len(self.working_list) >= self._max_processes: break
             if self.connections[conn][1] == 'busy':
                 try:
                     # make sure the connection is still live
@@ -292,6 +291,7 @@ class CrunchClient():
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
+                if len(self.working_list) >= self._max_processes: break
                 if not pending: continue
                 try:
                     c_run = self.connections[conn][0].root.run
