@@ -218,6 +218,7 @@ class CrunchClient():
     def make_link(self, c_name):
         '''create a connection'''
         try:
+            s_name = c_name.split(':')[0]
             host = self.servers[c_name]['host']
             port = self.servers[c_name]['port']
             conn = rpyc.connect(host, port)
