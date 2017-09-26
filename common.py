@@ -212,7 +212,7 @@ class CrunchClient():
             # initialize connections based on CPUs and process load
             conn = '{}:{}:{}'.format(name, idx, user)
             self.connections[conn] = None
-            res = self.make_link(conn)
+            #res = self.make_link(conn)
         return msg
 
     def make_link(self, c_name):
@@ -239,7 +239,6 @@ class CrunchClient():
         return True
 
     def _check_tasks(self):
-        pdb.set_trace()
 
         for task in self.working_list:
             # record and clean-up any completed tasks
