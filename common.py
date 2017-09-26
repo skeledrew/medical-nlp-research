@@ -272,6 +272,7 @@ class CrunchClient():
             print('Completed task #%d on %s' % (task['idx'], task['conn']))
             self.working_list.pop(idx)
             self.work_load -= 1
+        print('Working size: ' + len(self.working_list))
 
         for conn in self.connections:
             # find unused connection and...
