@@ -327,6 +327,7 @@ class CrunchClient():
                 time.sleep(interval)
                 e_time += interval
                 if secs > 0 and e_time >= secs: break
+                print('Nudging the checker...')
                 Timer(5, self._check_tasks).start()
 
         except Exception as e:
