@@ -10,22 +10,25 @@ class CrunchService(rpyc.Service):
 
     def on_connect(self):
         self.users_list = os.listdir('/home')
+        self.log_file = os.environ['HOME'] + '/crunch_server.log'
 
     def on_disconnect(self):
         pass
 
     def invalid_user(self, user):
-        msg = '%s: Invalid user "%s" tried to connect!' % (current_time, user)
-        log_file = os.environ['HOME'] + '/crunch_server.log'
-        write_log(msg, log=log_file)
+        msg = '%s: Invalid user "%s" tried to connect!' % (current_time(), user)
+        write_log(msg, log=self.log_file)
         return None
 
     def exposed_run(self, user, obj, args=[], kwargs={}):
         if not user in self.users_list: return self.invalid_user(user)
-        if inspect.isfunction(obj): return obj(*args, **kwargs)
+        write_log('%s: Crunching %s, %s, %s...' % (current_time(), repr(obj), repr(args), repr(kwargs)), log=self.log_file)
+        res = None
+        if inspect.isfunction(obj) or inspect.isbuiltin(obj) or inspect.ismethod(obj): res = obj(*args, **kwargs)
         if inspect.isclass(obj):
-            obj.run()
-            return obj
+            res = obj.run()
+        write_log('%s: Finished crunching!' % (current_time()), log=self.log_file)
+        return res
 
     def exposed_cpu_count(self):
         return os.cpu_count()
@@ -36,10 +39,8 @@ def current_time():
 
 def write_log(msg, print_=True, log=None):
     # from common
-    global logFile
-    if log: logFile = log
 
-    with open(logFile, 'a') as lf:
+    with open(log, 'a') as lf:
         lf.write(msg + '\n')
     if print_: print(msg)
     return

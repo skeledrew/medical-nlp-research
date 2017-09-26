@@ -162,7 +162,7 @@ class Distance():
 
 class CrunchClient():
 
-    def __init__(self, user=''):
+    def __init__(self, user='', procs=1):
         self.user = user  # default user name
         self.servers = {}  # can connect to multiple servers
         self.connections = {}  # single use to trigger forking
@@ -171,6 +171,15 @@ class CrunchClient():
         self.done_list = []
         self.work_load = 0
         self.complete = False
+        self.procs = procs  # processes per CPU
+        self._aborting = False
+
+    def reset_lists(self):
+        self.task_list = self.working_list = self.done_list = []
+        return True
+
+    def get_results(self):
+        return self.done_list
 
     def add_server(self, host='localhost', port=9999, name='', user=''):
         '''Add a connectable server to the server list.
@@ -197,14 +206,15 @@ class CrunchClient():
         msg = 'Successfully created server "{}" on host: "{}", port: {}'.format(name, host, port)
         msg += ' with user {}.'.format(user) if user else ' with default user'
 
-        for idx in cpus:
+        for idx in range(int(cpus * self.procs)):
+            # initialize connections based on CPUs and process load
             conn = '{}:{}:{}'.format(name, idx, user)
             self.connections[conn] = None
             res = self.make_link(conn)
         return msg
 
     def make_link(self, c_name):
-    # create a connection
+        '''create a connection'''
         try:
             host = self.servers[c_name]['host']
             port = self.servers[c_name]['port']
@@ -220,11 +230,12 @@ class CrunchClient():
     def add_task(self, func, args=[], kwargs={}):
         self.task_list.append([func, args, kwargs])
         self.done_list.append(None)
-        if not self.work_load: Timer(1, self.check_tasks).start()
+        if not self.work_load: Timer(1, self._check_tasks).start()
         self.work_load += 1
+        self.complete = False
         return True
 
-    def check_tasks(self):
+    def _check_tasks(self):
 
         for task in self.working_list:
             # record and clean-up any completed tasks
@@ -249,6 +260,7 @@ class CrunchClient():
                     res = self.make_link(conn)
                     if not res: continue  # currently unusable
             user = conn.split(':')[2]
+            if self._aborting: continue
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
@@ -261,7 +273,8 @@ class CrunchClient():
                 task['conn'] = conn
                 self.working_list.append(task)
                 self.work_load += 1
-            if self.work_load: Timer(5, self.check_tasks).start()
+            if self.work_load: Timer(5, self._check_tasks).start()
+            if not self.work_load: self.complete = True
 
     def total_cpus(self, name='local'):
         # use to get both CPUs and check availavility
@@ -275,6 +288,33 @@ class CrunchClient():
             print(msg)
             return 0
         return cpus
+
+    def wait(self, secs=0, interval=5):
+        # blocks until complete, set time elapsed or interrupted
+        e_time = 0
+        print('Entered wait phase.')
+
+        try:
+            while not complete:
+                time.sleep(interval)
+                e_time += interval
+                if secs > 0 and e_time >= secs: break
+
+        except Exception as e:
+            print('Exception encountered while waiting: ' + repr(e))
+            pdb.set_trace()
+            return False
+        return True
+
+    def abort(self, wait=True):
+        self._aborting = True
+        if wait: return True
+
+        for conn in self.connection:
+            # close and kill
+            self.connection[conn].close()
+            self.connection[conn] = None
+        return True
 
 
 ### For pickling operations
@@ -787,6 +827,21 @@ def re_index(match, s_):
 
 def get_env(key):
     return os.environ[key]
+
+def load_yaml(src):
+
+    with open(src) as fo:
+        return yaml.load(fo)
+
+def save_yaml(obj, f_name=None):
+    # saves to a file or returns string
+    text = yaml.dump(obj)
+    if not f_name: return text
+
+    with open(f_name, 'w') as fo:
+        fo.write(text)
+    return True
+
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
 commit_me(dataDir + 'tracking.json', 'common.py')

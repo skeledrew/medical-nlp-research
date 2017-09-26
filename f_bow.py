@@ -17,7 +17,7 @@ import custom_clfs
 
 
 ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create'
-DEBUG = True
+DEBUG = False
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 gSParams = [
@@ -64,7 +64,7 @@ gSParams = [
     #'GaussianNB'
     #'PassiveAggressiveRegressor',
     #'SGDRegressor',
-    'RulesBasedClassifier',  # custom
+    #'RulesBasedClassifier',  # custom
     #'RandomForestClassifier',
     #'DummyClassifier',  # for the baseline
     #'OptimizedRulesSeeker',  # custom
@@ -166,6 +166,7 @@ gSParams = [
 ]  # grid search params
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
+config = load_yaml('config.yaml')
 
 def gSGenericRunner(
     notesDirName,
@@ -380,8 +381,16 @@ def main(args):
   resume = 0
   for p in gSParams: g_size *= len(p)
   writeLog('%s: Generating call grid of size %d...' % (currentTime(), g_size))
+  ### setup distributed crunching
+  crunch_servers = config['crunch_servers']
+  crunch_client = CrunchClient()
+
+  for server in crunch_servers:
+    res = crunch_client.add_server(server['host'], server['port'], server['name'], server['user'])
+    writeLog('%s: %s' % (currentTime, res))
 
   if os.path.exists(curr_sess):
+    # continue from a saved session
     sess = loadPickle(curr_sess)
     results = sess['results']
     memo = sess['memo']
@@ -398,7 +407,8 @@ def main(args):
 
     try:
       writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
-      results[idx] = [results[idx], eval(results[idx])]
+      #results[idx] = [results[idx], eval(results[idx])]
+      crunch_client.add_task(eval, [results[idx]])
 
     except KeyboardInterrupt:
       writeLog('%s: Process INTerrupted by user. Saving progress...' % (currentTime()))
@@ -425,6 +435,9 @@ def main(args):
         results[idx] = 'Exception in #%d: %s.' % (idx+1, repr(e))
         writeLog('%s: %s' % (currentTime(), results[idx]))
         #raise
+  crunch_client.wait()
+  writeLog('%s: Crunching complete. Wrapping up...' % (currentTime))
+  results = crunch_client.get_results()
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
   rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)
