@@ -180,6 +180,7 @@ class CrunchClient():
         self.disabled = False
         self._timers = 0
         self._checking = False
+        self._max_processes = 0
 
     def reset_lists(self):
         self.task_list = self.working_list = self.done_list = []
@@ -213,6 +214,7 @@ class CrunchClient():
         self.servers[name] = {'host': host, 'port': port, 'user': user, 'cpus': cpus}
         msg = 'Successfully created server "{}" on host: "{}", port: {}'.format(name, host, port)
         msg += ' with user "{}".'.format(user) if user else ' with default user'
+        self._max_processes += int(cpus * self.procs)
 
         for idx in range(int(cpus * self.procs)):
             # initialize connections based on CPUs and process load
@@ -273,6 +275,7 @@ class CrunchClient():
 
         for conn in self.connections:
             # find unused connection and...
+            if len(self.working_list) >= self._max_processes: break
             if self.connections[conn][1] == 'busy':
                 try:
                     # make sure the connection is still live
