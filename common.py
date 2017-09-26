@@ -176,6 +176,7 @@ class CrunchClient():
         self.procs = procs  # processes per CPU
         self._aborting = False
         self.disabled = False
+        self._timers = 0
 
     def reset_lists(self):
         self.task_list = self.working_list = self.done_list = []
@@ -238,14 +239,16 @@ class CrunchClient():
         if self.disabled: return
         self.task_list.append([func, args, kwargs])
         self.done_list.append(None)
-        if not self.work_load: Timer(5, self._check_tasks).start()
+        if not self.work_load and not self._timing: Timer(5, self._check_tasks).start()
+        self._timers += 1
         self.work_load += 1
         self.complete = False
         return True
 
-    def _check_tasks(self):
+    def _check_tasks(self, timer_called=True):
         if self.disabled: return
-        print('Checking tasks...')
+        if timer_called: self._timers -= 1
+        if self._timers: return  # other timer(s) running
 
         for task in self.working_list:
             # record and clean-up any completed tasks
@@ -273,21 +276,25 @@ class CrunchClient():
             if self._aborting: continue
             if not self.connections[conn]: self.make_link(conn)
             if not self.connections[conn]: continue
-            pdb.set_trace()
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
                 if not pending: continue
-                c_run = self.connections[conn].root.run
-                async_run = rpyc.async(c_run)
-                task = {}
-                task['result'] = async_run(user, pending[0], pending[1], pending[2])
-                task['idx'] = idx
-                task['conn'] = conn
-                self.working_list.append(task)
-                self.work_load += 1
-            if self.work_load: Timer(5, self._check_tasks).start()
+                try:
+                    c_run = self.connections[conn].root.run
+                    async_run = rpyc.async(c_run)
+                    task = {}
+                    task['result'] = async_run(user, pending[0], pending[1], pending[2])
+                    task['idx'] = idx
+                    task['conn'] = conn
+                    self.working_list.append(task)
+                    #self.work_load += 1
+
+                except Exception as e:
+                    print(repr(e))
+            if self.work_load and not self._timers: Timer(5, self._check_tasks).start()
             if not self.work_load: self.complete = True
+            self._timers += 1
 
     def total_cpus(self, name='local'):
         # use to get both CPUs and check availavility
