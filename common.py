@@ -290,7 +290,6 @@ class CrunchClient():
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
-                print(idx, pending)
                 if not pending: continue
                 try:
                     c_run = self.connections[conn][0].root.run
@@ -309,7 +308,7 @@ class CrunchClient():
                     print('Something broke while trying to run: %s' % repr(e))
                     self.connections[conn][1] = 'dead'
         Timer(5, self._check_tasks).start()
-        print('Triggered timer for next check...')
+        print('Working on %d processes with a load of %d...' % (len(self.working_list), self.work_load))
         if not self.work_load: self.complete = True
         self._timers += 1
         self._checking = False
