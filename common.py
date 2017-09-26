@@ -261,6 +261,7 @@ class CrunchClient():
             self.connections[task['conn']] = None
             self.working_list.remove(task)
             self.work_load -= 1
+        print('Checking for unused connections...')
 
         for conn in self.connections:
             # find unused connection and...
@@ -290,10 +291,12 @@ class CrunchClient():
                     task['conn'] = conn
                     self.working_list.append(task)
                     #self.work_load += 1
+                    print('Started task #%d on %s' % (task['idx'], task['conn']))
 
                 except Exception as e:
                     print(repr(e))
             Timer(5, self._check_tasks).start()
+            print('Triggered timer for next check...')
             if not self.work_load: self.complete = True
             self._timers += 1
 
