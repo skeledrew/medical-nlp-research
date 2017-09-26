@@ -388,7 +388,7 @@ def main(args):
 
   for server in crunch_servers:
     res = crunch_client.add_server(server['host'], server['port'], server['name'], server['user'])
-    writeLog('%s: %s' % (currentTime, res))
+    writeLog('%s: %s' % (currentTime(), res))
 
   if os.path.exists(curr_sess):
     # continue from a saved session
