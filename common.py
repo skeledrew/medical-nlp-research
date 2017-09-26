@@ -276,6 +276,7 @@ class CrunchClient():
         for conn in self.connections:
             # find unused connection and...
             if self.connections[conn][1] in ['busy', 'ready']:
+                print('Status1', conn, self.connections[conn][1])
                 try:
                     # make sure the connection is still live
                     self.connections[conn][0].ping()
@@ -285,9 +286,10 @@ class CrunchClient():
                     print('Something\'s wrong with ', conn)
                     res = self.make_link(conn)
                     if not res == 'ready': continue  # currently unusable
+                    print('Status2', conn, self.connections[conn][1])
             user = conn.split(':')[2]
             if self._aborting: continue
-            print('Status', conn, self.connections[conn][1])
+            print('Status3', conn, self.connections[conn][1])
             if self.connections[conn][1] is 'dead': self.make_link(conn)
             if not self.connections[conn][1] is 'ready': continue
             print('Free connection', conn)
