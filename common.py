@@ -179,6 +179,7 @@ class CrunchClient():
         self._aborting = False
         self.disabled = False
         self._timers = 0
+        self._checking = False
 
     def reset_lists(self):
         self.task_list = self.working_list = self.done_list = []
@@ -196,7 +197,7 @@ class CrunchClient():
         try:
             c = rpyc.connect(host, port)
             cpus = c.root.cpu_count()
-            c.close()
+            #c.close()
 
         except ConnectionRefusedError:
             msg = 'No service found on host: "{}", port: {}'.format(host, port)
@@ -248,7 +249,8 @@ class CrunchClient():
         return True
 
     def _check_tasks(self, timer_called=True):
-        if self.disabled or self.complete: return
+        if self.disabled or self.complete or self._checking: return
+        self._checking = True
         if timer_called: self._timers -= 1
         if self._timers > 0: return  # other timer(s) running
         print('Checking tasks...')
@@ -305,6 +307,7 @@ class CrunchClient():
         print('Triggered timer for next check...')
         if not self.work_load: self.complete = True
         self._timers += 1
+        self._checking = False
 
     def total_cpus(self, name='local'):
         # use to get both CPUs and check availavility
