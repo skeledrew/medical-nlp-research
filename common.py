@@ -290,16 +290,18 @@ class CrunchClient():
                     task['result'] = async_run(user, pending[0], pending[1], pending[2])
                     task['idx'] = idx
                     task['conn'] = conn
+                    task['detail'] = pending
                     self.working_list.append(task)
+                    self.task_list[idx] = None
                     #self.work_load += 1
                     print('Started task #%d on %s' % (task['idx'], task['conn']))
 
                 except Exception as e:
                     print(repr(e))
-            Timer(5, self._check_tasks).start()
-            print('Triggered timer for next check...')
-            if not self.work_load: self.complete = True
-            self._timers += 1
+        Timer(5, self._check_tasks).start()
+        print('Triggered timer for next check...')
+        if not self.work_load: self.complete = True
+        self._timers += 1
 
     def total_cpus(self, name='local'):
         # use to get both CPUs and check availavility
