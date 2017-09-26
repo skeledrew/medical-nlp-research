@@ -228,6 +228,7 @@ class CrunchClient():
             msg = 'Something broke: {}'.format(repr(e))
             print(msg)
             return False
+        time.sleep(1.5)  # allow the new connection to settle
         return True
 
     def add_task(self, func, args=[], kwargs={}):
@@ -264,7 +265,8 @@ class CrunchClient():
                     if not res: continue  # currently unusable
             user = conn.split(':')[2]
             if self._aborting: continue
-            if self.connections[conn] == None: self.make_link(conn)
+            if not self.connections[conn]: self.make_link(conn)
+            if not self.connections[conn]: continue
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
