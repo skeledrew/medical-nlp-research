@@ -384,6 +384,7 @@ def main(args):
   ### setup distributed crunching
   crunch_servers = config['crunch_servers']
   crunch_client = CrunchClient()
+  pdb.set_trace()
 
   for server in crunch_servers:
     res = crunch_client.add_server(server['host'], server['port'], server['name'], server['user'])
