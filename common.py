@@ -291,7 +291,7 @@ class CrunchClient():
 
             for idx, pending in enumerate(self.task_list):
                 # ... run the next pending task
-                if len(self.working_list) >= self._max_processes: break
+                if len(self.working_list) >= self._max_processes or self.connections[conn][1] is 'busy': break
                 if not pending: continue
                 try:
                     c_run = self.connections[conn][0].root.run
