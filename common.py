@@ -217,14 +217,14 @@ class CrunchClient():
         for idx in range(int(cpus * self.procs)):
             # initialize connections based on CPUs and process load
             conn = '{}:{}:{}'.format(name, idx, user)
-            self.connections[conn] = None
+            self.connections[conn] = [None, 'dead']
             #res = self.make_link(conn)
         return msg
 
     def make_link(self, c_name):
         '''create a connection'''
         if self.disabled: return
-        status = 'unknown'
+        status = 'dead'
         try:
             s_name = c_name.split(':')[0]  # server name
             host = self.servers[s_name]['host']
