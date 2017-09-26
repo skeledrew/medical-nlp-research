@@ -242,7 +242,7 @@ class CrunchClient():
         #self._timers += 1
         self.work_load += 1
         self.complete = False
-        self._check_tasks(False)
+        Timer(5, self._check_tasks).start()
         return True
 
     def _check_tasks(self, timer_called=True):
@@ -255,7 +255,7 @@ class CrunchClient():
             # record and clean-up any completed tasks
             if not task['result'].ready: continue
             if self.done_list[task['idx']] is not None: raise ValueError('This should be empty!')
-            self.done_list[task['idx']] = task['idx'].value
+            self.done_list[task['idx']] = task['result'].value
             self.task_list[task['idx']] = None
             self.connections[task['conn']].close()
             self.connections[task['conn']] = None
