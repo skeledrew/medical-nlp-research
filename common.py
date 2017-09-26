@@ -239,14 +239,14 @@ class CrunchClient():
         if self.disabled: return
         self.task_list.append([func, args, kwargs])
         self.done_list.append(None)
-        if not self.work_load and not self._timers: Timer(5, self._check_tasks).start()
-        self._timers += 1
+        #self._timers += 1
         self.work_load += 1
         self.complete = False
+        self._check_tasks(False)
         return True
 
     def _check_tasks(self, timer_called=True):
-        if self.disabled: return
+        if self.disabled or self.complete: return
         if timer_called: self._timers -= 1
         if self._timers: return  # other timer(s) running
         print('Checking tasks...')
@@ -293,7 +293,7 @@ class CrunchClient():
 
                 except Exception as e:
                     print(repr(e))
-            if self.work_load and not self._timers: Timer(5, self._check_tasks).start()
+            Timer(5, self._check_tasks).start()
             if not self.work_load: self.complete = True
             self._timers += 1
 
