@@ -249,7 +249,7 @@ class CrunchClient():
         print('Nudged', self.complete, self._timers)
         if self.disabled or self.complete: return
         if timer_called: self._timers -= 1
-        if self._timers: return  # other timer(s) running
+        if self._timers > 0: return  # other timer(s) running
         print('Checking tasks...')
 
         for task in self.working_list:
