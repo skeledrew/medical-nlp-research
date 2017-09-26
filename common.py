@@ -296,7 +296,7 @@ class CrunchClient():
         print('Entered wait phase.')
 
         try:
-            while not complete:
+            while not self.complete:
                 time.sleep(interval)
                 e_time += interval
                 if secs > 0 and e_time >= secs: break
