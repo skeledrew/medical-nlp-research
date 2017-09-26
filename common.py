@@ -239,7 +239,7 @@ class CrunchClient():
         if self.disabled: return
         self.task_list.append([func, args, kwargs])
         self.done_list.append(None)
-        if not self.work_load and not self._timing: Timer(5, self._check_tasks).start()
+        if not self.work_load and not self._timers: Timer(5, self._check_tasks).start()
         self._timers += 1
         self.work_load += 1
         self.complete = False
