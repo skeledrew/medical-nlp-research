@@ -240,9 +240,9 @@ class CrunchClient():
         self.task_list.append([func, args, kwargs])
         self.done_list.append(None)
         #self._timers += 1
-        self.work_load += 1
         self.complete = False
-        Timer(5, self._check_tasks).start()
+        if not self.work_load: Timer(5, self._check_tasks).start()
+        self.work_load += 1
         return True
 
     def _check_tasks(self, timer_called=True):
