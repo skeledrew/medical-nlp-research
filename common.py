@@ -257,7 +257,6 @@ class CrunchClient():
         self._checking = True
         if timer_called: self._timers -= 1
         if self._timers > 0: return  # other timer(s) running
-        print('Checking tasks...')
         #pdb.set_trace()
 
         for task in self.working_list:
@@ -268,9 +267,9 @@ class CrunchClient():
             #self.task_list[task['idx']] = None
             #self.connections[task['conn']].close()
             self.connections[task['conn']][1] = 'ready'
+            print('Completed task #%d on %s' % (task['idx'], task['conn']))
             self.working_list.remove(task)
             self.work_load -= 1
-        print('Checking for unused connections...')
 
         for conn in self.connections:
             # find unused connection and...
