@@ -261,7 +261,7 @@ class CrunchClient():
         if self._timers > 0: return  # other timer(s) running
         #pdb.set_trace()
 
-        for task in self.working_list:
+        for idx, task in enumerate(self.working_list):
             # record and clean-up any completed tasks
             if not task['result'].ready: continue
             if self.done_list[task['idx']] is not None: raise ValueError('This should be empty!')
@@ -270,7 +270,7 @@ class CrunchClient():
             #self.connections[task['conn']].close()
             self.connections[task['conn']][1] = 'ready'
             print('Completed task #%d on %s' % (task['idx'], task['conn']))
-            self.working_list.remove(task)
+            self.working_list.pop(idx)
             self.work_load -= 1
 
         for conn in self.connections:
