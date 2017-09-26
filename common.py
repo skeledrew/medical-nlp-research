@@ -175,6 +175,7 @@ class CrunchClient():
         self.complete = False
         self.procs = procs  # processes per CPU
         self._aborting = False
+        self.disabled = False
 
     def reset_lists(self):
         self.task_list = self.working_list = self.done_list = []
@@ -187,6 +188,7 @@ class CrunchClient():
         '''Add a connectable server to the server list.
         Takes server host, port, a name and a valid user on the system.
         Returns a string describing the result.'''
+        if self.disabled: return
         cpus = 0
         try:
             c = rpyc.connect(host, port)
@@ -217,6 +219,7 @@ class CrunchClient():
 
     def make_link(self, c_name):
         '''create a connection'''
+        if self.disabled: return
         try:
             s_name = c_name.split(':')[0]  # server name
             host = self.servers[s_name]['host']
@@ -232,6 +235,7 @@ class CrunchClient():
         return True
 
     def add_task(self, func, args=[], kwargs={}):
+        if self.disabled: return
         self.task_list.append([func, args, kwargs])
         self.done_list.append(None)
         if not self.work_load: Timer(5, self._check_tasks).start()
@@ -240,6 +244,8 @@ class CrunchClient():
         return True
 
     def _check_tasks(self):
+        if self.disabled: return
+        print('Checking tasks...')
 
         for task in self.working_list:
             # record and clean-up any completed tasks
@@ -297,6 +303,7 @@ class CrunchClient():
 
     def wait(self, secs=0, interval=5):
         # blocks until complete, set time elapsed or interrupted
+        if self.disabled: return
         e_time = 0
         print('Entered wait phase.')
 
