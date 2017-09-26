@@ -196,7 +196,7 @@ class CrunchClient():
         try:
             c = rpyc.connect(host, port)
             cpus = c.root.cpu_count()
-            c.close()
+            #c.close()
 
         except ConnectionRefusedError:
             msg = 'No service found on host: "{}", port: {}'.format(host, port)
