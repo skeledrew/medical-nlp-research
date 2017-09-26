@@ -246,6 +246,7 @@ class CrunchClient():
         return True
 
     def _check_tasks(self, timer_called=True):
+        print('Nudged', self.complete, self._timers)
         if self.disabled or self.complete: return
         if timer_called: self._timers -= 1
         if self._timers: return  # other timer(s) running
@@ -327,7 +328,6 @@ class CrunchClient():
                 time.sleep(interval)
                 e_time += interval
                 if secs > 0 and e_time >= secs: break
-                print('Nudging the checker...')
                 Timer(5, self._check_tasks).start()
 
         except Exception as e:
