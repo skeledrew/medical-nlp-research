@@ -384,7 +384,7 @@ def main(args):
   ### setup distributed crunching
   crunch_servers = config['crunch_servers']
   crunch_client = CrunchClient()
-  pdb.set_trace()
+  setattr(crunch_client, 'gSGenericRunner', gSGenericRunner)
 
   for server in crunch_servers:
     res = crunch_client.add_server(server['host'], server['port'], server['name'], server['user'])
@@ -407,9 +407,12 @@ def main(args):
     if idx < resume: idx = resume
 
     try:
-      writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
+      #writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
       #results[idx] = [results[idx], eval(results[idx])]
-      crunch_client.add_task(eval, [results[idx]])
+      func = globals()[results[idx].split('(')[0]]
+      args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
+      print('To crunch', func, args)
+      crunch_client.add_task(func, **args)
 
     except KeyboardInterrupt:
       writeLog('%s: Process INTerrupted by user. Saving progress...' % (currentTime()))
