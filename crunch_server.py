@@ -1,7 +1,7 @@
 #! /home/aphillips5/envs/nlpenv/bin/python3
 
 
-import os, inspect, sys, time
+import os, inspect, sys, time, pdb
 
 import rpyc
 
@@ -20,15 +20,20 @@ class CrunchService(rpyc.Service):
         write_log(msg, log=self.log_file)
         return None
 
-    def exposed_run(self, user, obj, args=[], kwargs={}):
+    def exposed_run(self, user, obj, args, kwargs):
         if not user in self.users_list: return self.invalid_user(user)
-        write_log('%s: Crunching %s, %s, %s...' % (current_time(), repr(obj), repr(args), repr(kwargs)), log=self.log_file)
-        res = None
-        if inspect.isfunction(obj) or inspect.isbuiltin(obj) or inspect.ismethod(obj): res = obj(*args, **kwargs)
-        if inspect.isclass(obj):
-            res = obj.run()
-        write_log('%s: Finished crunching!' % (current_time()), log=self.log_file)
-        return res
+        try:
+            write_log('%s: Crunching "%s", %s, %s...' % (current_time(), repr(obj), repr(args), repr(kwargs)), log=self.log_file)
+            res = None
+            if inspect.isfunction(obj) or inspect.isbuiltin(obj) or inspect.ismethod(obj): res = obj(*args) if not kwargs else obj(**kwargs) if not args else obj(*args, **kwargs)
+            if inspect.isclass(obj):
+                res = obj.run()
+            write_log('%s: Finished crunching!' % (current_time()), log=self.log_file)
+            return res
+
+        except Exception as e:
+            print('Something broke: ' + repr(e))
+            return e
 
     def exposed_cpu_count(self):
         return os.cpu_count()
@@ -44,7 +49,6 @@ def write_log(msg, print_=True, log=None):
         lf.write(msg + '\n')
     if print_: print(msg)
     return
-
 
 if __name__ == '__main__':
     port = 9999 if len(sys.argv) < 2 else sys.argv[1]
