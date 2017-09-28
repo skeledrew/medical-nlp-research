@@ -31,8 +31,6 @@ from threading import Timer
 import yaml
 import rpyc
 
-sys.setrecursionlimit(10000)
-
 
 baseDir = '/NLPShare/Alcohol/'
 dataDir = baseDir + 'data/'
@@ -359,7 +357,33 @@ class CrunchClient():
             self.connection[conn] = None
         return True
 
+class CSVWrapper():
 
+    def __init__(self, src, args=[], kwargs={}):
+        if not exists(src): return
+        self.f_name = src
+        self.val_list = []
+
+        with open(src) as fo:
+            _reader = csv.reader(fo, *args, **kwargs)
+            self.delim = ','  # TODO: get from reader
+
+            for row in _reader:
+                self.val_list.append(row)
+
+    def make_dict(self, key_idx=0):
+        self.val_dict = {}
+
+        for row in self.val_list:
+            key = row.pop(key_idx)
+            self.val_dict[key] = row
+        return self.val_dict
+
+    def save(self):
+
+        with open(self.f_name, 'w') as fo:
+            pass
+        return True
 ### For pickling operations
 
 def loadPickle(fName):
