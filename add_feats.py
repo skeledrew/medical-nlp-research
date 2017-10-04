@@ -275,7 +275,7 @@ def bac_note_add(content, row):
             match_num = int(match.group(0))
             if status == bac_unk: status = bac_no if match_num == 0 else bac_yes
             annot = status
-            annot += '%s%s' % (bac_val, match_num)
+            annot += '%s%d' % (bac_val, match_num)
             if match_num > 130: annot += bac_crit
             if (status == bac_yes and match_num == 0) or (status == bac_no and match_num > 0): annot += bac_clash
             break  # no need to check other patterns
