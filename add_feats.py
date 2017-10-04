@@ -237,6 +237,52 @@ def unique(content, row):
         uniq_lines.append(line)
     return '\n'.join(uniq_lines)
 
+def bac_note_add(content, row):
+    # add y/n and value if parsable; should prob do unique first
+    lines = content.split('\n')
+    bac_unk = ' NOTES_BAC_UNKNOWN'
+    bac_yes = ' NOTES_BAC_YES'
+    bac_no = ' NOTES_BAC_NO'
+    bac_val = ' NOTES_BAC_VAL_'
+    bac_crit = ' NOTES_BAC_CRITICAL'
+    bac_clash = ' NOTES_BAC_PARSE_ISSUE_OR_NOTES_CONTRADICTION'
+    status = bac_unk
+    value = -1
+    pats = [
+            r'etoh {0,5}\d+',
+            r'\+ {0,3}etoh',
+            r'blood {0,5}alcohol .{0,15}\d+',
+            r'\d .{0,10}blood {0,5}alcohol',
+            r'elevated {0,5}blood {0,5}alcohol',
+            r'blood {0,5}alcohol {0,5}elevated',
+            r'[^a-z](negative|positive) {0,5}(bac|bal)[^a-z]',
+    ]
+    pos_pats = r'(\+|elevated|positive)'
+    neg_pats = r'(\-|negative)'
+    annot = ''
+
+    for line in lines:
+        break_out = False
+
+        for pat in pats:
+            match = re.search(pat, line)
+            if not match: continue
+            match_text = match.group(0)
+            if re.search(neg_pats, match_text): status = bac_no
+            if re.search(pos_pats, match_text): status = bac_yes
+            match = re.search('\d+', line)
+            annot += status
+            if not match: break_out = True; break  # we're done here
+            match_num = int(match.group(0))
+            annot += '%s%s' % (bac_val, match_num)
+            if match_num > 130: annot += bac_crit
+            if (status == bac_yes and match_num == 0) or (status == bac_no and match_num > 0): annot += bac_clash
+            break  # no need to check other patterns
+        if break_out: break
+    content += annot
+    return content
+
+
 def mod(name, content, mod_func):
     mrn = name.split('.')[0].lstrip('0')
 
