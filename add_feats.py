@@ -271,8 +271,9 @@ def bac_note_add(content, row):
             if re.search(neg_pats, match_text): status = bac_no
             if re.search(pos_pats, match_text): status = bac_yes
             match = re.search('\d+', line)
-            annot += status
+            annot = status
             if not match: break_out = True; break  # we're done here
+            annot = status
             match_num = int(match.group(0))
             annot += '%s%s' % (bac_val, match_num)
             if match_num > 130: annot += bac_crit
