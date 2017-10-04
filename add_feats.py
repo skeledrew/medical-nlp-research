@@ -259,7 +259,7 @@ def bac_note_add(content, row):
     ]
     pos_pats = r'(\+|elevated|positive)'
     neg_pats = r'(\-|negative)'
-    annot = ''
+    annot = status
 
     for line in lines:
         break_out = False
@@ -271,7 +271,6 @@ def bac_note_add(content, row):
             if re.search(neg_pats, match_text): status = bac_no
             if re.search(pos_pats, match_text): status = bac_yes
             match = re.search('\d+', line)
-            annot = status
             if not match: break_out = True; break  # we're done here
             match_num = int(match.group(0))
             if status == bac_unk: status = bac_no if match_num == 0 else bac_yes
