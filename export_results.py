@@ -111,7 +111,7 @@ def get_gs_params(path):
 def main(args):
     
     if len(args) == 1:
-        print('No args given. Terminating...')
+        print(usage)
         return
 
     if args[1] == 'fields':
