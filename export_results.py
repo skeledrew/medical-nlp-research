@@ -101,6 +101,13 @@ def get_top_results(critr, path):
     slack_post(fin_msg, '@aphillips')
     return top
 
+def get_gs_params(path):
+    results = loadJson(path)
+
+    for result in results:
+        if 'methods' in result[0]: return result
+    return 'Couldn\'t find grid search parameters'
+
 def main(args):
     
     if len(args) == 1:
