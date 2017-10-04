@@ -14,7 +14,7 @@ from peel import substances as subs
 
 
 DEBUG = True
-mod_funcs = ['bac_yn_add', 'bac_val_add', 'gender_add', 'race_add', 'week_cons_add', 'lower_zap', 'merge', 'unique']
+mod_funcs = ['bac_yn_add', 'bac_val_add', 'gender_add', 'race_add', 'week_cons_add', 'lower_zap', 'merge', 'unique', 'bac_note_add']
 usage = 'Usage: %s /path/to/src/dir/ /path/to/dest/dir/ mod1+mod2+...+modN\nMods are: %s' % (sys.argv[0], str(mod_funcs))
 holder = {}
 BAC_C = 64
