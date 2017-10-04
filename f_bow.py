@@ -17,7 +17,7 @@ import custom_clfs
 
 
 ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create'
-DEBUG = False
+DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 gSParams = [
@@ -38,37 +38,39 @@ gSParams = [
     #'anc_notes_trim_cuis_bac-all_gender_race',
     #'anc_notes_trim_bac-all_gender_race_w-cons',
     #'anc_notes_trim_cuis_bac-all_gender_race_w-cons',
-    'anc_trim_w-cons',
+    #'anc_trim_w-cons',
     #'anc_notes_sent',
-    'anc_notes_sent_wv-trim',
-    'anc_notes_sent_wv-trim_cuis',
-    'anc_wv-trim_w-cons',
-    'anc_notes_sent_wv-trim_w-cons',
-    'anc_notes_sent_wv-trim_cuis_w-cons',
-    'anc_notes_sent_wv-trim_unique_gender_race',  # zapped dups
-    'anc_notes_sent_wv-trim_cuis_gender_race',
-    'anc_notes_sent_wv-trim_w-cons_unique_gender_race',
-    'anc_notes_sent_wv-trim_cuis_w-cons_gender_race',
+    #'anc_notes_sent_wv-trim',
+    #'anc_notes_sent_wv-trim_cuis',
+    #'anc_wv-trim_w-cons',
+    #'anc_notes_sent_wv-trim_w-cons',
+    #'anc_notes_sent_wv-trim_cuis_w-cons',
+    #'anc_notes_sent_wv-trim_unique_gender_race',  # zapped dups
+    #'anc_notes_sent_wv-trim_cuis_gender_race',
+    #'anc_notes_sent_wv-trim_w-cons_unique_gender_race',
+    #'anc_notes_sent_wv-trim_cuis_w-cons_gender_race',
+    'anc_trim_n-bac',
+    'anc_wv-trim_n-bac'
   ],  # data dirs
   [
     'LinearSVC',  # 17-09-25 - include in all results
-    #'BernoulliNB',
+    'BernoulliNB',
     #'SVC',
     ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
     'SGDClassifier',
     'LogisticRegression',
     'PassiveAggressiveClassifier',
-    #'NearestCentroid',
-    #'KNeighborsClassifier',
-    #'MultinomialNB',
-    #'GaussianNB'
+    'NearestCentroid',
+    'KNeighborsClassifier',
+    'MultinomialNB',
+    'GaussianNB',
     #'PassiveAggressiveRegressor',
     #'SGDRegressor',
     #'RulesBasedClassifier',  # custom
-    #'RandomForestClassifier',
-    #'DummyClassifier',  # for the baseline
+    'RandomForestClassifier',
+    'DummyClassifier',  # for the baseline
     #'OptimizedRulesSeeker',  # custom
-    #'AdaBoostClassifier',
+    'AdaBoostClassifier',
   ],  # classifiers
   [
     #5,
@@ -83,16 +85,16 @@ gSParams = [
   ],  # n-grams
   [
     0,
-    #10,
-    #50
+    10,
+    50
   ],  # minDF
   [
-    #None,
+    None,
     'l1',
     'l2',
     #'elasticnet',
     #'none',
-    IGNORE
+    #IGNORE
   ],  # penalty
   [
     #0.0000001,
@@ -100,10 +102,10 @@ gSParams = [
     #0.00001,
     #0.0001,
     #0.001,
-    #0.01,
-    #0.1,
+    0.01,
+    0.1,
     1,
-    #10,
+    10,
     #100,
     #1000,
     #10000,
@@ -119,14 +121,14 @@ gSParams = [
   [0],  # TTS random state
   [
     'hinge',
-    #'log',
-    #'modified_huber',
+    'log',
+    'modified_huber',
     'squared_hinge',
     #'perceptron',
-    #'squared_loss',
+    'squared_loss',
     'huber',
-    #'epsilon_insensitive',
-    #'squared_epsilon_insensitive',
+    'epsilon_insensitive',
+    'squared_epsilon_insensitive',
     #IGNORE,
   ],  # loss
   [5], # n_neighbors
@@ -152,10 +154,10 @@ gSParams = [
   ],  # CVec analyzer
   [
     True,
-    #False
+    False
   ],  # CVec binary
   [
-    'text',
+    #'text',
     #'count',
     'tfidf',
   ],  # preprocessing task
@@ -163,6 +165,9 @@ gSParams = [
     -1,  # all CPUs
     #1,
   ],  # n jobs
+  [
+    0.1 #1/10**a for a in range(15)  # 15 decreasing powers
+  ],  # alpha
 ]  # grid search params
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
@@ -188,6 +193,7 @@ def gSGenericRunner(
     binary,
     preTask,
     nJobs,
+    alpha,
 ):
   result = {}  # holds all the created objects, etc
   frame = currentframe()
@@ -208,6 +214,7 @@ def gSGenericRunner(
     'kernel': kernel,
     'n_jobs': nJobs,
     'random_state': 1,  # make deterministic
+    'alpha': alpha,
   }
   classifier = MakeClf(clfName, hyParams, clfMods)
   result['classifier'] = re.sub('\n *', ' ', str(classifier))
@@ -311,6 +318,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   memo[kf_hash] = {}
   ps = []
   rs = []
+  f1s = []
   raw_resuts = []  # holds tn, fp, fn, tp
   folds = KFold(n_splits=numFolds)
   misses = []
@@ -348,7 +356,6 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   memo[kf_hash]['raw'] = raw_results
   return p, r, f1, std, misses, raw_results
 
-
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
   # train-test split
   tts_hash = hash_sum('%d%s%s' % (randState, pp_hash, clf_hash))
@@ -383,7 +390,8 @@ def main(args):
   writeLog('%s: Generating call grid of size %d...' % (currentTime(), g_size))
   ### setup distributed crunching
   crunch_servers = config['crunch_servers']
-  crunch_client = CrunchClient()
+  crunch_client = CrunchClient(procs=1.5)
+  crunch_client.disabled = True
   setattr(crunch_client, 'gSGenericRunner', gSGenericRunner)
 
   for server in crunch_servers:
@@ -407,12 +415,11 @@ def main(args):
     if idx < resume: idx = resume
 
     try:
-      #writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
-      #results[idx] = [results[idx], eval(results[idx])]
-      func = globals()[results[idx].split('(')[0]]
-      args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
-      print('To crunch', func, args)
-      crunch_client.add_task(func, *args)
+      writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
+      results[idx] = [results[idx], eval(results[idx])]
+      #func = globals()[results[idx].split('(')[0]]
+      #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
+      #crunch_client.add_task(func, args)
 
     except KeyboardInterrupt:
       writeLog('%s: Process INTerrupted by user. Saving progress...' % (currentTime()))
@@ -504,6 +511,11 @@ def test_eval(args):
   writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params), test_set, p, r, f1))
   rf_name = path_name_prefix('test-res_', args[0])
   saveJson({'classifier': classifier, 'options': params, 'test_set': test_set, 'P': p, 'R': r, 'F1': f1}, rf_name)
+
+
+def test_it(args, kw):
+  print('Test ran fine...')
+  return 'Success!'
 
 if __name__ == "__main__":
   try:
