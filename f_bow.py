@@ -232,7 +232,7 @@ def gSGenericRunner(
     result['error'] = None
     result['raw'] = raw
 
-  except KeyError as e:
+  except KeyError, IndexError as e:
     print(repr(e))
     pdb.set_trace()
 
