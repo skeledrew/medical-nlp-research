@@ -129,7 +129,7 @@ gSParams = [
     'huber',
     'epsilon_insensitive',
     'squared_epsilon_insensitive',
-    #IGNORE,
+    IGNORE,
   ],  # loss
   [5], # n_neighbors
   [
@@ -232,7 +232,7 @@ def gSGenericRunner(
     result['error'] = None
     result['raw'] = raw
 
-  except IndexError as e:
+  except (KeyError, IndexError) as e:
     print(repr(e))
     pdb.post_mortem()
 
@@ -318,7 +318,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
 def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   # KFold
   kf_hash = hash_sum('%d%s%s' % (numFolds, pp_hash, clf_hash))
-  if kf_hash in memo: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash]['raw']
+  if kf_hash in memo and memo[kf_hash]: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash]['raw']
   memo[kf_hash] = {}
   ps = []
   rs = []
