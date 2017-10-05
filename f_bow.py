@@ -323,7 +323,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   ps = []
   rs = []
   f1s = []
-  raw_resuts = []  # holds tn, fp, fn, tp
+  raw_results = []  # holds tn, fp, fn, tp
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
