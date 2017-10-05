@@ -384,6 +384,8 @@ class CSVWrapper():
         with open(self.f_name, 'w') as fo:
             pass
         return True
+
+
 ### For pickling operations
 
 def loadPickle(fName):
