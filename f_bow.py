@@ -77,9 +77,9 @@ gSParams = [
     10,
   ],  # for n-folds CV
   [
-    (1,1),
-    (1,2),
-    (1,3),
+    (1,1),  # others raise "TypeError('sequence item 0: expected str instance, tuple found',)"
+    #(1,2),
+    #(1,3),
     #(2,2),
     #(2,3)
   ],  # n-grams
