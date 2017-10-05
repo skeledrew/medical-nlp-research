@@ -60,8 +60,8 @@ def get_top_results(critr, path):
     rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
     if not isinstance(top, list): top = [top]
     tmp_top = deepcopy(top)
-    del tmp_top[0]['features']
-    del tmp_top[0]['mis']
+    if 'features' in tmp_top: del tmp_top[0]['features']
+    if 'mis' in tmp_top: del tmp_top[0]['mis']
     saveJson(tmp_top, rf_name)
     print('Saved main results to file!')
 
@@ -109,9 +109,9 @@ def get_gs_params(path):
     return 'Couldn\'t find grid search parameters'
 
 def main(args):
-    
+
     if len(args) == 1:
-        print(usage)
+        print('No args given. Quitting...')
         return
 
     if args[1] == 'fields':
