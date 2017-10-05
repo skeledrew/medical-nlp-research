@@ -20,158 +20,10 @@ ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create'
 DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
-gSParams = [
-  {'methods': ['gSGenericRunner']},
-  [
-    #'anc_notes',  # complete notes
-    #'anc_notes_trim',  # peel.py applied
-    #'anc_notes_cuis',  # cuis w/out dict fix
-    #'anc_notes_trim_cuis',
-    #'anc_notes_v2_cuis',  # cuis w/ dict fix
-    #'anc_notes_trim_v2_cuis',  # trim cuis
-    #'anc_bac-yn',  # BAC y/n values, from anc but no notes
-    #'anc_notes_trim_v3',  # trim with BAC
-    #'anc_notes_trim_v3_cuis',  # trim cuis with BAC
-    #'anc_notes_trim_bac-all',  # all BAC data
-    #'anc_notes_trim_cuis_bac-all',  # v2 cuis
-    #'anc_notes_trim_bac-all_gender_race',
-    #'anc_notes_trim_cuis_bac-all_gender_race',
-    #'anc_notes_trim_bac-all_gender_race_w-cons',
-    #'anc_notes_trim_cuis_bac-all_gender_race_w-cons',
-    #'anc_trim_w-cons',
-    #'anc_notes_sent',
-    #'anc_notes_sent_wv-trim',
-    #'anc_notes_sent_wv-trim_cuis',
-    #'anc_wv-trim_w-cons',
-    #'anc_notes_sent_wv-trim_w-cons',
-    #'anc_notes_sent_wv-trim_cuis_w-cons',
-    #'anc_notes_sent_wv-trim_unique_gender_race',  # zapped dups
-    #'anc_notes_sent_wv-trim_cuis_gender_race',
-    #'anc_notes_sent_wv-trim_w-cons_unique_gender_race',
-    #'anc_notes_sent_wv-trim_cuis_w-cons_gender_race',
-    'anc_trim_n-bac',
-    'anc_wv-trim_n-bac'
-  ],  # data dirs
-  [
-    'LinearSVC',  # 17-09-25 - include in all results
-    'BernoulliNB',
-    #'SVC',
-    ##'Perceptron',  # NB: Perceptron() is equivalent to SGDClassifier(loss=”perceptron”, eta0=1, learning_rate=”constant”, penalty=None)
-    'SGDClassifier',
-    'LogisticRegression',
-    'PassiveAggressiveClassifier',
-    'NearestCentroid',
-    'KNeighborsClassifier',
-    'MultinomialNB',
-    'GaussianNB',
-    #'PassiveAggressiveRegressor',
-    #'SGDRegressor',
-    #'RulesBasedClassifier',  # custom
-    'RandomForestClassifier',
-    'DummyClassifier',  # for the baseline
-    #'OptimizedRulesSeeker',  # custom
-    'AdaBoostClassifier',
-  ],  # classifiers
-  [
-    #5,
-    10,
-  ],  # for n-folds CV
-  [
-    (1,1),  # others raise "TypeError('sequence item 0: expected str instance, tuple found',)"
-    #(1,2),
-    #(1,3),
-    #(2,2),
-    #(2,3)
-  ],  # n-grams
-  [
-    0,
-    10,
-    50
-  ],  # minDF
-  [
-    None,
-    'l1',
-    'l2',
-    #'elasticnet',
-    #'none',
-    #IGNORE
-  ],  # penalty
-  [
-    #0.0000001,
-    #0.000001,
-    #0.00001,
-    #0.0001,
-    #0.001,
-    0.01,
-    0.1,
-    1,
-    10,
-    #100,
-    #1000,
-    #10000,
-    #100000,
-    #1000000,
-    #10000000,
-  ],  # C
-  ['balanced'],  # weight
-  [
-    'kf',
-    #'tts'
-  ],  # validation method
-  [0],  # TTS random state
-  [
-    'hinge',
-    'log',
-    'modified_huber',
-    'squared_hinge',
-    #'perceptron',
-    'squared_loss',
-    'huber',
-    'epsilon_insensitive',
-    'squared_epsilon_insensitive',
-    IGNORE,
-  ],  # loss
-  [5], # n_neighbors
-  [
-    'uniform',
-    #'distance'
-  ], # KNN weights
-  [
-    #'constant',
-    'optimal',
-    #'invscaling',
-    #IGNORE,
-  ],  # SGD learning rate
-  [
-    #'rbf',
-    'linear',
-    #'poly',
-    #'sigmoid'
-  ],  # kernel
-  [
-    'word',
-    #'char_wb',
-  ],  # CVec analyzer
-  [
-    True,
-    False
-  ],  # CVec binary
-  [
-    #'text',
-    #'count',
-    'tfidf',
-  ],  # preprocessing task
-  [
-    -1,  # all CPUs
-    #1,
-  ],  # n jobs
-  [
-    0.1 #1/10**a for a in range(15)  # 15 decreasing powers
-  ],  # alpha
-]  # grid search params
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
 config = load_yaml('config.yaml')
+gSParams = config['gSParams']
 
 def gSGenericRunner(
     notesDirName,
@@ -200,9 +52,9 @@ def gSGenericRunner(
   args, _, _, values = getargvalues(frame)
   result['options'] = allArgs = {arg: values[arg] for arg in args}
   preproc_hash = hash_sum('%s%s%d%s%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary, preTask))
+  pdb.set_trace()
   vals = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
   matrix, bunch, result['features'] = vals[0], vals[1], vals[2]
-  #pdb.set_trace()
   hyParams = {
     'penalty': penalty,
     'C': C,
@@ -237,6 +89,14 @@ def gSGenericRunner(
     pdb.post_mortem()
 
   except Exception as e:
+    ignore = False
+
+    for err_pat in ERROR_IGNORE.split('||'):
+      if re.search(err_pat, repr(e)): ignore = True
+
+    if not ignore:
+      print(repr(e))
+      pdb.post_mortem()
     writeLog('%s: Error in classification: %s. Skipping...' % (currentTime(), repr(e)[:80]))
     result = {'classifier': result['classifier'], 'options': result['options']}
     result['error'] = e.args
@@ -452,7 +312,7 @@ def main(args):
         #raise
   crunch_client.wait()
   writeLog('%s: Crunching complete. Wrapping up...' % (currentTime()))
-  results = crunch_client.get_results()
+  #results = crunch_client.get_results()
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
   rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)
