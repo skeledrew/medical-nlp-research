@@ -318,7 +318,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
 def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   # KFold
   kf_hash = hash_sum('%d%s%s' % (numFolds, pp_hash, clf_hash))
-  if kf_hash in memo and memo[kf_hash]: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash]['raw']
+  if kf_hash in memo: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash]['raw']
   memo[kf_hash] = {}
   ps = []
   rs = []
@@ -345,7 +345,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
     rs.append(recall_score(y_test, pred, pos_label=1))
     f1s.append(f1_score(y_test, pred, pos_label=1))
     raw = confusion_matrix(y_test, pred)
-    raw = {'tn': raw[0], 'fp': raw[1], 'fn': raw[2], 'tp': raw[3]}
+    raw = {'tn': raw[0][0], 'fp': raw[1][1], 'fn': raw[1][0], 'tp': raw[1][1]}
     raw_results.append(raw)
   misses = list(set(misses))
   misses.sort()
