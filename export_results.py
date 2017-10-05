@@ -58,12 +58,16 @@ def get_top_results(critr, path, ext='json'):
         top = targ
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
     mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
-    rf_name = path_name_prefix('top-res-%s_' % cr_hash, path).replace('.json', '.yaml')
+    rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
     if not isinstance(top, list): top = [top]
     tmp_top = deepcopy(top)
     if 'features' in tmp_top: del tmp_top[0]['features']
     if 'mis' in tmp_top: del tmp_top[0]['mis']
-    save_yaml(tmp_top, rf_name)
+    try:
+        saveJson(tmp_top, rf_name)
+    except:
+        rf_name = rf_name.replace('.json', '.yaml')
+        save_yaml(tmp_top, rf_name)
     print('Saved main results to file!')
 
     if 'features' in top[0] and top[0]['features']:
@@ -96,7 +100,12 @@ def get_top_results(critr, path, ext='json'):
         with open(mf_name, 'w') as fo:
             fo.write('\n'.join(top[0]['mis']))
         top[0]['mis'] = mf_name
-    save_yaml(top, rf_name)
+    try:
+        saveJson(top, rf_name)
+
+    except:
+        rf_name = rf_name.replace('.json', '.yaml')
+        save_yaml(top, rf_name)
     fin_msg = '\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name)
     writeLog(fin_msg)
     slack_post(fin_msg, '@aphillips')
