@@ -232,9 +232,9 @@ def gSGenericRunner(
     result['error'] = None
     result['raw'] = raw
 
-  except KeyError, IndexError as e:
+  except IndexError as e:
     print(repr(e))
-    pdb.set_trace()
+    pdb.post_mortem()
 
   except Exception as e:
     writeLog('%s: Error in classification: %s. Skipping...' % (currentTime(), repr(e)[:80]))
