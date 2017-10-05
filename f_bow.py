@@ -316,7 +316,7 @@ def main(args):
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
   rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)
-  saveJson(results, rf_name + '.json')
+  save_yaml(results, rf_name + '.yaml')
   savePickle(memo, '%sexp%s_memo.pkl' % (dataDir, ex_num))
   if os.path.exists(curr_sess): os.remove(curr_sess)
   e_time = currentTime()
