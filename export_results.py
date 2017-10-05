@@ -7,7 +7,7 @@ from common import *
 
 
 DEBUG = True
-usage = 'Usage: %s top {criteria} /path/to/exp_results.json' % (sys.argv[0])
+usage = 'Usage: %s top {criteria} /path/to/exp_results' % (sys.argv[0])
 #resolve_cuis = False
 
 
@@ -26,10 +26,11 @@ def get_fields_in_json(args):
     print(fields)
     return
 
-def get_top_results(critr, path):
+def get_top_results(critr, path, ext='json'):
     # 17-08-01
-    j_cont = loadJson(path)
-    if not isinstance(j_cont, list): raise Exception('%s should be a list' % args[2])
+    j_cont = loadJson(path) if ext == 'json' else load_yaml(path) if ext == 'yaml' else None
+    path = path.replace('.yaml', '.json')  # temp compat hack
+    if not isinstance(j_cont, list): raise Exception('%s should be a list' % path)
     cr_hash = hash_sum(critr)
     critr = str_to_dict(critr, '&', '=')
     top = {'f1': 0.0, 'recall': 0.0, 'precision': 0.0}
@@ -57,12 +58,12 @@ def get_top_results(critr, path):
         top = targ
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
     mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
-    rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
+    rf_name = path_name_prefix('top-res-%s_' % cr_hash, path).replace('.json', '.yaml')
     if not isinstance(top, list): top = [top]
     tmp_top = deepcopy(top)
     if 'features' in tmp_top: del tmp_top[0]['features']
     if 'mis' in tmp_top: del tmp_top[0]['mis']
-    saveJson(tmp_top, rf_name)
+    save_yaml(tmp_top, rf_name)
     print('Saved main results to file!')
 
     if 'features' in top[0] and top[0]['features']:
@@ -95,7 +96,7 @@ def get_top_results(critr, path):
         with open(mf_name, 'w') as fo:
             fo.write('\n'.join(top[0]['mis']))
         top[0]['mis'] = mf_name
-    saveJson(top, rf_name)
+    save_yaml(top, rf_name)
     fin_msg = '\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name)
     writeLog(fin_msg)
     slack_post(fin_msg, '@aphillips')
@@ -124,6 +125,7 @@ def main(args):
         if not os.path.exists(args[3]): args[3] = dataDir + args[3]
         if not os.path.exists(args[3]): raise Exception('%s doesn\'t exist' % args[3])
         if args[3].endswith('.json'): get_top_results(args[2], args[3])
+        if args[3].endswith('.yaml'): get_top_results(args[2], args[3], 'yaml')
         return
 
     if args[1].replace('-', '', 1).isdigit():
