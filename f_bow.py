@@ -232,6 +232,10 @@ def gSGenericRunner(
     result['error'] = None
     result['raw'] = raw
 
+  except KeyError as e:
+    print(repr(e))
+    pdb.set_trace()
+
   except Exception as e:
     writeLog('%s: Error in classification: %s. Skipping...' % (currentTime(), repr(e)[:80]))
     result = {'classifier': result['classifier'], 'options': result['options']}
@@ -314,7 +318,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
 def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   # KFold
   kf_hash = hash_sum('%d%s%s' % (numFolds, pp_hash, clf_hash))
-  if kf_hash in memo: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis']
+  if kf_hash in memo and memo[kf_hash]: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash]['raw']
   memo[kf_hash] = {}
   ps = []
   rs = []
