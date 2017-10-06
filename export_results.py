@@ -28,6 +28,7 @@ def get_fields_in_json(args):
 
 def get_top_results(critr, path, ext='json'):
     # 17-08-01
+    print('%s: Loading %s...' % (currentTime(), path))
     j_cont = loadJson(path) if ext == 'json' else load_yaml(path) if ext == 'yaml' else None
     path = path.replace('.yaml', '.json')  # temp compat hack
     if not isinstance(j_cont, list): raise Exception('%s should be a list' % path)
@@ -53,7 +54,22 @@ def get_top_results(critr, path, ext='json'):
         # seek max specified score
         targ = j_cont[idx][1]
         if not 'f1' in targ or targ['f1'] == None: continue
-        ##check given criteria here
+
+        for cr in critr:
+
+            if cr in targ:
+                # is p, r, f1
+                check = None
+
+                try:
+                    if critr[cr][:2] in ['<=', '>=', '==']: check = eval('%s%s' % (targ[cr], critr[cr]))
+                    if not check: continue
+
+                except:
+                    pass
+            if not cr in targ['options']: continue
+            t_cr = targ['options'][cr]
+            if isinstance(t_cr, str) and not re.match(critr[cr], t_cr): continue  # reqs regex match
         if targ[optimize] <= top[optimize]: continue
         top = targ
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
