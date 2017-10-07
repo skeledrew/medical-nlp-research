@@ -205,11 +205,11 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
     rs.append(recall_score(y_test, pred, pos_label=1))
     f1s.append(f1_score(y_test, pred, pos_label=1))
     raw = confusion_matrix(y_test, pred)
-    raw = {'tn': raw[0][0], 'fp': raw[1][1], 'fn': raw[1][0], 'tp': raw[1][1]}
+    raw = {'tn': int(raw[0][0]), 'fp': int(raw[1][1]), 'fn': int(raw[1][0]), 'tp': int(raw[1][1])}
     raw_results.append(raw)
   misses = list(set(misses))
   misses.sort()
-  p, r, f1, std = np.mean(ps), np.mean(rs), np.mean(f1s), np.std(np.array(f1s))
+  p, r, f1, std = int(np.mean(ps)), int(np.mean(rs)), int(np.mean(f1s)), int(np.std(np.array(f1s)))
   raw_means = {key: sum(map(lambda result: result[key], raw_results)) / len(raw_results) for key in ['tn', 'fp', 'fn', 'tp']}
   raw_results.append(raw_means)
   memo[kf_hash]['p'] = p
@@ -316,7 +316,10 @@ def main(args):
   results.append(gSParams)
   ex_num = getExpNum(dataDir + 'tracking.json')
   rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)
-  save_yaml(results, rf_name + '.yaml')
+  try:
+    saveJson(results, rf_name + '.json')
+  except:
+    save_yaml(results, rf_name + '.yaml')
   savePickle(memo, '%sexp%s_memo.pkl' % (dataDir, ex_num))
   if os.path.exists(curr_sess): os.remove(curr_sess)
   e_time = currentTime()
