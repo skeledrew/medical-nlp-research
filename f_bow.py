@@ -52,7 +52,7 @@ def gSGenericRunner(
   args, _, _, values = getargvalues(frame)
   result['options'] = allArgs = {arg: values[arg] for arg in args}
   preproc_hash = hash_sum('%s%s%d%s%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary, preTask))
-  #pdb.set_trace()
+  if DEBUG: pdb.set_trace()
   vals = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
   matrix, bunch, result['features'] = vals[0], vals[1], vals[2]
   hyParams = {
