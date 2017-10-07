@@ -16,7 +16,7 @@ from common import *
 import custom_clfs
 
 
-ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix||TypeError..unorderable types'
+ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix'
 DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
@@ -279,7 +279,7 @@ def main(args):
     if idx < resume: idx = resume
 
     try:
-      writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
+      #writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
       results[idx] = [results[idx], eval(results[idx])]
       #func = globals()[results[idx].split('(')[0]]
       #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
