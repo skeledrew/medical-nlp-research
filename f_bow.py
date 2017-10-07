@@ -279,7 +279,7 @@ def main(args):
     if idx < resume: idx = resume
 
     try:
-      #writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
+      writeLog('\n%s: Processing #%d of %d: %s' % (currentTime(), idx + 1, len(results), results[idx]))
       results[idx] = [results[idx], eval(results[idx])]
       #func = globals()[results[idx].split('(')[0]]
       #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
