@@ -17,7 +17,7 @@ import custom_clfs
 
 
 ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix'
-DEBUG = True
+DEBUG = False
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
@@ -209,7 +209,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
     raw_results.append(raw)
   misses = list(set(misses))
   misses.sort()
-  p, r, f1, std = int(np.mean(ps)), int(np.mean(rs)), int(np.mean(f1s)), int(np.std(np.array(f1s)))
+  p, r, f1, std = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s)))
   raw_means = {key: sum(map(lambda result: result[key], raw_results)) / len(raw_results) for key in ['tn', 'fp', 'fn', 'tp']}
   raw_results.append(raw_means)
   memo[kf_hash]['p'] = p
