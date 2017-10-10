@@ -54,6 +54,7 @@ def get_top_results(critr, path, ext='json'):
         # seek max specified score
         targ = j_cont[idx][1]
         if not 'f1' in targ or targ['f1'] == None: continue
+        skip = False
 
         for cr in critr:
 
@@ -69,8 +70,10 @@ def get_top_results(critr, path, ext='json'):
                     pass
             if not cr in targ['options']: continue
             t_cr = targ['options'][cr]
-            if isinstance(t_cr, str) and re.match(critr[cr], t_cr): break  # reqs regex match
-        #if 'SGD' in t_cr: pdb.set_trace()  ## temp
+            if isinstance(t_cr, str) and  re.match(critr[cr], t_cr): continue  # regex non-match
+            skip = True  # invalidate for any other criteria
+            break
+        if skip: continue
         if targ[optimize] <= top[optimize]: continue
         top = targ
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
