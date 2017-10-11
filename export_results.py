@@ -132,7 +132,13 @@ def get_top_results(critr, path, ext='json'):
     return top
 
 def get_gs_params(path):
-    results = loadJson(path)
+    results = None
+
+    try:
+        result = loadJson(path)
+
+    except:
+        result = load_yaml(path)
 
     for result in results:
         if 'methods' in result[0]: return result
