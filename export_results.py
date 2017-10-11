@@ -28,12 +28,13 @@ def get_fields_in_json(args):
 
 def get_top_results(critr, path, ext='json'):
     # 17-08-01
+    cr_hash = hash_sum(critr)
+    critr = str_to_dict(critr, '&', '=')
+    print('Given criteria "%s" with hash "%s"' % (critr, cr_hash))
     print('%s: Loading %s...' % (currentTime(), path))
     j_cont = loadJson(path) if ext == 'json' else load_yaml(path) if ext == 'yaml' else None
     path = path.replace('.yaml', '.json')  # temp compat hack
     if not isinstance(j_cont, list): raise Exception('%s should be a list' % path)
-    cr_hash = hash_sum(critr)
-    critr = str_to_dict(critr, '&', '=')
     top = {'f1': 0.0, 'recall': 0.0, 'precision': 0.0}
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
@@ -105,7 +106,7 @@ def get_top_results(critr, path, ext='json'):
                     # found a cui to resolve
                     cui_name = name.lstrip('-').upper()
                     if cui_name.startswith('NEG'): cui_name = cui_name[3:]
-                    if not len(cui_Name) == 8: raise ValueError('CUI must be formatted C#######, got "%s"' % cui_name)
+                    if not len(cui_name) == 8: raise ValueError('CUI must be formatted C#######, got "%s"' % cui_name)
                     real_name = umls_clt.find_cui(cui_name)['name']
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
