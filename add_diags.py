@@ -1,4 +1,4 @@
-#! /NLPShare/nlpenv/bin/python3
+#! /home/aphillips5/envs/nlpenv/bin/python3
 
 '''
 Read cut diags and add to notes
@@ -7,6 +7,7 @@ Read cut diags and add to notes
 from common import *
 import csv
 from fuzzywuzzy import fuzz
+from os.path import exists
 
 
 def loadDiags(diags=''):
@@ -82,5 +83,10 @@ def addDiags(notes):
     return noteDict
 
 if __name__ == '__main__':
-    dNotes = addDiags(allNotes)
-    saveJson(dNotes, allNotesWithDiags)
+    notes = allNotes  # json file
+    notes_with_diags = allNotesWithDiags  # json file
+    if len(sys.argv) > 3 and exists(sys.argv[1]):
+        notes = sys.argv[1]
+        notes_with_diags = sys.argv[2]
+    dNotes = addDiags(notes)
+    saveJson(dNotes, notes_with_diags)

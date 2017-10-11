@@ -2,6 +2,7 @@
 
 
 import os, inspect, sys, time, pdb
+import subprocess as sp
 
 import rpyc
 
@@ -37,6 +38,18 @@ class CrunchService(rpyc.Service):
 
     def exposed_cpu_count(self):
         return os.cpu_count()
+
+def bind_process(pid=None, cpus=None):
+    # takes an int or string
+    if isinstance(pid, str): return get_pids(pid)
+    if not cpus: return shell_run('taskset -p {}'.format(pid))
+    return shell_run('taskset -p {} {}'.format(cpus, pid))
+
+def shell_run(cmd):
+    return sp.check_output(["/bin/bash", '-c', '"{}"'.format(cmd)]).decode().strip()
+
+def get_pids(p_name):
+    return shell_run('ps -A |grep {} |cut -d " " -f 1'.format(p_name).split('\n'))
 
 def current_time():
     # from common
