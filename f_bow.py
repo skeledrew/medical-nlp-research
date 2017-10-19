@@ -205,7 +205,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
     rs.append(recall_score(y_test, pred, pos_label=1))
     f1s.append(f1_score(y_test, pred, pos_label=1))
     raw = confusion_matrix(y_test, pred)
-    raw = {'tn': int(raw[0][0]), 'fp': int(raw[1][1]), 'fn': int(raw[1][0]), 'tp': int(raw[1][1])}
+    raw = {'tn': int(raw[0][0]), 'fp': int(raw[0][1]), 'fn': int(raw[1][0]), 'tp': int(raw[1][1])}
     raw_results.append(raw)
   misses = list(set(misses))
   misses.sort()
