@@ -615,6 +615,7 @@ def splitDir(srcDir, destDir, percentOut, random=True, test=False):
     #return content[:numOut], content[numOut:]
 
 def calcScores(tp=0, fp=0, fn=0, tn=0):
+    '''Takes tp, fp, fn and tn; returns p, r, f1'''
     precision = tp / (tp + fp)
     recall = tp / (tp + fn)
     f1 = 2 * ((precision * recall) / (precision + recall))
