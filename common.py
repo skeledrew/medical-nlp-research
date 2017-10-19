@@ -912,6 +912,21 @@ def save_yaml(obj, f_name=None):
         fo.write(text)
     return True
 
+def confusion_matrix(data, pred_f, true_f, table=False):
+    '''Takes data as an iterable and 2 functions
+       - pred_f returns a boolean prediction
+       - act_f returns the boolean actual
+       - table (opt) determines if results should be returned in a dict or table
+       Returns matrix values'''
+    tp = tn = fp = fn = 0
+
+    for e in data:
+        if pred_f(e) and true_f(e): tp += 1
+        if pred_f(e) and not true_f(e): fp += 1
+        if not pred_f(e) and true_f(e): fn += 1
+        if not (pred_f(e) or true_f(e)): tn += 1
+    return {'tp': tp, 'fp': fp, 'fn': fn, 'tn': tn} if not table else [[tp, fp][fn, tn]]
+
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
 commit_me(dataDir + 'tracking.json', 'common.py')
