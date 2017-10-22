@@ -244,10 +244,10 @@ class BitVectorizor():
 
     def split_doc(self, doc, splits=[' ']):
         '''Recursively splits a snippet'''
-        if splits: split = splits.pop(0)
+        split = splits.pop(0)
         s_doc = re.split(split, doc) if isinstance(split, str) else self.make_ngrams(doc, split)
 
-        if not splits:
+        if len(splits) == 1:
             # word level
             if not s_doc in self._ent_list: self._ent_list.append(s_doc)
             self._tmp_doc.append(s_doc)
