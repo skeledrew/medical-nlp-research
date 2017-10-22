@@ -220,7 +220,7 @@ class BitVectorizor():
         for doc in docs:
             # break into snippets of words, sentences, etc
             if not isinstance(doc, str): raise ValueError('Doc must be a string')
-            blob.append(split_doc(doc.lower(), splits=self._splits[:]))
+            blob.append(self.split_doc(doc.lower(), splits=self._splits[:]))
             self._make_numbers()
             self._bit_matrix.append(self._tmp_doc)
             self._tmp_doc = []
