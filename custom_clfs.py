@@ -242,7 +242,7 @@ class BitVectorizor():
                 idx_vec.append(self._ent_list.index(sub))
         return
 
-    def split_doc(doc, splits=[' ']):
+    def split_doc(self, doc, splits=[' ']):
         '''Recursively splits a snippet'''
         split = splits.pop(0)
         s_doc = re.split(split, doc) if isinstance(split, str) else make_ngrams(doc, split)
