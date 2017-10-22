@@ -204,7 +204,7 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
 
 class BitVectorizor():
 
-    def __init__(self, ngram_range=[1,1], min_df=None, splits=['. ', ' ']):
+    def __init__(self, ngram_range=[1,1], min_df=None, splits=[r'\. ', r' ']):
         self._splits = splits
         self._black_list = []
         self._ent_list = []
