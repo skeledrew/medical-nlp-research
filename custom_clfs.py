@@ -202,6 +202,92 @@ class OptimizedRulesSeeker(BaseEstimator, ClassifierMixin):
     def predict(self, X):
         return self._clf.predict(X)
 
+class BitVectorizor():
+
+    def __init__(self, ngram_range=[1,1], min_df=None, splits=['. ', ' ']):
+        self._splits = splits
+        self._black_list = []
+        self._ent_list = []
+        self._ind_vec_list = []
+        #self._split_level_cnt = len(splits)
+        self._tmp_doc = []
+        self._bit_matrix = []
+
+    def fit_transform(docs):
+        if not isinstance(docs, list): raise ValueError('BitVectorizor can only transform a list of documents')  # TODO: ensure this is a list and not array
+        blob = []
+
+        for doc in docs:
+            # break into snippets of words, sentences, etc
+            if not isinstance(doc, str): raise ValueError('Doc must be a string')
+            blob.append(split_doc(doc.lower(), splits=self._splits[:]))
+            self._make_numbers()
+            self._bit_matrix.append(self._tmp_doc)
+            self._tmp_doc = []
+        return self._bit_matrix
+
+    def _make_numbers(self):
+
+        for ent in self._ent_list:
+            # process each snippet entity
+
+            if isinstance(ent, str):
+                # single word
+                self._idx_vec_list.append(self._ent_list.index(ent))
+                continue
+            if not isinstance(ent, list): raise ValueError('"{}" must be a string or list'.format(ent))
+
+            for sub in ent:
+                if not sub in self._ent_list: raise ValueError('"{}" is not in the list of known entities'.format(sub))
+                idx_vec.append(self._ent_list.index(sub))
+        return
+
+    def split_doc(doc, splits=[' ']):
+        '''Recursively splits a snippet'''
+        split = splits.pop(0)
+        s_doc = re.split(split, doc) if isinstance(split, str) else make_ngrams(doc, split)
+
+        if not splits:
+            # word level
+            if not s_doc in self._ent_list: self._ent_list.append(s_doc)
+            self._tmp_doc.append(s_doc)
+            return s_doc
+
+        for idx, part in enumerate(s_doc):
+            s_doc[idx] = split_doc(part, splits)
+            s_doc[idx].sort()
+            if not part in self._ent_list: self._ent_list.append(s_doc[idx])
+            self._tmp_doc.append(s_doc[idx])
+        return s_doc
+
+    def make_ngrams(doc, ng_range):
+        '''Extract a range of given ngrams'''
+        ng_doc = []
+        if not (type(ng_range) in [list, tuple] or len(ng_range)): raise ValueError('N-gram range must be an iterable of 2 elements')
+
+        for ngram in range(ng_range[0], ng_range[1]):
+
+            for idx, _ in enumerate(doc):
+
+                try:
+                    ng_doc.append(doc[idx:idx + ngram])
+
+                except:
+                    # reached out of range
+                    break
+        return doc
+
+class FingerprintMappingClassifier(BaseEstimator, ClassifierMixin):
+
+    def __init__(self):
+        pass
+
+    def fit(self):
+        pass
+
+    def predict(self):
+        pass
+
 if __name__ == '__main__':
     print('This module contains importable classifiers')
 #pdb.set_trace()
