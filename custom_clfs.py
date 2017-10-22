@@ -213,7 +213,7 @@ class BitVectorizor():
         self._tmp_doc = []
         self._bit_matrix = []
 
-    def fit_transform(docs):
+    def fit_transform(self, docs):
         if not isinstance(docs, list): raise ValueError('BitVectorizor can only transform a list of documents')  # TODO: ensure this is a list and not array
         blob = []
 
