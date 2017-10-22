@@ -247,7 +247,7 @@ class BitVectorizor():
         split = splits.pop(0)
         s_doc = re.split(split, doc) if isinstance(split, str) else self.make_ngrams(doc, split)
 
-        if len(splits) == 1:
+        if len(splits) == 0:
             # word level
             if not s_doc in self._ent_list: self._ent_list.append(s_doc)
             self._tmp_doc.append(s_doc)
