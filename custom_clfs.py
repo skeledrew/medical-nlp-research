@@ -208,7 +208,7 @@ class BitVectorizor():
         self._splits = splits
         self._black_list = []
         self._ent_list = []
-        self._ind_vec_list = []
+        self._idx_vec_list = []
         #self._split_level_cnt = len(splits)
         self._tmp_doc = []
         self._bit_matrix = []
