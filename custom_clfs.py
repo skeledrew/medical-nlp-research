@@ -212,6 +212,7 @@ class BitVectorizor():
         #self._split_level_cnt = len(splits)
         self._tmp_doc = []
         self._bit_matrix = []
+        self._ent_list_pos = 0
 
     def fit_transform(self, docs):
         if not isinstance(docs, list): raise ValueError('BitVectorizor can only transform a list of documents')  # TODO: ensure this is a list and not array
@@ -225,6 +226,7 @@ class BitVectorizor():
             self._make_numbers()
             self._bit_matrix.append(self._tmp_doc)
             self._tmp_doc = []
+            self._ent_list_pos = len(self._ent_list)
         return self._bit_matrix
 
     def _make_numbers(self):
@@ -234,13 +236,20 @@ class BitVectorizor():
 
             if isinstance(ent, str):
                 # single word
-                self._idx_vec_list.append(self._ent_list.index(ent))
+                ent_idx = self._ent_list.index(ent)
+                if ent_idx in self._idx_vec_list: continue
+                self._idx_vec_list.append(ent_idx)
                 continue
             if not isinstance(ent, list): raise ValueError('"{}" must be a string or list'.format(ent))
+            idx_vec = []
+            ## TODO: try and detect if the entity was already vec'd
 
             for sub in ent:
+                # list of entities
                 if not sub in self._ent_list: raise ValueError('"{}" is not in the list of known entities'.format(sub))
                 idx_vec.append(self._ent_list.index(sub))
+            idx_vec.sort()
+            if not idx_vec in self._idx_vec_list: self._idx_vec_list.append(ent_idx)
         return
 
     def split_doc(self, doc, splits=[' ']):
