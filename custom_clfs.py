@@ -256,7 +256,7 @@ class BitVectorizor():
 
         for idx, part in enumerate(s_doc):
             s_doc[idx] = self.split_doc(part, splits)
-            s_doc[idx].sort()
+            if isinstance(s_doc[idx], list): s_doc[idx].sort()
             if not part in self._ent_list: self._ent_list.append(s_doc[idx])
             self._tmp_doc.append(s_doc[idx])
         return s_doc
