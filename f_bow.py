@@ -24,6 +24,7 @@ memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
 config = load_yaml('config.yaml')
 gSParams = config['gSParams']
+custom_pp = ['text', 'bits']  # custom preprocessors
 
 def gSGenericRunner(
     notesDirName,
@@ -72,10 +73,11 @@ def gSGenericRunner(
   result['classifier'] = re.sub('\n *', ' ', str(classifier))
   clf_hash = hash_sum(result['classifier'])
   if not clf_hash in memo: memo[clf_hash] = classifier
+  sk_feats = False if pre_task in custom_pp else True
 
   try:
     p = r = f1 = std = 0
-    p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features']) #if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
+    p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats) #if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
     result['f1'] = f1
@@ -182,7 +184,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
     raise Exception('Failed to create %s with params %s; %s' % (clf_name, params, repr(e)))
   return classifier
 
-def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
+def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_feats=True):
   # KFold
   kf_hash = hash_sum('%d%s%s' % (numFolds, pp_hash, clf_hash))
   if kf_hash in memo and memo[kf_hash]: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash]['raw']
@@ -196,6 +198,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats):
   wghts_read = False
 
   for idx in range(len(feats)):
+    if not sk_feats: break
     feats[idx] = [feats[idx][0], feats[idx][1]]
   f_idx = 0
 
