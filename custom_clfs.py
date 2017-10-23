@@ -258,7 +258,13 @@ class BitVectorizor():
         return
 
     def _make_bits(self):
-        pass
+        # TODO: need to reverse and append zeros after all docs read
+        bit_vec = [0] * len(self._idx_vec_list)
+
+        for number in self._tmp_doc:
+            bit_vec[self._idx_vec_list.index(number)] = 1
+        self._tmp_doc = bit_vec
+        return
 
     def split_doc(self, doc, splits=[' ']):
         '''Recursively splits a snippet'''
