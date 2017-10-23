@@ -331,6 +331,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
 
         for doc, lbl in zip(X, y):
             # sort docs by class
+            lbl = str(lbl)
             if not lbl in self._classes: self._classes[lbl] = []
             self._classes[lbl].append(doc)
         samps = {}
