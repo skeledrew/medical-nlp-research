@@ -229,11 +229,10 @@ class BitVectorizor():
             self._bit_matrix.append(self._tmp_doc)
             self._tmp_doc = []
             self._ent_list_pos = len(self._ent_list)
-        max_size = self._bit_matrix[-1]
+        max_size = len(self._bit_matrix[-1])
 
-        for idx, bv in self._bit_matrix:
+        for idx, bv in enumerate(self._bit_matrix):
             # make all bit vectors the same length
-            print(idx, bv)
 
             if len(bv) == max_size: continue
             pdb.set_trace()
