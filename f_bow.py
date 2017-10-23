@@ -53,7 +53,7 @@ def gSGenericRunner(
   args, _, _, values = getargvalues(frame)
   result['options'] = allArgs = {arg: values[arg] for arg in args}
   preproc_hash = hash_sum('%s%s%d%s%s%s' % (notesDirName, str(ngramRange), minDF, analyzer, binary, preTask))
-  if DEBUG: pdb.set_trace()
+  #if DEBUG: pdb.set_trace()
   vals = PreProc(notesDirName, ngramRange, minDF, analyzer, binary, preTask, preproc_hash)
   matrix, bunch, result['features'] = vals[0], vals[1], vals[2]
   hyParams = {
@@ -73,7 +73,7 @@ def gSGenericRunner(
   result['classifier'] = re.sub('\n *', ' ', str(classifier))
   clf_hash = hash_sum(result['classifier'])
   if not clf_hash in memo: memo[clf_hash] = classifier
-  sk_feats = False if pre_task in custom_pp else True
+  sk_feats = False if preTask in custom_pp else True
 
   try:
     p = r = f1 = std = 0
