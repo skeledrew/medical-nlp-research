@@ -222,6 +222,7 @@ class BitVectorizor():
         for doc in docs:
             # break into snippets of words, sentences, etc
             if not isinstance(doc, str): raise ValueError('Doc must be a string')
+            pdb.set_trace()
             blob.append(self.split_doc(doc.lower(), splits=self._splits[:]))
             self._make_numbers()
             self._bit_matrix.append(self._tmp_doc)
@@ -230,7 +231,7 @@ class BitVectorizor():
         return self._bit_matrix
 
     def _make_numbers(self):
-        pdb.set_trace()
+        #pdb.set_trace()
 
         for idx in range(self._ent_list_pos, len(self._ent_list)):
             # process each snippet entity
