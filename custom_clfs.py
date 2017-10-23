@@ -321,8 +321,9 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
         self._tol = tolerance  # %age; use for black listing feats
         self._classes = {}
         self._algos = {}
+        self._load_algos()
 
-    def load_algos(self):
+    def _load_algos(self):
         self._algos['simple'] = this._algo_simple_
 
     def fit(self, X, y):
@@ -365,6 +366,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
 
     def run_algo(self, doc, algo=None):
         if not algo: algo = self._algo
+        pred = None
 
         try:
             pred = self._algos[algo](doc)
