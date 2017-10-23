@@ -17,7 +17,7 @@ import custom_clfs
 
 
 ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix'
-DEBUG = False
+DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
@@ -122,7 +122,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
     return text_matrix, bunch, [], pipe  # no features
 
   if pre_task == 'bits':
-    bit_vec = custom_clf.BitVectorizor(ngram_range=ngramRange)
+    bit_vec = custom_clfs.BitVectorizor(ngram_range=ngramRange)
     bits_matrix = np.array(bit_vec.fit_transform(bunch.data))
     memo[param_hash]['matrix'] = bits_matrix
     return bits_matrix, bunch, bit_vec._ent_list, pipe
