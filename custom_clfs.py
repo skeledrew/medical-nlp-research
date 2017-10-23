@@ -263,7 +263,7 @@ class BitVectorizor():
 
         for number in self._tmp_doc:
             bit_vec[self._idx_vec_list.index(number)] = 1
-        self._tmp_doc = bit_vec
+        self._tmp_doc = int(''.join(bit_vec), 2)
         return
 
     def split_doc(self, doc, splits=[' ']):
