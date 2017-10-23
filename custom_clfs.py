@@ -342,7 +342,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
 
         for lbl in samps:
             # create "class prints"
-            class_print = ''.join(['0'] * len(samps[lbl][0]))
+            class_print = ''.join(['0'] * (len(bin(samps[lbl][0]))-2))
             bit_sum = 0
 
             for samp in samps[lbl]:
