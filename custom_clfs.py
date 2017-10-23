@@ -235,6 +235,7 @@ class BitVectorizor():
             # make all bit vectors the same length
 
             if len(bv) == max_size: continue
+            pdb.set_trace()
             diff = max_size - len(bv)
             pad = ''.join(['0'] * diff)
             self._bit_matrix[idx] = int(bv + pad, 2)
