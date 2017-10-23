@@ -270,7 +270,7 @@ class BitVectorizor():
             s_doc[idx] = self.split_doc(part, splits[1:]) if splits else s_doc[idx]
             if isinstance(s_doc[idx], list): s_doc[idx].sort()
             if not s_doc[idx] in self._ent_list: self._ent_list.append(s_doc[idx])
-            self._tmp_doc.append(s_doc[idx])
+            if not s_doc[idx] in self._tmp_doc: self._tmp_doc.append(s_doc[idx])
         splits.pop(0)
         return s_doc
 
