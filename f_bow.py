@@ -115,15 +115,16 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   if not b_hash in memo: memo[b_hash] = bunch
   memo[param_hash]['bunch'] = bunch
   pipe = []  # hold transformer objects
+  text_matrix = [s.decode('utf-8') for s in bunch.data]  # make str
 
   if pre_task == 'text':
-    text_matrix = np.array([s.decode('utf-8') for s in bunch.data])
+    text_matrix = np.array(text_matrix)
     memo[param_hash]['matrix'] = text_matrix
     return text_matrix, bunch, [], pipe  # no features
 
   if pre_task == 'bits':
     bit_vec = custom_clfs.BitVectorizor(ngram_range=ngramRange)
-    bits_matrix = np.array(bit_vec.fit_transform(bunch.data))
+    bits_matrix = np.array(bit_vec.fit_transform(text_matrix))
     memo[param_hash]['matrix'] = bits_matrix
     return bits_matrix, bunch, bit_vec._ent_list, pipe
 
