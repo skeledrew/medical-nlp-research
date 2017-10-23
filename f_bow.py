@@ -121,6 +121,12 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
     memo[param_hash]['matrix'] = text_matrix
     return text_matrix, bunch, [], pipe  # no features
 
+  if pre_task == 'bits':
+    bit_vec = custom_clf.BitVectorizor(ngram_range=ngramRange)
+    bits_matrix = np.array(bit_vec.fit_transform(bunch.data))
+    memo[param_hash]['matrix'] = bits_matrix
+    return bits_matrix, bunch, bit_vec._ent_list, pipe
+
   # raw occurences
   vectorizer = CountVectorizer(
     ngram_range=ngramRange,
