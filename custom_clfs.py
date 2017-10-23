@@ -233,9 +233,7 @@ class BitVectorizor():
 
         for idx, bv in enumerate(self._bit_matrix):
             # make all bit vectors the same length
-            #diff = max_size - len(bv)
-            #pad = ''.join(['0'] * diff)
-            self._bit_matrix[idx] = bv.ljust(max_len, '0')#int(bv + pad, 2)
+            self._bit_matrix[idx] = int(bv.ljust(max_len, '0'), 2)
         return self._bit_matrix
 
     def _make_numbers(self):
