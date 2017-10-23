@@ -249,7 +249,7 @@ class BitVectorizor():
                 if not sub in self._ent_list: raise ValueError('"{}" is not in the list of known entities'.format(sub))
                 idx_vec.append(self._ent_list.index(sub))
             idx_vec.sort()
-            if not idx_vec in self._idx_vec_list: self._idx_vec_list.append(ent_idx)
+            if not idx_vec in self._idx_vec_list: self._idx_vec_list.append(idx_vec)
         return
 
     def split_doc(self, doc, splits=[' ']):
