@@ -261,7 +261,7 @@ class BitVectorizor():
         if not splits:
             # word level
             if not doc in self._ent_list: self._ent_list.append(doc)
-            self._tmp_doc.append(doc)
+            if not doc in self._tmp_doc: self._tmp_doc.append(doc)
             return doc
         split = splits[0]
         s_doc = re.split(split, doc) if isinstance(split, str) else self.make_ngrams(doc, split)
