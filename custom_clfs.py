@@ -359,7 +359,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
         preds = []
 
         for doc in X:
-            pred = run_algo(doc)
+            pred = self.run_algo(doc)
             preds.append(pred)
         return preds
 
