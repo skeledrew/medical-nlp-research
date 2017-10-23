@@ -310,19 +310,85 @@ class BitVectorizor():
                     break
         return doc
 
+class BitMappingClassifier(BaseEstimator, ClassifierMixin):
+
+    def __init__(self, algo='simple', iteration=50, rand_state=1, class_weight='balanced', sample_size=10, tolerance=15):
+        self._algo = algo  # str
+        self._iter = iteration  # int
+        self._weight = class_weight  # str
+        self._samp_size = sample_size  # %age
+        self._rand = rand_state  # int
+        self._tol = tolerance  # %age; use for black listing feats
+        self._classes = {}
+        self._algos = {}
+
+    def load_algos(self):
+        self._algos['simple'] = this._algo_simple_
+
+    def fit(self, X, y):
+        '''Train model'''
+        if DEBUG: pdb.set_trace()
+
+        for doc, lbl in zip(X, y):
+            # sort docs by class
+            if not lbl in self._classes: self._classes[lbl] = []
+            self._classes[lbl].append(doc)
+        samps = {}
+
+        for lbl in self._classes:
+            # get samples
+            samps[lbl] = random.sample(self._classes[lbl], self._samp_size)
+        class_prints = {}
+
+        for lbl in samps:
+            # create "class prints"
+            class_print = ''.join(['0'] * len(samps[lbl][0]))
+            bit_sum = 0
+
+            for samp in samps[lbl]:
+                # bitwise OR with each class sample
+                bit_sum |= samp
+            class_print[bit_sum] = lbl  # flipped it; dunno why :/
+        #black_list = []
+        self._class_prints = class_prints
+        return self
+
+    def predict(self, X):
+        '''Get predictions for a set of documents'''
+        preds = []
+
+        for doc in X:
+            pred = run_algo(doc)
+            preds.append(pred)
+        return preds
+
+    def run_algo(self, doc, algo=None):
+        if not algo: algo = self._algo
+
+        try:
+            pred = self._algos[algo](doc)
+
+        except Exception as e:
+            print(repr(e))
+            pass
+        return pred
+
+    def _algo_simple_(self, doc):
+        last_diff = 0
+        last_class = None
+        if DEBUG: pdb.set_trace()
+
+        for bs in self._class_prints:
+            curr_diff = self.count_set_bits(doc & bs)
+            if not curr_diff > last_diff: continue
+            last_diff = curr_diff
+            last_class = self._class_prints[bs]
+        return last_class
+
     def count_set_bits(val):
         return bin(val).count('1')
 
-class FingerprintMappingClassifier(BaseEstimator, ClassifierMixin):
-
-    def __init__(self, iter=50):
-        pass
-
-    def fit(self, X, y):
-        pass
-
-    def predict(self, X):
-        pass
+DEBUG = True
 
 if __name__ == '__main__':
     print('This module contains importable classifiers')
