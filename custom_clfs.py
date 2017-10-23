@@ -324,7 +324,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
         self._load_algos()
 
     def _load_algos(self):
-        self._algos['simple'] = this._algo_simple_
+        self._algos['simple'] = self._algo_simple_
 
     def fit(self, X, y):
         '''Train model'''
