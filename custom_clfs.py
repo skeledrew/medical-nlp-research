@@ -229,7 +229,7 @@ class BitVectorizor():
             self._bit_matrix.append(self._tmp_doc)
             self._tmp_doc = []
             self._ent_list_pos = len(self._ent_list)
-        max_size = len(self._bit_matrix[-1])
+        max_len = len(self._bit_matrix[-1])
 
         for idx, bv in enumerate(self._bit_matrix):
             # make all bit vectors the same length
