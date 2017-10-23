@@ -229,6 +229,15 @@ class BitVectorizor():
             self._bit_matrix.append(self._tmp_doc)
             self._tmp_doc = []
             self._ent_list_pos = len(self._ent_list)
+        max_size = self._bit_matrix[-1]
+
+        for idx, bv in self._bit_matrix:
+            # make all bit vectors the same length
+
+            if len(bv) == max_size: continue
+            diff = max_size - len(bv)
+            pad = ''.join(['0'] * diff)
+            self._bit_matrix[idx] = int(bv + pad, 2)
         return self._bit_matrix
 
     def _make_numbers(self):
@@ -263,7 +272,7 @@ class BitVectorizor():
 
         for number in self._tmp_doc:
             bit_vec[self._idx_vec_list.index(number)] = '1'
-        self._tmp_doc = int(''.join(bit_vec[::-1]), 2)
+        self._tmp_doc = ''.join(bit_vec[::-1])
         return
 
     def split_doc(self, doc, splits=[' ']):
