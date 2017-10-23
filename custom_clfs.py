@@ -348,7 +348,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
             for samp in samps[lbl]:
                 # bitwise OR with each class sample
                 bit_sum |= samp
-            class_print[bit_sum] = lbl  # flipped it; dunno why :/
+            class_prints[bit_sum] = lbl  # flipped it; dunno why :/
         #black_list = []
         self._class_prints = class_prints
         return self
