@@ -217,7 +217,7 @@ class BitVectorizor():
     def fit_transform(self, docs):
         if not isinstance(docs, list): raise ValueError('BitVectorizor can only transform a list of documents')  # TODO: ensure this is a list and not array
         blob = []
-        pdb.set_trace()
+        #pdb.set_trace()
 
         for doc in docs:
             # break into snippets of words, sentences, etc
@@ -230,9 +230,11 @@ class BitVectorizor():
         return self._bit_matrix
 
     def _make_numbers(self):
+        pdb.set_trace()
 
-        for ent in self._ent_list:
+        for idx in range(self._ent_list_pos, len(self._ent_list)):
             # process each snippet entity
+            ent = self._ent_list[idx]
 
             if isinstance(ent, str):
                 # single word
