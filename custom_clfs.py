@@ -263,14 +263,15 @@ class BitVectorizor():
             if not doc in self._ent_list: self._ent_list.append(doc)
             self._tmp_doc.append(doc)
             return doc
-        split = splits.pop(0)
+        split = splits[0]
         s_doc = re.split(split, doc) if isinstance(split, str) else self.make_ngrams(doc, split)
 
         for idx, part in enumerate(s_doc):
-            s_doc[idx] = self.split_doc(part, splits) #if splits else s_doc[idx]
+            s_doc[idx] = self.split_doc(part, splits[1:]) if splits else s_doc[idx]
             if isinstance(s_doc[idx], list): s_doc[idx].sort()
             if not s_doc[idx] in self._ent_list: self._ent_list.append(s_doc[idx])
             self._tmp_doc.append(s_doc[idx])
+        splits.pop(0)
         return s_doc
 
     def make_ngrams(doc, ng_range):
