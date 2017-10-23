@@ -225,13 +225,13 @@ class BitVectorizor():
             pdb.set_trace()
             blob.append(self.split_doc(doc.lower(), splits=self._splits[:]))
             self._make_numbers()
+            self._make_bits()
             self._bit_matrix.append(self._tmp_doc)
             self._tmp_doc = []
             self._ent_list_pos = len(self._ent_list)
         return self._bit_matrix
 
     def _make_numbers(self):
-        #pdb.set_trace()
 
         for idx in range(self._ent_list_pos, len(self._ent_list)):
             # process each snippet entity
@@ -242,6 +242,7 @@ class BitVectorizor():
                 ent_idx = self._ent_list.index(ent)
                 if ent_idx in self._idx_vec_list: continue
                 self._idx_vec_list.append(ent_idx)
+                self._tmp_doc.append(ent_idx)
                 continue
             if not isinstance(ent, list): raise ValueError('"{}" must be a string or list'.format(ent))
             idx_vec = []
@@ -253,7 +254,11 @@ class BitVectorizor():
                 idx_vec.append(self._ent_list.index(sub))
             idx_vec.sort()
             if not idx_vec in self._idx_vec_list: self._idx_vec_list.append(idx_vec)
+            self._tmp_doc.append(idx_vec)
         return
+
+    def _make_bits(self):
+        pass
 
     def split_doc(self, doc, splits=[' ']):
         '''Recursively splits a snippet'''
@@ -261,7 +266,7 @@ class BitVectorizor():
         if not splits:
             # word level
             if not doc in self._ent_list: self._ent_list.append(doc)
-            if not doc in self._tmp_doc: self._tmp_doc.append(doc)
+            #if not doc in self._tmp_doc: self._tmp_doc.append(doc)
             return doc
         split = splits[0]
         s_doc = re.split(split, doc) if isinstance(split, str) else self.make_ngrams(doc, split)
@@ -270,7 +275,7 @@ class BitVectorizor():
             s_doc[idx] = self.split_doc(part, splits[1:]) if splits else s_doc[idx]
             if isinstance(s_doc[idx], list): s_doc[idx].sort()
             if not s_doc[idx] in self._ent_list: self._ent_list.append(s_doc[idx])
-            if not s_doc[idx] in self._tmp_doc: self._tmp_doc.append(s_doc[idx])
+            #if not s_doc[idx] in self._tmp_doc: self._tmp_doc.append(s_doc[idx])
         splits.pop(0)
         return s_doc
 
@@ -290,6 +295,9 @@ class BitVectorizor():
                     # reached out of range
                     break
         return doc
+
+    def count_set_bits(val):
+        return bin(val).count('1')
 
 class FingerprintMappingClassifier(BaseEstimator, ClassifierMixin):
 
