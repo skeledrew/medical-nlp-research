@@ -273,6 +273,7 @@ class BitVectorizor():
 
         for number in self._tmp_doc:
             bit_vec[self._idx_vec_list.index(number)] = '1'
+        pdb.set_trace()
         self._tmp_doc = ''.join(bit_vec[::-1])
         return
 
