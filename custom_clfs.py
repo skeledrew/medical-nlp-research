@@ -209,6 +209,7 @@ class BitVectorizor():
         self._black_list = []
         self._ent_list = []
         self._idx_vec_list = []
+        self._bin_vec_list = []
         #self._split_level_cnt = len(splits)
         self._tmp_doc = []
         self._bit_matrix = []
@@ -224,7 +225,6 @@ class BitVectorizor():
             if not isinstance(doc, str): raise ValueError('Doc must be a string')
             blob.append(self.split_doc(doc.lower(), splits=self._splits[:]))
             self._make_numbers()
-            pdb.set_trace()
             self._make_bits()
             self._bit_matrix.append(self._tmp_doc)
             self._tmp_doc = []
@@ -264,6 +264,9 @@ class BitVectorizor():
 
     def _make_bits(self):
         # TODO: need to reverse and append zeros after all docs read
+
+        #for idx in range(self._ent_list_pos, len(self._idx_vec_list)):
+            #
         bit_vec = ['0'] * len(self._idx_vec_list)
 
         for number in self._tmp_doc:
@@ -312,13 +315,13 @@ class BitVectorizor():
 
 class FingerprintMappingClassifier(BaseEstimator, ClassifierMixin):
 
-    def __init__(self):
+    def __init__(self, iter=50):
         pass
 
-    def fit(self):
+    def fit(self, X, y):
         pass
 
-    def predict(self):
+    def predict(self, X):
         pass
 
 if __name__ == '__main__':
