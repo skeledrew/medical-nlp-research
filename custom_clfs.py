@@ -369,7 +369,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
         pred = None
 
         try:
-            pred = self._algos[algo](doc)
+            pred = self._algos.get(algo, 'simple')(doc)
 
         except Exception as e:
             print('Something broke:', repr(e))
@@ -377,7 +377,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
         return pred
 
     def _algo_simple_(self, doc):
-        last_diff = 0
+        last_diff = -1
         last_class = None
         #if DEBUG: pdb.set_trace()
 
