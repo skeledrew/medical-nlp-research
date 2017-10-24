@@ -328,7 +328,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
 
     def fit(self, X, y):
         '''Train model'''
-        if DEBUG: pdb.set_trace()
+        #if DEBUG: pdb.set_trace()
 
         for doc, lbl in zip(X, y):
             # sort docs by class
@@ -361,7 +361,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
 
         for doc in X:
             pred = self.run_algo(doc)
-            preds.append(pred)
+            preds.append(int(pred))
         return preds
 
     def run_algo(self, doc, algo=None):
@@ -379,7 +379,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
     def _algo_simple_(self, doc):
         last_diff = 0
         last_class = None
-        if DEBUG: pdb.set_trace()
+        #if DEBUG: pdb.set_trace()
 
         for bs in self._class_prints:
             curr_diff = self.count_set_bits(doc & bs)
