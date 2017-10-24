@@ -388,7 +388,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
             last_class = self._class_prints[bs]
         return last_class
 
-    def count_set_bits(val):
+    def count_set_bits(self, val):
         return bin(val).count('1')
 
 DEBUG = True
