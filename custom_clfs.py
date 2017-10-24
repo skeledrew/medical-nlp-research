@@ -374,7 +374,6 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
         except Exception as e:
             print('Something broke:', repr(e))
             pass
-        if type(pred) == type(None): pdb.set_trace()
         return pred
 
     def _algo_simple_(self, doc):
@@ -387,6 +386,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
             if not curr_diff > last_diff: continue
             last_diff = curr_diff
             last_class = self._class_prints[bs]
+        if type(last_class) == type(None): pdb.set_trace()
         return last_class
 
     def count_set_bits(self, val):
