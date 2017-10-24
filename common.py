@@ -918,7 +918,7 @@ def save_yaml(obj, f_name=None):
         fo.write(text)
     return True
 
-def confusion_matrix(data, pred_f, true_f, table=False):
+def confusion_matrix_(data, pred_f, true_f, table=False):
     '''Takes data as an iterable and 2 functions
        - pred_f returns a boolean prediction
        - act_f returns the boolean actual
