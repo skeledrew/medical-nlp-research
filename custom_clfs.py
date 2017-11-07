@@ -449,7 +449,7 @@ class BitKNNClassifier(BaseEstimator, ClassifierMixin):
                 scores[lbl].append(diff)
             scores[lbl].sort()
 
-        for idx in self._n_nei:
+        for idx in range(self._n_nei):
             # find class with most smallest diffs
             curr_max = None
             curr_score = None
