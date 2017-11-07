@@ -312,7 +312,7 @@ class BitVectorizor():
 
 class BitMappingClassifier(BaseEstimator, ClassifierMixin):
 
-    def __init__(self, algo='simple', iteration=50, rand_state=1, class_weight='balanced', sample_size=10, tolerance=15):
+    def __init__(self, algo='simple', iteration=50, rand_state=1, class_weight='balanced', sample_size=10, tolerance=15, stop_words=['']):
         self._algo = algo  # str
         self._iter = iteration  # int
         self._weight = class_weight  # str
@@ -321,10 +321,18 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
         self._tol = tolerance  # %age; use for black listing feats
         self._classes = {}
         self._algos = {}
+        self._stop_words = []
+        self._register_stops(stop_words)
         self._load_algos()
 
     def _load_algos(self):
         self._algos['simple'] = self._algo_simple_
+
+    def _register_stops(sws):
+        if not sws: return
+        if isinstance(sws, str) and exists(sws): sws = open(sws).read()
+        if isinstance(sws, str) and '[' in sws and ']' in sws: sws = json.loads(sws)
+        self._stop_words = sws
 
     def fit(self, X, y):
         '''Train model'''
@@ -391,6 +399,72 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
 
     def count_set_bits(self, val):
         return bin(val).count('1')
+
+class BitKNNClassifier(BaseEstimator, ClassifierMixin):
+
+    def __init__(self, n_neighbors, rand_state=None, samp_size=100, max_diff=None, min_same=None):
+        self._n_nei = n_neighbors
+        self._rand_state = rand_state
+        self._classes = {}
+        self._samp_size = samp_size
+        self._max_diff = max_diff
+        self._min_same = min_same
+
+    def fit(self, X, y):
+
+        for doc, lbl in zip(X, y):
+            lbl = str(lbl)
+            if not lbl in self._classes: self._classes[lbl] = []
+            self._classes[lbl].append(doc)
+        samps = {}
+        if isinstance(self._rand_state, int): random.seed(self._rand_state)
+
+        for lbl in self._classes:
+            samps[lbl] = random.sample(self._classes[lbl], self._samp_size)
+            self._samps = samps
+        return self
+
+    def predict(self, X):
+        preds = []
+
+        for doc in X:
+            pred = self.do_knn(doc)
+            preds.append(int(pred))
+        return preds
+
+    def do_knn(self, doc):
+        # bit diff KNN
+        scores = {}
+        totals = {}
+        max_nearest = None
+
+        for lbl in self._samps:
+            # get all diffs together
+            if not lbl in scores:
+                scores[lbl] = []
+                totals[lbl] = 0
+
+            for samp in self._samps[lbl]:
+                diff = self.count_set_bits(doc & samp)
+                scores[lbl].append(diff)
+            scores[lbl].sort()
+
+        for idx in self._n_nei:
+            # find class with most smallest diffs
+            curr_max = None
+            curr_score = None
+
+            for lbl in scores:
+                # find current smallest diff
+                if curr_max == None or scores[lbl][idx] < curr_score: curr_max = lbl; curr_score = scores[lbl][idx]
+            totals[curr_max] += 1
+        best_score = None
+        best_class = None
+
+        for lbl in totals:
+            # get the class with the most nearest
+            if not best_class or best_score < totals[lbl]: best_class = lbl; best_score = totals[lbl]
+        return best_class
 
 DEBUG = True
 
