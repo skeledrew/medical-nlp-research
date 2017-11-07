@@ -445,7 +445,7 @@ class BitKNNClassifier(BaseEstimator, ClassifierMixin):
                 totals[lbl] = 0
 
             for samp in self._samps[lbl]:
-                diff = self.count_set_bits(doc & samp)
+                diff = BitMappingClassifier.count_set_bits(doc & samp)
                 scores[lbl].append(diff)
             scores[lbl].sort()
 
