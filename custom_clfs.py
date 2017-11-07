@@ -402,7 +402,7 @@ class BitMappingClassifier(BaseEstimator, ClassifierMixin):
 
 class BitKNNClassifier(BaseEstimator, ClassifierMixin):
 
-    def __init__(self, n_neighbors, rand_state=None, samp_size=100, max_diff=None, min_same=None):
+    def __init__(self, n_neighbors=5, rand_state=None, samp_size=100, max_diff=None, min_same=None):
         self._n_nei = n_neighbors
         self._rand_state = rand_state
         self._classes = {}
