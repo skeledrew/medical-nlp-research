@@ -350,6 +350,7 @@ def test_eval(args, **rest_kw):
   results = loadJson(args[0]) if isinstance(args[0], str) else args[0]
   if isinstance(results, dict): results = [results]
   if not isinstance(results, list): raise ValueError('Invalid result format; must be a list.')
+  pdb.set_trace()
   if not isinstance(args[1], int) or not args[1].isdigit() or int(args[1]) < 0 or int(args[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
   result = results[int(args[1])]
   if not os.path.exists(args[2]): raise Exception('Invalid path for test set')
