@@ -404,7 +404,7 @@ def test_it(args, kw):
 
 def learning_curve(*args):
   # 17-11-09
-  lc_p = kwargs['lc_params']
+  lc_p = args[8]
   train_result = lc_p['assoc_data']
   test_path = get_test_path('{}{}'.format(dataDir, lc_p['train_set']))
   lcf_name = path_name_prefix('learn-curve__{}__'.format(lc_p['train_set']), test_path)
