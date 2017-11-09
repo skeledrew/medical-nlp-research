@@ -407,7 +407,7 @@ def learning_curve(*args):
   lc_p = args[8]
   train_result = lc_p['assoc_data']
   test_path = get_test_path('{}{}'.format(dataDir, lc_p['train_set']))
-  lcf_name = path_name_prefix('learn-curve_{}-{}__'.format(lc_p['least'], lc_p['step'], test_path) + '.csv'
+  lcf_name = path_name_prefix('learn-curve_{}-{}_'.format(lc_p['least'], lc_p['step']), test_path) + '.csv'
   curve_values = []
   whole_matrix = args[2].toarray()
   whole_bunch = args[3]
