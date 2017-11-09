@@ -47,6 +47,7 @@ def gSGenericRunner(
     preTask,
     nJobs,
     alpha,
+    lc_params,
 ):
   result = {}  # holds all the created objects, etc
   frame = currentframe()
@@ -77,14 +78,17 @@ def gSGenericRunner(
 
   try:
     p = r = f1 = std = 0
-    p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats) #if modSel == 'kf' else TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
+    lc_params['train_set'] = notesDirName
+    lc_params['mode'] = modSel
+    lc_params['assoc_data']
+    p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats) if modSel == 'kf' else learning_curve(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats, lc_params) #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
     result['f1'] = f1
     result['std'] = std
     result['mis'] = mis
-    result['error'] = None
     result['raw'] = raw
+    result['error'] = None
 
   except (KeyError, IndexError) as e:
     print(repr(e))
@@ -184,7 +188,7 @@ def MakeClf(clf_name, hyparams, clf_mods):
     raise Exception('Failed to create %s with params %s; %s' % (clf_name, params, repr(e)))
   return classifier
 
-def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_feats=True):
+def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_feats=True, **rest_kw):
   # KFold
   kf_hash = hash_sum('%d%s%s' % (numFolds, pp_hash, clf_hash))
   if kf_hash in memo and memo[kf_hash]: return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash]['f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash]['raw']
@@ -327,20 +331,21 @@ def main(args):
   ex_num = getExpNum(dataDir + 'tracking.json')
   rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)
   try:
-    saveJson(results, rf_name + '.json')
+    if save_progress: saveJson(results, rf_name + '.json')
   except:
     save_yaml(results, rf_name + '.yaml')
-  savePickle(memo, '%sexp%s_memo.pkl' % (dataDir, ex_num))
+  if save_progress: savePickle(memo, '%sexp%s_memo.pkl' % (dataDir, ex_num))
   if os.path.exists(curr_sess): os.remove(curr_sess)
   e_time = currentTime()
   fin_msg = 'Operation complete for experiment #%d. Started %s and ended %s.' % (ex_num, s_time, e_time)
   writeLog(fin_msg)
   slack_post(fin_msg, '@aphillips')
 
-def test_eval(args):
-  # takes results file, result index, test dir
-  if not os.path.exists(args[0]): raise Exception('Invalid result file: %s' % args[0])
-  results = loadJson(args[0])
+def test_eval(args, **rest_kw):
+  # takes results file/dict, result index, test dir
+  save_progress = False if rest_kw['lc_params']['mode'] in ['lc'] = True
+  if isinstance(args[0], str) and not os.path.exists(args[0]): raise Exception('Invalid result file: %s' % args[0])
+  results = loadJson(args[0]) if isinstance(args[0], str) else args[0]
   if isinstance(results, dict): results = [results]
   if not isinstance(results, list): raise ValueError('Invalid result format; must be a list.')
   if not args[1].isdigit() or int(args[1]) < 0 or int(args[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
@@ -377,22 +382,108 @@ def test_eval(args):
   if hasattr(clf_pipe, 'coef_'): [feats[idx].append(clf_pipe.coef_[0][idx]) for idx in range(len(feats))]
   misses = GetMisses(y_test, pred, test_bunch.filenames)
   misses = list(set(misses))
-  p =precision_score(y_test, pred, pos_label=1)
+  p = precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
   f1 = f1_score(y_test, pred, pos_label=1)
   mf_name = path_name_prefix('miscat-test_', args[0].replace('.json', '.txt'))
-  saveText('\n'.join(misses), mf_name)
+  if save_progress: saveText('\n'.join(misses), mf_name)
   ff_name = path_name_prefix('feats-test_', args[0])
-  saveText('\n'.join(', '.join(f) for f in feats), ff_name)
+  if save_progress: saveText('\n'.join(', '.join(f) for f in feats), ff_name)
   classifier = re.sub('\n *', ' ', str(clf_pipe.steps[-1][-1]))
   writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params), test_set, p, r, f1))
   rf_name = path_name_prefix('test-res_', args[0])
-  saveJson({'classifier': classifier, 'options': params, 'test_set': test_set, 'P': p, 'R': r, 'F1': f1}, rf_name)
-
+  result = {'classifier': classifier, 'options': params, 'test_set': test_set, 'P': p, 'R': r, 'F1': f1}
+  if save_progress: saveJson(result, rf_name)
+  return result
 
 def test_it(args, kw):
   print('Test ran fine...')
   return 'Success!'
+
+def learning_curve(*args, **kwargs):
+  # 17-11-09
+  lc_p = kwargs['lc_params']
+  train_result = lc_p['assoc_data']
+  test_path = get_test_path('{}{}'.format(dataDir, lc_p['train_set']))
+  lcf_name = path_name_prefix('learn-curve__{}__'.format(lc_p['train_set']), test_path)
+  curve_values = []
+  whole_matrix = args[2]
+  whole_bunch = args[3]
+  data_len = len(whole_bunch.target)
+  pdb.set_trace()
+  classes = {}
+
+  for idx, lbl in enumerate(whole_bunch.target):
+    # separate classes
+    if not lbl in classes: classes[lbl] = {'y': [], 'X': []}
+    classes[lbl]['X'].append(whole_matrix[idx])
+    classes[lbl]['y'].append(whole_bunch[idx])
+
+  for t_size in range(lc_p['least'], lc_p['most'], lc_p['step']):
+    # get F1 at each step
+    if t_size >= 100: break  # use everything
+    t_size = t_size / 100  # %age
+    samps = {}
+    sub_bunch = []
+    sub_matrix = []
+    random.seed(train_result['options']['randState'])
+
+    for lbl in classes:
+      # get portions
+      class_len = len(classes[lbl])
+      samp_idxs = random.sample(range(classes_len), int(classes_len * t_size)).sort()
+      if not lbl in samps: samps[lbl] = {}
+
+      for idx in samp_idxs:
+        sub_bunch.append(classes[lbl]['y'][idx])
+        sub_matrix.append(classes[lbl]['X'][idx])
+    args[2] = np.asarray(sub_matrix)
+    args[3] = np.asarray(sub_bunch)
+
+    try:
+      train_result = lc_p['assoc_data']
+      p, r, f1, std, mis, raw = CrossVal(*args, **kwargs)
+      train_result['precision'] = p
+      train_result['recall'] = r
+      train_result['f1'] = f1
+      train_result['std'] = std
+      train_result['mis'] = mis
+      train_result['raw'] = raw
+      train_result['error'] = None
+      test_result = test_eval(train_result, 0, test_path)
+      curve_values.append([t_size, test_result['F1']])
+
+    except Exception as e:
+      print('Something broke: {}. Skipping...'.format(repr(e)))
+      pass
+  #ex_num = getExpNum(dataDir + 'tracking.json')
+  saveText('\n'.join(','.join(v) for v in curve_values), lcf_name)
+  return train_result
+
+
+def get_test_path(train_path):
+  # 17-11-09
+  # TODO: include 'train' in naming scheme to facilitate test name discovery
+  if not os.path.exists(train_path): raise OSError('Train dataset "{}" does not exist'.format{train_path})
+  path_parts = os.path.split(train_path)
+  test_path = ''
+
+  if 'train' in path_parts[-1]:
+    path_parts[-1] = path_parts[-1].replace('train', 'test')
+    test_path = os.path.join(*path_parts)
+    if os.path.exists(test_path): return test_path
+  with_notes_pat = '\w+_notes_\w+'
+
+  if re.search(with_notes_pat, path_parts[-1]):
+    test_path = os.path.join(*path_parts[:-1], path_parts[-1].replace('_notes_', '_notes_'))
+    if os.path.exists(test_path): return test_path
+  no_notes_match = re.match('([a-z]+)_', path_parts[-1])
+
+  if no_notes_match:
+    frag = non_notes_match.group(1)
+    test_path = os.path.join(*path_parts[:-1], path_parts[-1].replace(frag, '{}test_'.format(frag), 1))
+    if os.path.exists(test_path): return test_path
+  raise OSError('Unable to find test set path from "{}"'.format(train_path))
 
 if __name__ == "__main__":
   try:
