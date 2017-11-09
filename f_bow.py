@@ -418,7 +418,7 @@ def learning_curve(*args):
 
   for idx, lbl in enumerate(whole_bunch.target):
     # separate classes
-    if not lbl in classes: classes[lbl] = {'y': [], 'X': []}
+    if not lbl in classes: classes[lbl] = {'y': [], 'X': [], 'filenames': []}
     classes[lbl]['X'].append(whole_matrix[idx])
     classes[lbl]['y'].append(whole_bunch.target[idx])
     classes[lbl]['filenames'].append(whole_bunch.filenames[idx])
