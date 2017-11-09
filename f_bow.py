@@ -445,7 +445,7 @@ def learning_curve(*args):
 
     try:
       train_result = lc_p['assoc_data']
-      p, r, f1, std, mis, raw = CrossVal(*args, **kwargs)
+      p, r, f1, std, mis, raw = CrossVal(*args)
       train_result['precision'] = p
       train_result['recall'] = r
       train_result['f1'] = f1
