@@ -413,7 +413,6 @@ def learning_curve(*args):
   whole_matrix = args[2].toarray()
   whole_bunch = args[3]
   data_len = len(whole_bunch.target)
-  pdb.set_trace()
   classes = {}
 
   for idx, lbl in enumerate(whole_bunch.target):
@@ -462,6 +461,7 @@ def learning_curve(*args):
       train_result['mis'] = mis
       train_result['raw'] = raw
       train_result['error'] = None
+      pdb.set_trace()
       test_result = test_eval([train_result, 0, test_path])
       curve_values.append([t_size, test_result['F1']])
 
