@@ -443,6 +443,7 @@ def learning_curve(*args):
     args[2] = np.asarray(sub_matrix)
     grp = Group()
     setattr(grp, 'target', np.asarray(sub_bunch))
+    setattr(grp, 'filenames', whole_bunch.filename)
     args[3] = grp
 
     try:
