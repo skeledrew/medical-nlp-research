@@ -481,11 +481,11 @@ def get_test_path(train_path):
     path_parts[-1] = path_parts[-1].replace('_notes_', '_notes_test_', 1)
     test_path = os.path.join(*path_parts)
     if os.path.exists(test_path): return test_path
-  no_notes_match = re.match('([a-z]+)_', path_parts[-1])
+  no_notes_match = re.match('([a-z]+_)', path_parts[-1])
 
   if no_notes_match:
     # verbose notes removed
-    frag = non_notes_match.group(1)
+    frag = no_notes_match.group(1)
     path_parts[-1] = path_parts[-1].replace(frag, '{}test_'.format(frag), 1)
     test_path = os.path.join(*path_parts)
     if os.path.exists(test_path): return test_path
