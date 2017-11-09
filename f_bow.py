@@ -407,9 +407,9 @@ def learning_curve(*args):
   lc_p = args[8]
   train_result = lc_p['assoc_data']
   test_path = get_test_path('{}{}'.format(dataDir, lc_p['train_set']))
-  lcf_name = path_name_prefix('learn-curve_{}-{}__{}__'.format(lc_p['least'], lc_p['step'], lc_p['train_set']), test_path) + '.csv'
+  lcf_name = path_name_prefix('learn-curve_{}-{}__'.format(lc_p['least'], lc_p['step'], test_path) + '.csv'
   curve_values = []
-  whole_matrix = args[2].asarray()
+  whole_matrix = args[2].toarray()
   whole_bunch = args[3]
   data_len = len(whole_bunch.target)
   pdb.set_trace()
@@ -419,7 +419,7 @@ def learning_curve(*args):
     # separate classes
     if not lbl in classes: classes[lbl] = {'y': [], 'X': []}
     classes[lbl]['X'].append(whole_matrix[idx])
-    classes[lbl]['y'].append(whole_bunch[idx])
+    classes[lbl]['y'].append(whole_bunch.target[idx])
 
   for t_size in range(lc_p['least'], lc_p['most'], lc_p['step']):
     # get F1 at each step
