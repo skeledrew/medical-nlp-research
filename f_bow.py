@@ -461,8 +461,8 @@ def learning_curve(*args):
       train_result['mis'] = mis
       train_result['raw'] = raw
       train_result['error'] = None
-      pdb.set_trace()
       test_result = test_eval([train_result, 0, test_path])
+      pdb.set_trace()
       curve_values.append([t_size, test_result['F1']])
 
     except Exception as e:
