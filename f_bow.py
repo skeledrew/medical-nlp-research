@@ -432,7 +432,7 @@ def learning_curve(*args):
 
     for lbl in classes:
       # get portions
-      class_len = len(classes[lbl])
+      classes_len = len(classes[lbl])
       samp_idxs = random.sample(range(classes_len), int(classes_len * t_size)).sort()
       if not lbl in samps: samps[lbl] = {}
 
