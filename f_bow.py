@@ -402,7 +402,7 @@ def test_it(args, kw):
   print('Test ran fine...')
   return 'Success!'
 
-def learning_curve(*args, **kwargs):
+def learning_curve(*args):
   # 17-11-09
   lc_p = kwargs['lc_params']
   train_result = lc_p['assoc_data']
