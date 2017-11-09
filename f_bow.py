@@ -407,7 +407,7 @@ def learning_curve(*args):
   lc_p = args[8]
   train_result = lc_p['assoc_data']
   test_path = get_test_path('{}{}'.format(dataDir, lc_p['train_set']))
-  lcf_name = path_name_prefix('learn-curve__{}__'.format(lc_p['train_set']), test_path)
+  lcf_name = path_name_prefix('learn-curve__{}__'.format(lc_p['train_set']), test_path) + '.csv'
   curve_values = []
   whole_matrix = args[2]
   whole_bunch = args[3]
@@ -458,7 +458,6 @@ def learning_curve(*args):
     except Exception as e:
       print('Something broke: {}. Skipping...'.format(repr(e)))
       pass
-  #ex_num = getExpNum(dataDir + 'tracking.json')
   saveText('\n'.join(','.join(v) for v in curve_values), lcf_name)
   return train_result
 
@@ -467,7 +466,7 @@ def get_test_path(train_path):
   # 17-11-09
   # TODO: include 'train' in naming scheme to facilitate test name discovery
   if not os.path.exists(train_path): raise OSError('Train dataset "{}" does not exist'.format(train_path))
-  path_parts = os.path.split(train_path)
+  path_parts = list(os.path.split(train_path))
   test_path = ''
 
   if 'train' in path_parts[-1]:
