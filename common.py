@@ -386,6 +386,8 @@ class CSVWrapper():
             pass
         return True
 
+class Group():
+    pass
 
 ### For pickling operations
 
