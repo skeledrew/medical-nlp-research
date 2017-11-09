@@ -462,7 +462,7 @@ def learning_curve(*args):
       train_result['mis'] = mis
       train_result['raw'] = raw
       train_result['error'] = None
-      test_result = test_eval(train_result, 0, test_path)
+      test_result = test_eval([train_result, 0, test_path])
       curve_values.append([t_size, test_result['F1']])
 
     except Exception as e:
