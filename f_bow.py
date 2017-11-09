@@ -407,9 +407,9 @@ def learning_curve(*args):
   lc_p = args[8]
   train_result = lc_p['assoc_data']
   test_path = get_test_path('{}{}'.format(dataDir, lc_p['train_set']))
-  lcf_name = path_name_prefix('learn-curve__{}__'.format(lc_p['train_set']), test_path) + '.csv'
+  lcf_name = path_name_prefix('learn-curve_{}-{}__{}__'.format(ls_p['least'], lc_p['step'], lc_p['train_set']), test_path) + '.csv'
   curve_values = []
-  whole_matrix = args[2]
+  whole_matrix = args[2].asarray()
   whole_bunch = args[3]
   data_len = len(whole_bunch.target)
   pdb.set_trace()
@@ -469,7 +469,6 @@ def get_test_path(train_path):
   path_parts = list(os.path.split(train_path))
   test_path = ''
   old_name = path_parts[-1]
-  pdb.set_trace()
 
   if 'train' in path_parts[-1]:
     # handle future name format
