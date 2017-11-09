@@ -80,7 +80,7 @@ def gSGenericRunner(
     p = r = f1 = std = 0
     lc_params['train_set'] = notesDirName
     lc_params['mode'] = modSel
-    lc_params['assoc_data']
+    lc_params['assoc_data'] = result
     p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats) if modSel == 'kf' else learning_curve(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats, lc_params) #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
