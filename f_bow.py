@@ -345,7 +345,7 @@ def main(args):
 
 def test_eval(args, **rest_kw):
   # takes results file/dict, result index, test dir
-  save_progress = False if rest_kw['lc_params']['mode'] in ['lc'] else True
+  save_progress = False if args[0]['options']['modSel'] in ['lc'] else True
   if isinstance(args[0], str) and not os.path.exists(args[0]): raise Exception('Invalid result file: %s' % args[0])
   results = loadJson(args[0]) if isinstance(args[0], str) else args[0]
   if isinstance(results, dict): results = [results]
