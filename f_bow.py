@@ -449,6 +449,7 @@ def learning_curve(*args):
         sub_matrix.append(classes[lbl]['X'][idx])
     args[2] = np.asarray(sub_matrix)
     sub_bunch.target = np.asarray(sub_bunch.target)
+    sub_bunch.filenames = np.asarray(sub_bunch.filenames)
     args[3] = sub_bunch
 
     try:
