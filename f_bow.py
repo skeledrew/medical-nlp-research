@@ -468,12 +468,14 @@ def get_test_path(train_path):
   if not os.path.exists(train_path): raise OSError('Train dataset "{}" does not exist'.format(train_path))
   path_parts = list(os.path.split(train_path))
   test_path = ''
+  old_name = path_parts[-1]
 
   if 'train' in path_parts[-1]:
     # handle future name format
     path_parts[-1] = path_parts[-1].replace('train', 'test', 1)
     test_path = os.path.join(*path_parts)
     if os.path.exists(test_path): return test_path
+    path_parts[-1] = old_name
   with_notes_pat = '\w+_notes_\w+'
 
   if re.search(with_notes_pat, path_parts[-1]):
@@ -481,6 +483,8 @@ def get_test_path(train_path):
     path_parts[-1] = path_parts[-1].replace('_notes_', '_notes_test_', 1)
     test_path = os.path.join(*path_parts)
     if os.path.exists(test_path): return test_path
+    test_path = ''
+    path_parts[-1] = old_name
   no_notes_match = re.match('([a-z]+_)', path_parts[-1])
 
   if no_notes_match:
