@@ -405,6 +405,7 @@ def test_it(args, kw):
 def learning_curve(*args):
   # 17-11-09
   lc_p = args[8]
+  args = list(args)
   train_result = lc_p['assoc_data']
   test_path = get_test_path('{}{}'.format(dataDir, lc_p['train_set']))
   lcf_name = path_name_prefix('learn-curve_{}-{}_'.format(lc_p['least'], lc_p['step']), test_path) + '.csv'
