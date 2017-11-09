@@ -81,7 +81,7 @@ def gSGenericRunner(
     lc_params['train_set'] = notesDirName
     lc_params['mode'] = modSel
     lc_params['assoc_data'] = result
-    p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats, **rest_kw) if modSel == 'kf' else learning_curve(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats, lc_params) #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
+    p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats) if modSel == 'kf' else learning_curve(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats, lc_params) #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
     result['f1'] = f1
@@ -445,7 +445,7 @@ def learning_curve(*args):
 
     try:
       train_result = lc_p['assoc_data']
-      p, r, f1, std, mis, raw = CrossVal(*args)
+      p, r, f1, std, mis, raw = CrossVal(*args[:-1])
       train_result['precision'] = p
       train_result['recall'] = r
       train_result['f1'] = f1
