@@ -421,13 +421,19 @@ def learning_curve(*args):
     if not lbl in classes: classes[lbl] = {'y': [], 'X': []}
     classes[lbl]['X'].append(whole_matrix[idx])
     classes[lbl]['y'].append(whole_bunch.target[idx])
+    classes[lbl]['filenames'].append(whole_bunch.filenames[idx])
 
   for t_size in range(lc_p['least'], lc_p['most'], lc_p['step']):
     # get F1 at each step
     if t_size >= 100: break  # use everything
     t_size = t_size / 100  # %age
     samps = {}
-    sub_bunch = []
+    sub_bunch = Group()
+    setattr(sub_bunch, 'target_names', whole_bunch.target_names)
+    setattr(sub_bunch, 'DESCR', whole_bunch.DESCR)
+    setattr(sub_bunch, 'target', [])
+    setattr(sub_bunch, 'filenames', [])
+    setattr(sub_bunch, 'data', None)
     sub_matrix = []
     random.seed(train_result['options']['randState'])
 
@@ -438,13 +444,12 @@ def learning_curve(*args):
       if not lbl in samps: samps[lbl] = {}
 
       for idx in samp_idxs:
-        sub_bunch.append(classes[lbl]['y'][idx])
+        sub_bunch.target.append(classes[lbl]['y'][idx])
+        sub_bunch.filenames.append(classes[lbl]['filenames'][idx])
         sub_matrix.append(classes[lbl]['X'][idx])
     args[2] = np.asarray(sub_matrix)
-    grp = Group()
-    setattr(grp, 'target', np.asarray(sub_bunch))
-    setattr(grp, 'filenames', whole_bunch.filename)
-    args[3] = grp
+    sub_bunch.target = np.asarray(sub_bunch.target)
+    args[3] = sub_bunch
 
     try:
       train_result = lc_p['assoc_data']
