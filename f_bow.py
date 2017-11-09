@@ -441,7 +441,9 @@ def learning_curve(*args):
         sub_bunch.append(classes[lbl]['y'][idx])
         sub_matrix.append(classes[lbl]['X'][idx])
     args[2] = np.asarray(sub_matrix)
-    args[3] = np.asarray(sub_bunch)
+    grp = Group()
+    setattr(grp, 'target', np.asarray(sub_bunch))
+    args[3] = grp
 
     try:
       train_result = lc_p['assoc_data']
