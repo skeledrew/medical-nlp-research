@@ -469,6 +469,7 @@ def get_test_path(train_path):
   path_parts = list(os.path.split(train_path))
   test_path = ''
   old_name = path_parts[-1]
+  pdb.set_trace()
 
   if 'train' in path_parts[-1]:
     # handle future name format
@@ -476,7 +477,16 @@ def get_test_path(train_path):
     test_path = os.path.join(*path_parts)
     if os.path.exists(test_path): return test_path
     path_parts[-1] = old_name
+  no_notes_match = re.match('([a-z]+_)', path_parts[-1])
   with_notes_pat = '\w+_notes_\w+'
+
+  if no_notes_match:
+    # verbose notes removed
+    frag = no_notes_match.group(1)
+    path_parts[-1] = path_parts[-1].replace(frag, '{}test_'.format(frag), 1)
+    test_path = os.path.join(*path_parts)
+    if os.path.exists(test_path): return test_path
+    path_parts[-1] = old_name
 
   if re.search(with_notes_pat, path_parts[-1]):
     # contains verbose notes
@@ -485,14 +495,6 @@ def get_test_path(train_path):
     if os.path.exists(test_path): return test_path
     test_path = ''
     path_parts[-1] = old_name
-  no_notes_match = re.match('([a-z]+_)', path_parts[-1])
-
-  if no_notes_match:
-    # verbose notes removed
-    frag = no_notes_match.group(1)
-    path_parts[-1] = path_parts[-1].replace(frag, '{}test_'.format(frag), 1)
-    test_path = os.path.join(*path_parts)
-    if os.path.exists(test_path): return test_path
   raise OSError('Unable to find test set path from "{}"'.format(train_path))
 
 if __name__ == "__main__":
