@@ -23,7 +23,7 @@ numCalls = 300  # number of calls; TODO: facilitate passing call num to called f
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
 config = load_yaml('config.yaml')
-gSParams = config['gSParams']
+gSParams = config['gSParams']  # TODO: validate contents
 custom_pp = ['text', 'bits']  # custom preprocessors
 
 def gSGenericRunner(
@@ -286,9 +286,8 @@ def main(args):
     writeLog('Continuing session saved at %s from index %d' % (curr_sess, resume))
 
   else:
-    pdb.set_trace()
     results = gridSearchAOR(gSParams, doEval=False, funcList=[gSGenericRunner])
-  if not results: raise ValueError('Grid failed')
+  if not results: raise ValueError('Grid failed. Params are: {}'.format(str(gSParams)))
   writeLog('%s: Processing method calls %s to %s' % (currentTime(), results[resume], results[-1]))
   #pdb.set_trace()
 
