@@ -271,6 +271,7 @@ def main(args):
   crunch_client = CrunchClient(procs=1.5)
   crunch_client.disabled = True
   setattr(crunch_client, 'gSGenericRunner', gSGenericRunner)
+  save_progress = True if not '--learn-curve' in args else False
 
   for server in crunch_servers:
     res = crunch_client.add_server(server['host'], server['port'], server['name'], server['user'])
@@ -285,7 +286,9 @@ def main(args):
     writeLog('Continuing session saved at %s from index %d' % (curr_sess, resume))
 
   else:
+    pdb.set_trace()
     results = gridSearchAOR(gSParams, doEval=False, funcList=[gSGenericRunner])
+  if not results: raise ValueError('Grid failed')
   writeLog('%s: Processing method calls %s to %s' % (currentTime(), results[resume], results[-1]))
   #pdb.set_trace()
 
@@ -343,7 +346,7 @@ def main(args):
 
 def test_eval(args, **rest_kw):
   # takes results file/dict, result index, test dir
-  save_progress = False if rest_kw['lc_params']['mode'] in ['lc'] = True
+  save_progress = False if rest_kw['lc_params']['mode'] in ['lc'] else True
   if isinstance(args[0], str) and not os.path.exists(args[0]): raise Exception('Invalid result file: %s' % args[0])
   results = loadJson(args[0]) if isinstance(args[0], str) else args[0]
   if isinstance(results, dict): results = [results]
@@ -464,24 +467,29 @@ def learning_curve(*args, **kwargs):
 def get_test_path(train_path):
   # 17-11-09
   # TODO: include 'train' in naming scheme to facilitate test name discovery
-  if not os.path.exists(train_path): raise OSError('Train dataset "{}" does not exist'.format{train_path})
+  if not os.path.exists(train_path): raise OSError('Train dataset "{}" does not exist'.format(train_path))
   path_parts = os.path.split(train_path)
   test_path = ''
 
   if 'train' in path_parts[-1]:
-    path_parts[-1] = path_parts[-1].replace('train', 'test')
+    # handle future name format
+    path_parts[-1] = path_parts[-1].replace('train', 'test', 1)
     test_path = os.path.join(*path_parts)
     if os.path.exists(test_path): return test_path
   with_notes_pat = '\w+_notes_\w+'
 
   if re.search(with_notes_pat, path_parts[-1]):
-    test_path = os.path.join(*path_parts[:-1], path_parts[-1].replace('_notes_', '_notes_'))
+    # contains verbose notes
+    path_parts[-1] = path_parts[-1].replace('_notes_', '_notes_test_', 1)
+    test_path = os.path.join(*path_parts)
     if os.path.exists(test_path): return test_path
   no_notes_match = re.match('([a-z]+)_', path_parts[-1])
 
   if no_notes_match:
+    # verbose notes removed
     frag = non_notes_match.group(1)
-    test_path = os.path.join(*path_parts[:-1], path_parts[-1].replace(frag, '{}test_'.format(frag), 1))
+    path_parts[-1] = path_parts[-1].replace(frag, '{}test_'.format(frag), 1)
+    test_path = os.path.join(*path_parts)
     if os.path.exists(test_path): return test_path
   raise OSError('Unable to find test set path from "{}"'.format(train_path))
 
