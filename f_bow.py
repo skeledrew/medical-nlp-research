@@ -480,7 +480,7 @@ def get_test_path(train_path):
   no_notes_match = re.match('([a-z]+_)', path_parts[-1])
   with_notes_pat = '\w+_notes_\w+'
 
-  if no_notes_match:
+  if no_notes_match and not re.search(with_notes_pat, path_parts[-1]):
     # verbose notes removed
     frag = no_notes_match.group(1)
     path_parts[-1] = path_parts[-1].replace(frag, '{}test_'.format(frag), 1)
