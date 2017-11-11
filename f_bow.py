@@ -359,7 +359,7 @@ def test_eval(args, **rest_kw):
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
   hyparams = str_to_dict(re.split('\( *', result['classifier'])[-1][:-1], ', *', '=', True)  # get from clf string
-  hyparams = [hyparams[hp][1:-1] for hp in hyparams]  # zap extra quotes
+  hyparams = [hyparams[hp][1:-1] if '"' in hyparams[hp] else float(hyparams[hp]) if '.' in hyparams[hp] else int(hyparams[hp]) if hyparams[hp].isdigit() else True if hyparams[hp] == 'True' else False if hyparams[hp] == 'False' else None if hyparams[hp] == 'None' else float(hyparams[hp]) if hyparams[hp][0] in ['-', '+'] and '.' in hyparams[hp] else int(hyparams[hp]) if hyparams[hp][0] in ['-', '+'] and hyparams[hp][1:].isdigit() else hyparams[hp] for hp in hyparams]  # zap extra quotes
   hyparams = {}
 
   for ccp in params:
