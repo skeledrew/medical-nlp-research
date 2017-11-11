@@ -355,7 +355,7 @@ def test_eval(args, **rest_kw):
   if not args[1].isdigit() or int(args[1]) < 0 or int(args[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
   result = results[int(args[1])]
   if not os.path.exists(args[2]): raise Exception('Invalid path for test set')
-  writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
+  #writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
   hyparams = str_to_dict(re.split('\( *', result['classifier'])[-1][:-1], ', *', '=', True)  # get from clf string
