@@ -359,7 +359,7 @@ def test_eval(args, **rest_kw):
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
   hyparams = str_to_dict(re.split('\( *', result['classifier'])[-1][:-1], ', *', '=', True)  # get from clf string
-  hyparams = {key, val[1:-1] if val[0] in ['"', "'"] else key, float(val) if '.' in val else key, int(val) if val.isdigit() else key, True if val == 'True' else key, False if val == 'False' else key, None if val == 'None' else key, float(val) if val[0] in ['-', '+'] and '.' in val else key, int(val) if val[0] in ['-', '+'] and val[1:].isdigit() else key, val for key, val in zip(hyparams.keys(), hyparams.values())}  # zap extra quotes & convert non-strings
+  hyparams = {key: (val[1:-1] if val[0] in ['"', "'"] else float(val) if '.' in val else int(val) if val.isdigit() else True if val == 'True' else False if val == 'False' else None if val == 'None' else float(val) if val[0] in ['-', '+'] and '.' in val else int(val) if val[0] in ['-', '+'] and val[1:].isdigit() else val) for key, val in zip(hyparams.keys(), hyparams.values())}  # zap extra quotes & convert non-strings
   hyparams = {}
 
   for ccp in params:
@@ -389,13 +389,13 @@ def test_eval(args, **rest_kw):
   p = precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
   f1 = f1_score(y_test, pred, pos_label=1)
-  mf_name = path_name_prefix('miscat-test_', args[0].replace('.json', '.txt'))
+  mf_name = path_name_prefix('miscat-test_', args[0].replace('.json', '.txt')) if save_progress else None
   if save_progress: saveText('\n'.join(misses), mf_name)
-  ff_name = path_name_prefix('feats-test_', args[0])
+  ff_name = path_name_prefix('feats-test_', args[0]) if save_progress else None
   if save_progress: saveText('\n'.join(', '.join(f) for f in feats), ff_name)
   classifier = re.sub('\n *', ' ', str(clf_pipe.steps[-1][-1]))
   writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params), test_set, p, r, f1))
-  rf_name = path_name_prefix('test-res_', args[0])
+  rf_name = path_name_prefix('test-res_', args[0]) if save_progress else None
   result = {'classifier': classifier, 'options': params, 'test_set': test_set, 'P': p, 'R': r, 'F1': f1}
   if save_progress: saveJson(result, rf_name)
   return result
