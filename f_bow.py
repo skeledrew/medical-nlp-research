@@ -351,7 +351,8 @@ def test_eval(args, **rest_kw):
   if isinstance(results, dict): results = [results]
   if not isinstance(results, list): raise ValueError('Invalid result format; must be a list.')
   pdb.set_trace()
-  if isinstance(args[1], int) or not args[1].isdigit() or int(args[1]) < 0 or int(args[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
+  args[1] = str(args[1])
+  if not args[1].isdigit() or int(args[1]) < 0 or int(args[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
   result = results[int(args[1])]
   if not os.path.exists(args[2]): raise Exception('Invalid path for test set')
   writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
