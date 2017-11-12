@@ -75,6 +75,7 @@ def gSGenericRunner(
   clf_hash = hash_sum(result['classifier'])
   if not clf_hash in memo: memo[clf_hash] = classifier
   sk_feats = False if preTask in custom_pp else True
+  pdb.set_trace()
 
   try:
     p = r = f1 = std = 0
