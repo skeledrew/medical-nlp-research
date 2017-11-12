@@ -112,9 +112,9 @@ def gSGenericRunner(
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
   # 17-07-07 preprocessing with memoization for better speed and efficient memory use
-  if param_hash in memo and not memo[param_hash]['matrix'] == None: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features']
+  if param_hash in memo and not memo[param_hash]['matrix'] == None: return memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features'], memo[param_hash]['pipe']
   memo[param_hash] = {}
-  memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features'] = None, None, []
+  memo[param_hash]['matrix'], memo[param_hash]['bunch'], memo[param_hash]['features'], memo[param_hash]['pipe'] = None, None, [], []
   notesRoot = dataDir + notesDirName
   b_hash = hash_sum(notesRoot)
   bunch = memo[b_hash] if b_hash in memo else load_files(notesRoot)
@@ -126,12 +126,14 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   if pre_task == 'text':
     text_matrix = np.array(text_matrix)
     memo[param_hash]['matrix'] = text_matrix
+    memo[param_hash]['pipe'] = pipe
     return text_matrix, bunch, [], pipe  # no features
 
   if pre_task == 'bits':
     bit_vec = custom_clfs.BitVectorizor(ngram_range=ngramRange)
     bits_matrix = np.array(bit_vec.fit_transform(text_matrix))
     memo[param_hash]['matrix'] = bits_matrix
+    memo[param_hash]['pipe'] = pipe
     return bits_matrix, bunch, bit_vec._ent_list, pipe
 
   # raw occurences
@@ -155,6 +157,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
 
   if pre_task == 'count':
     memo[param_hash]['matrix'] = count_matrix
+    memo[param_hash]['pipe'] = pipe
     return count_matrix, bunch, features, pipe
 
   # tf-idf
@@ -162,6 +165,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   pipe.append(('tfidf', tf))
   tfidf_matrix = tf.fit_transform(count_matrix)
   memo[param_hash]['matrix'] = tfidf_matrix
+  memo[param_hash]['pipe'] = pipe
   return tfidf_matrix, bunch, features, pipe
 
 def MakeClf(clf_name, hyparams, clf_mods):
