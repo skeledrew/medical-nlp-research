@@ -355,7 +355,6 @@ def test_eval(args, **rest_kw):
   if isinstance(results, dict): results = [results]
   if not isinstance(results, list): raise ValueError('Invalid result format; must be a list.')
   args[1] = str(args[1])
-  pdb.set_trace()
   if not args[1].isdigit() or int(args[1]) < 0 or int(args[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
   result = results[int(args[1])]
   if not os.path.exists(args[2]): raise Exception('Invalid path for test set')
@@ -374,7 +373,7 @@ def test_eval(args, **rest_kw):
   classifier = MakeClf(params['clfName'], hyparams, clfMods)
   _, train_bunch, feats, pipe = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
   _, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
-  pipe.append(('clf', classifier))
+  if not 'clf' in pipe[-1]: pipe.append(('clf', classifier))
   clf_pipe = Pipeline(pipe)
 
   for idx in range(len(feats)):
