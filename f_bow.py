@@ -384,7 +384,8 @@ def test_eval(args, **rest_kw):
 
   for idx in range(len(feats)):
     # make features holder into a list of lists
-    if isinstance(feats[idx], list) and len(feats[idx]) > 1: writeLog('Detected a double feature: "%s" and "%s"' % (feats[idx][0], feats[idx][1]))
+    if isinstance(feats[idx], list) and not len(feats[idx]) == 2: continue
+    #writeLog('Detected a double feature: "%s" and "%s"' % (feats[idx][0], feats[idx][1]))
     feats[idx] = [feats[idx][0] + feats[idx][1]]
   x_train = train_bunch.data
   y_train = train_bunch.target
