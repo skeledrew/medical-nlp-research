@@ -224,7 +224,10 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     rs.append(recall_score(y_test, pred, pos_label=1))
     f1s.append(f1_score(y_test, pred, pos_label=1))
     raw = confusion_matrix(y_test, pred)
-    raw = {'tn': int(raw[0:1][0:1] or 0), 'fp': int(raw[0:1][1:2] or 0), 'fn': int(raw[1:2][0:1] or 0), 'tp': int(raw[1:2][1:2] or 0)}
+    raw = dict(enumerate(raw))  # harden against missing values
+    raw[0] = dict(enumerate(raw.get(0, [0, 0])))
+    raw[1] = dict(enumerate(raw.get(1, [0, 0])))
+    raw = {'tn': int(raw[0][0]), 'fp': int(raw[0][1]), 'fn': int(raw[1][0]), 'tp': int(raw[1][1])}
     raw_results.append(raw)
   misses = list(set(misses))
   misses.sort()
