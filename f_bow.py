@@ -473,6 +473,7 @@ def learning_curve(*args):
       curve_values.append([t_size, test_result['F1']])
 
     except Exception as e:
+      if 'BdbQuit' in repr(e): raise e
       print('Something broke: {}. Skipping...'.format(repr(e)))
       pass
   pdb.set_trace()
