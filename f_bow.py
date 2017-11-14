@@ -480,7 +480,6 @@ def learning_curve(*args):
       if 'BdbQuit' in repr(e): raise e
       print('Something broke: {}. Skipping...'.format(repr(e)))
       pass
-  pdb.set_trace()
   saveText('\n'.join(','.join(str(e) for e in v) for v in curve_values), lcf_name)
   return train_result
 
