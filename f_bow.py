@@ -436,7 +436,7 @@ def learning_curve(*args):
 
   for t_size in range(lc_p['least'], lc_p['most'], lc_p['step']):
     # get F1 at each step
-    if t_size >= 100: break  # use everything
+    if t_size > 100: break  # use everything
     t_size = t_size / 100  # %age
     samps = {}
     sub_bunch = Group()
@@ -480,7 +480,8 @@ def learning_curve(*args):
       if 'BdbQuit' in repr(e): raise e
       print('Something broke: {}. Skipping...'.format(repr(e)))
       pass
-  saveText('\n'.join(','.join(v) for v in curve_values), lcf_name)
+  pdb.set_trace()
+  saveText('\n'.join(','.join(str(e) for e in v) for v in curve_values), lcf_name)
   return train_result
 
 def get_test_path(train_path):
