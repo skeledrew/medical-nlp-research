@@ -378,12 +378,13 @@ def test_eval(args, **rest_kw):
   classifier = MakeClf(params['clfName'], hyparams, clfMods)
   _, train_bunch, feats, pipe = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
   _, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
-  if not 'clf' in pipe[-1]: pipe.append(('clf', classifier))
+  if 'clf' in pipe[-1]: pipe.pop(-1)  # remove old classifier
+  pipe.append(('clf', classifier))
   clf_pipe = Pipeline(pipe)
 
   for idx in range(len(feats)):
     # make features holder into a list of lists
-    if feats[idx][0] and feats[idx][1]: writeLog('Detected a double feature: "%s" and "%s"' % (feats[idx][0], feats[idx][1]))
+    if isinstance(feats[idx], list) and len(feats[idx]) > 1: writeLog('Detected a double feature: "%s" and "%s"' % (feats[idx][0], feats[idx][1]))
     feats[idx] = [feats[idx][0] + feats[idx][1]]
   x_train = train_bunch.data
   y_train = train_bunch.target
@@ -402,7 +403,7 @@ def test_eval(args, **rest_kw):
   ff_name = path_name_prefix('feats-test_', args[0]) if save_progress else None
   if save_progress: saveText('\n'.join(', '.join(f) for f in feats), ff_name)
   classifier = re.sub('\n *', ' ', str(clf_pipe.steps[-1][-1]))
-  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params), test_set, p, r, f1))
+  writeLog('%s: Classifier %s \nwith options %s on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params)[:50], test_set, p, r, f1))
   rf_name = path_name_prefix('test-res_', args[0]) if save_progress else None
   result = {'classifier': classifier, 'options': params, 'test_set': test_set, 'P': p, 'R': r, 'F1': f1}
   if save_progress: saveJson(result, rf_name)
@@ -482,7 +483,6 @@ def learning_curve(*args):
   pdb.set_trace()
   saveText('\n'.join(','.join(v) for v in curve_values), lcf_name)
   return train_result
-
 
 def get_test_path(train_path):
   # 17-11-09
