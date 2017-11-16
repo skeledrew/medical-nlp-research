@@ -284,7 +284,7 @@ def main(args):
   if '--learn-curve' in args:
     # set stage
     save_progress = False
-    if not 'lc' in gSParams[9]: gSParams[9].append('lc')
+    if not 'lc' in gSParams[9]: gSParams[9] = ['lc']
 
   for server in crunch_servers:
     res = crunch_client.add_server(server['host'], server['port'], server['name'], server['user'])
