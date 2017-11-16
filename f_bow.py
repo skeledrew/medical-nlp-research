@@ -67,7 +67,7 @@ def gSGenericRunner(
     'learning_rate': learnRate,
     'kernel': kernel,
     'n_jobs': nJobs,
-    'random_state': 1,  # make deterministic
+    'random_state': randState,  # make deterministic
     'alpha': alpha,
   }
   classifier = MakeClf(clfName, hyParams, clfMods)
@@ -279,7 +279,12 @@ def main(args):
   crunch_client = CrunchClient(procs=1.5)
   crunch_client.disabled = True
   setattr(crunch_client, 'gSGenericRunner', gSGenericRunner)
-  save_progress = True if not '--learn-curve' in args else False
+  save_progress = True
+
+  if '--learn-curve' in args:
+    # set stage
+    save_progress = False
+    if not 'lc' in gSParams[9]: gSParams.append('lc')
 
   for server in crunch_servers:
     res = crunch_client.add_server(server['host'], server['port'], server['name'], server['user'])
