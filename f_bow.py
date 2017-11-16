@@ -11,6 +11,7 @@ from sklearn.metrics import f1_score
 from sklearn import svm, naive_bayes, linear_model, neighbors, ensemble, dummy
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix  # 17-09-25
+from sklearn.metrics import accuracy_score, roc_curve  # 17-11-16
 
 from common import *
 import custom_clfs
@@ -82,13 +83,14 @@ def gSGenericRunner(
     lc_params['train_set'] = notesDirName
     lc_params['mode'] = modSel
     lc_params['assoc_data'] = result
-    p, r, f1, std, mis, raw = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats) if modSel == 'kf' else learning_curve(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats, lc_params) #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
+    p, r, f1, std, mis, raw, others = CrossVal(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats) if modSel == 'kf' else learning_curve(numFolds, classifier, matrix, bunch, preproc_hash, clf_hash, result['features'], sk_feats, lc_params) #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
     result['precision'] = p
     result['recall'] = r
     result['f1'] = f1
     result['std'] = std
     result['mis'] = mis
     result['raw'] = raw
+    result['others'] = others
     result['error'] = None
 
   except (KeyError, IndexError) as e:
@@ -108,7 +110,7 @@ def gSGenericRunner(
     result = {'classifier': result['classifier'], 'options': result['options']}
     result['error'] = e.args
     result['f1'] = result['precision'] = result['recall'] = result['std'] = None
-  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s' % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std']))
+  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, ROC = %s, Accuracy = %s' % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std'], result['others']['roc'], result['others']['acc']))
   return result
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
@@ -202,6 +204,9 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   rs = []
   f1s = []
   raw_results = []  # holds tn, fp, fn, tp
+  other_results = {}  # throw in everything else being calculated
+  accs = []
+  rocs = []
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
@@ -229,18 +234,23 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw[1] = dict(enumerate(raw.get(1, [0, 0])))
     raw = {'tn': int(raw[0].get(0, 0)), 'fp': int(raw[0].get(1, 0)), 'fn': int(raw[1].get(0, 0)), 'tp': int(raw[1].get(1, 0))}
     raw_results.append(raw)
+    accs.append(accuracy_score(y_test, pred, pos_label=1))
+    rocs.append(roc_curve(y_test, pred, pos_label=1))
   misses = list(set(misses))
   misses.sort()
-  p, r, f1, std = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s)))
+  p, r, f1, std, acc = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.std(np.array(accs)))
   raw_means = {key: sum(map(lambda result: result[key], raw_results)) / len(raw_results) for key in ['tn', 'fp', 'fn', 'tp']}
   raw_results.append(raw_means)
+  roc = [sum(col) / float(len(col)) for col in zip(*rocs)]
   memo[kf_hash]['p'] = p
   memo[kf_hash]['r'] = r
   memo[kf_hash]['f1'] = f1
   memo[kf_hash]['std'] = std
   memo[kf_hash]['mis'] = misses
   memo[kf_hash]['raw'] = raw_results
-  return p, r, f1, std, misses, raw_results
+  memo[kf_hash]['acc'] = other_results['acc'] = acc
+  memo[kf_hash]['roc'] = other_results['roc'] = roc
+  return p, r, f1, std, misses, raw_results, other_results
 
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
   # train-test split
@@ -428,7 +438,7 @@ def learning_curve(*args):
   test_path = get_test_path('{}{}'.format(dataDir, lc_p['train_set']))
   lcf_name = path_name_prefix('learn-curve_{}-{}_'.format(lc_p['least'], lc_p['step']), test_path) + '.csv'
   curve_values = []
-  whole_matrix = args[2].toarray()
+  whole_matrix = args[2].toarray()  # make iteratable
   whole_bunch = args[3]
   data_len = len(whole_bunch.target)
   classes = {}
@@ -442,7 +452,7 @@ def learning_curve(*args):
 
   for t_size in range(lc_p['least'], lc_p['most'], lc_p['step']):
     # get F1 at each step
-    if t_size > 100: break  # use everything
+    if t_size > 100: break
     t_size = t_size / 100  # %age
     samps = {}
     sub_bunch = Group()
@@ -488,7 +498,7 @@ def learning_curve(*args):
       pass
   saveText('\n'.join(','.join(str(e) for e in v) for v in curve_values), lcf_name)
   #pdb.set_trace()
-  return 0, 0, 0, 0.0, [], []
+  return 0.0, 0.0, 0.0, 0.0, [], [], {}
 
 def get_test_path(train_path):
   # 17-11-09
