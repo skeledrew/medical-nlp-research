@@ -421,6 +421,7 @@ def test_it(args, kw):
 
 def learning_curve(*args):
   # 17-11-09
+  if DEBUG: pdb.set_trace()
   lc_p = args[8]
   args = list(args)
   train_result = lc_p['assoc_data']
