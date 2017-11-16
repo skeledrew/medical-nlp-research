@@ -481,7 +481,8 @@ def learning_curve(*args):
       print('Something broke: {}. Skipping...'.format(repr(e)))
       pass
   saveText('\n'.join(','.join(str(e) for e in v) for v in curve_values), lcf_name)
-  return train_result
+  pdb.set_trace()
+  return 0, 0, 0, 0.0, [], []
 
 def get_test_path(train_path):
   # 17-11-09
