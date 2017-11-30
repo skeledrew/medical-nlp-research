@@ -7,6 +7,7 @@ from common import *
 
 
 DEBUG = True
+COMMA_SUB = ';'  # replace commas in CUI real names with this
 usage = 'Usage: %s top {criteria} /path/to/exp_results' % (sys.argv[0])
 #resolve_cuis = False
 
@@ -107,7 +108,7 @@ def get_top_results(critr, path, ext='json'):
                     cui_name = name.lstrip('-').upper()
                     if cui_name.startswith('NEG'): cui_name = cui_name[3:]
                     if not len(cui_name) == 8: raise ValueError('CUI must be formatted C#######, got "%s"' % cui_name)
-                    real_name = umls_clt.find_cui(cui_name)['name']
+                    real_name = umls_clt.find_cui(cui_name)['name'].replace(',', COMMA_SUB)
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
