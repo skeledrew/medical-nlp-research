@@ -210,7 +210,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
-  pdb.set_trace()
+  #pdb.set_trace()
 
   for idx in range(len(feats)):
     if not sk_feats: break
