@@ -23,7 +23,7 @@ IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
-config = load_yaml('config.yaml')
+config = load_yaml('config_single.yaml')
 gSParams = config['gSParams']  # TODO: validate contents
 custom_pp = ['text', 'bits']  # custom preprocessors
 
@@ -224,6 +224,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     y_test = bunch.target[test_indices]
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
+    pred_p = classifier.predict_proba(x_test) if hasattr(classifier, 'predict_proba') else [0] * len(pred)
     if hasattr(classifier, 'coef_'): [feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))]
     misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
     ps.append(precision_score(y_test, pred, pos_label=1))
@@ -236,7 +237,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw = {'tn': int(raw[0].get(0, 0)), 'fp': int(raw[0].get(1, 0)), 'fn': int(raw[1].get(0, 0)), 'tp': int(raw[1].get(1, 0))}
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
-    rocs.append(roc_auc_score(y_test, pred))
+    rocs.append(roc_auc_score(y_test, pred_p))
   misses = list(set(misses))
   misses.sort()
   p, r, f1, std, acc, roc = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(np.array(accs))), float(np.mean(rocs))
