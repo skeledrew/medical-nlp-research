@@ -236,13 +236,13 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw = {'tn': int(raw[0].get(0, 0)), 'fp': int(raw[0].get(1, 0)), 'fn': int(raw[1].get(0, 0)), 'tp': int(raw[1].get(1, 0))}
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
-    rocs.append(roc_auc_curve(y_test, pred))
+    rocs.append(roc_auc_score(y_test, pred))
   misses = list(set(misses))
   misses.sort()
-  p, r, f1, std, acc = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.std(np.array(accs)))
+  p, r, f1, std, acc, roc = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(np.array(accs))), float(np.mean(rocs))
   raw_means = {key: sum(map(lambda result: result[key], raw_results)) / len(raw_results) for key in ['tn', 'fp', 'fn', 'tp']}
   raw_results.append(raw_means)
-  roc = [sum(col) / float(len(col)) for col in zip(*rocs)]
+  #roc = [sum(col) / float(len(col)) for col in zip(*rocs)]
   memo[kf_hash]['p'] = p
   memo[kf_hash]['r'] = r
   memo[kf_hash]['f1'] = f1
