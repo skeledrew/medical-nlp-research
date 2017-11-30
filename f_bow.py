@@ -11,7 +11,7 @@ from sklearn.metrics import f1_score
 from sklearn import svm, naive_bayes, linear_model, neighbors, ensemble, dummy
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix  # 17-09-25
-from sklearn.metrics import accuracy_score, roc_curve  # 17-11-16
+from sklearn.metrics import accuracy_score, roc_auc_score  # 17-11-16
 
 from common import *
 import custom_clfs
@@ -210,6 +210,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
+  pdb.set_trace()
 
   for idx in range(len(feats)):
     if not sk_feats: break
@@ -235,7 +236,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw = {'tn': int(raw[0].get(0, 0)), 'fp': int(raw[0].get(1, 0)), 'fn': int(raw[1].get(0, 0)), 'tp': int(raw[1].get(1, 0))}
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
-    rocs.append(roc_curve(y_test, pred, pos_label=1))
+    rocs.append(roc_auc_curve(y_test, pred))
   misses = list(set(misses))
   misses.sort()
   p, r, f1, std, acc = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.std(np.array(accs)))
