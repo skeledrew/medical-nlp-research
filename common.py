@@ -730,7 +730,11 @@ def ensureDirs(*paths):
 
         else:
             if not os.path.exists(path): os.makedirs(path)
-    return
+    return paths
+
+def ensure_dirs(*paths):
+    # 17-12-06 - snake_case name shim
+    return ensureDirs(*paths)
 
 def loadText(fName):
     # 17-06-12
@@ -935,6 +939,11 @@ def confusion_matrix_(data, pred_f, true_f, table=False):
         if not pred_f(e) and true_f(e): fn += 1
         if not (pred_f(e) or true_f(e)): tn += 1
     return {'tp': tp, 'fp': fp, 'fn': fn, 'tn': tn} if not table else [[tp, fp][fn, tn]]
+
+def is_primitive(item, primitives=None):
+    # 17-12-06
+    if not primitives: primitives = [int, float, bool, str]
+    return type(item) in primities
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
