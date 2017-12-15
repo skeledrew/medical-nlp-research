@@ -36,7 +36,7 @@ def get_top_results(critr, path, ext='json'):
     j_cont = loadJson(path) if ext == 'json' else load_yaml(path) if ext == 'yaml' else None
     path = path.replace('.yaml', '.json')  # temp compat hack
     if not isinstance(j_cont, list): raise Exception('%s should be a list' % path)
-    top = {'f1': 0.0, 'recall': 0.0, 'precision': 0.0}
+    top = {'f1': 0.0, 'recall': 0.0, 'precision': 0.0, 'accuracy': 0.0, 'auc': 0.0, 'acc': 0.0, 'spc':0.0, 'npv': 0.0}
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
     #pdb.set_trace()
@@ -49,7 +49,7 @@ def get_top_results(critr, path, ext='json'):
         writeLog('Unable to initialize UMLS client: {}'.format(repr(e)))
         umls_clt = None
     print('%s: Searching for best matching criteria...' % currentTime())
-    optimize = critr['optimize'] if 'optimize' in critr and critr['optimize'] in 'precision|recall|f1' else 'f1'
+    optimize = critr['optimize'] if 'optimize' in critr and critr['optimize'] in 'precision|recall|f1|acc|auc|spc|npv' else 'f1'
     resolve_cuis = critr['resolve_cuis'] if 'resolve_cuis' in critr and critr['resolve_cuis'] in 'yes|no' else 'no'
 
     for idx in range(len(j_cont)):
@@ -76,8 +76,8 @@ def get_top_results(critr, path, ext='json'):
             skip = True  # invalidate for any other criteria
             break
         if skip: continue
-        if targ[optimize] <= top[optimize]: continue
-        top = targ
+        if targ.get(optimize, 0.0) <= top.get(optimize, 0.0): continue
+        top = deepcopy(targ)
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
     mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
     rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
