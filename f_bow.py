@@ -110,7 +110,7 @@ def gSGenericRunner(
     result = {'classifier': result['classifier'], 'options': result['options']}
     result['error'] = e.args
     result['f1'] = result['precision'] = result['recall'] = result['std'] = None
-  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, AUC = %s, Accuracy = %s, Specificity = %s, NPV = %s' % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std'], result['others']['auc'], result['others']['acc'])), result['others']['spc'], result['others']['npv']
+  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, AUC = %s, Accuracy = %s, Specificity = %s, NPV = %s' % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std'], result['others']['auc'], result['others']['acc'], result['others']['spc'], result['others']['npv']))
   return result
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
