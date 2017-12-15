@@ -23,7 +23,7 @@ IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
-config = load_yaml('config_single.yaml')
+config = load_yaml('config.yaml')
 gSParams = config['gSParams']  # TODO: validate contents
 custom_pp = ['text', 'bits']  # custom preprocessors
 
@@ -240,10 +240,10 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
     aucs.append(roc_auc_score(y_test, pred_p or [0.0] * len(y_test)))
-    spcs.append(raw['tn'] / (raw['tn'] + raw['fp']))
-    npvs.append(raw['tn'] / (raw['tn'] + raw['fn']))
+    spcs.append(raw['tn'] / ((raw['tn'] + raw['fp']) or 1))
+    npvs.append(raw['tn'] / ((raw['tn'] + raw['fn']) or 1))
     #rocs.append(roc_curve(y_test, pred_p))
-  pdb.set_trace()
+  #pdb.set_trace()
   misses = list(set(misses))
   misses.sort()
   p, r, f1, std, acc, auc, spc, npv = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(accs)), float(np.mean(aucs)), float(np.mean(spcs)), float(np.mean(npvs))
