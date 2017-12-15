@@ -243,6 +243,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     spcs.append(raw['tn'] / (raw['tn'] + raw['fp']))
     npvs.append(raw['tn'] / (raw['tn'] + raw['fn']))
     #rocs.append(roc_curve(y_test, pred_p))
+  pdb.set_trace()
   misses = list(set(misses))
   misses.sort()
   p, r, f1, std, acc, auc, spc, npv = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(accs)), float(np.mean(aucs)), float(np.mean(spcs)), float(np.mean(npvs))
@@ -546,6 +547,8 @@ def get_test_path(train_path):
     path_parts[-1] = old_name
   raise OSError('Unable to find test set path from "{}"'.format(train_path))
 
+def score(**kwargs):
+  pass
 if __name__ == "__main__":
   try:
     main(sys.argv)
