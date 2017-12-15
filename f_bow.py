@@ -110,7 +110,7 @@ def gSGenericRunner(
     result = {'classifier': result['classifier'], 'options': result['options']}
     result['error'] = e.args
     result['f1'] = result['precision'] = result['recall'] = result['std'] = None
-  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, AUC = %s, Accuracy = %s' % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std'], result['others']['roc'], result['others']['acc']))
+  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, AUC = %s, Accuracy = %s, Specificity = %s, NPV = %s' % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std'], result['others']['auc'], result['others']['acc'])), result['others']['spc'], result['others']['npv']
   return result
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
@@ -206,7 +206,9 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   raw_results = []  # holds tn, fp, fn, tp
   other_results = {}  # throw in everything else being calculated
   accs = []
-  rocs = []
+  aucs = []
+  spcs = []
+  npvs = []
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
@@ -224,7 +226,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     y_test = bunch.target[test_indices]
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
-    pred_p = classifier.predict_proba(x_test) if hasattr(classifier, 'predict_proba') else [0] * len(pred)
+    pred_p = classifier.predict_proba(x_test) if hasattr(classifier, 'predict_proba') else None
     if hasattr(classifier, 'coef_'): [feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))]
     misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
     ps.append(precision_score(y_test, pred, pos_label=1))
@@ -237,10 +239,13 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw = {'tn': int(raw[0].get(0, 0)), 'fp': int(raw[0].get(1, 0)), 'fn': int(raw[1].get(0, 0)), 'tp': int(raw[1].get(1, 0))}
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
-    rocs.append(roc_auc_score(y_test, pred_p))
+    aucs.append(roc_auc_score(y_test, pred_p) or 0.0)
+    spcs.append(raw['tn'] / (raw['tn'] + raw['fp']))
+    npvs.append(raw['tn'] / (raw['tn'] + raw['fn']))
+    #rocs.append(roc_curve(y_test, pred_p))
   misses = list(set(misses))
   misses.sort()
-  p, r, f1, std, acc, roc = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(np.array(accs))), float(np.mean(rocs))
+  p, r, f1, std, acc, auc, spc, npv = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(accs)), float(np.mean(aucs)), float(np.mean(spcs)), float(np.mean(npvs))
   raw_means = {key: sum(map(lambda result: result[key], raw_results)) / len(raw_results) for key in ['tn', 'fp', 'fn', 'tp']}
   raw_results.append(raw_means)
   #roc = [sum(col) / float(len(col)) for col in zip(*rocs)]
@@ -251,7 +256,9 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   memo[kf_hash]['mis'] = misses
   memo[kf_hash]['raw'] = raw_results
   memo[kf_hash]['acc'] = other_results['acc'] = acc
-  memo[kf_hash]['roc'] = other_results['roc'] = roc
+  memo[kf_hash]['auc'] = other_results['auc'] = auc
+  memo[kf_hash]['spc'] = other_results['spc'] = spc
+  memo[kf_hash]['npv'] = other_results['npv'] = npv
   return p, r, f1, std, misses, raw_results, other_results
 
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
@@ -292,6 +299,7 @@ def main(args):
   crunch_client.disabled = True
   setattr(crunch_client, 'gSGenericRunner', gSGenericRunner)
   save_progress = True
+  save_err = 0
 
   if '--learn-curve' in args:
     # set stage
@@ -360,11 +368,13 @@ def main(args):
   try:
     if save_progress: saveJson(results, rf_name + '.json')
   except:
+    save_err += 1
     save_yaml(results, rf_name + '.yaml')
   if save_progress: savePickle(memo, '%sexp%s_memo.pkl' % (dataDir, ex_num))
   if os.path.exists(curr_sess): os.remove(curr_sess)
   e_time = currentTime()
-  fin_msg = 'Operation complete for experiment #%d. Started %s and ended %s.' % (ex_num, s_time, e_time)
+  save_err_msg = '' if not save_err else ' . An error occurred during JSON save so YAML used instead.'
+  fin_msg = 'Operation complete for experiment #%d. Started %s and ended %s. %s' % (ex_num, s_time, e_time, save_err_msg)
   writeLog(fin_msg)
   slack_post(fin_msg, '@aphillips')
 
