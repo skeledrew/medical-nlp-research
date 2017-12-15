@@ -239,7 +239,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw = {'tn': int(raw[0].get(0, 0)), 'fp': int(raw[0].get(1, 0)), 'fn': int(raw[1].get(0, 0)), 'tp': int(raw[1].get(1, 0))}
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
-    aucs.append(roc_auc_score(y_test, pred_p or [0.0] * len(y_test)))
+    aucs.append(roc_auc_score(y_test, pred_p if pred_p else [0.0] * len(y_test)))
     spcs.append(raw['tn'] / ((raw['tn'] + raw['fp']) or 1))
     npvs.append(raw['tn'] / ((raw['tn'] + raw['fn']) or 1))
     #rocs.append(roc_curve(y_test, pred_p))
