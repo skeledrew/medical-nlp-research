@@ -23,7 +23,7 @@ IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
-config = load_yaml('config.yaml')
+config = load_yaml('config_single.yaml')
 gSParams = config['gSParams']  # TODO: validate contents
 custom_pp = ['text', 'bits']  # custom preprocessors
 
@@ -240,6 +240,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
     aucs.append(roc_auc_score(y_test, pred_p if not type(pred_p) == type(None) and pred_p.shape == y_test.shape else [0.0] * len(y_test)))
+    if not type(pred_p) == type(None): pdb.set_trace()
     spcs.append(raw['tn'] / ((raw['tn'] + raw['fp']) or 1))
     npvs.append(raw['tn'] / ((raw['tn'] + raw['fn']) or 1))
     #rocs.append(roc_curve(y_test, pred_p))
@@ -549,6 +550,7 @@ def get_test_path(train_path):
 
 def score(**kwargs):
   pass
+
 if __name__ == "__main__":
   try:
     main(sys.argv)
