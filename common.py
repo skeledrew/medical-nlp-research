@@ -390,25 +390,27 @@ class Group():
     pass
 
 class MemoryClient():
+    '''Holds objects for other processes
+    Todo: Make dict interface'''
 
     def __init__(self, name, host='localhost', port=9998):
         self._host = host
         self._port = port
         self._name = name
-        self.__blob = None
+        self.__conn = None
         self.__connect()
 
     def __call__(self, key, data=None):
         self.__connect()
-        if self.__blob: return self.__blob(self._name, key, data)
+        if self.__conn: return self.__conn.root.blob(self._name, key, data)
         return Exception('Something broke during the call.')
 
     def __connect(self):
-        if self.__blob: return
+        if self.__conn: return
 
         try:
             c = rpyc.connect(self._host, self._port)
-            self.__blob = c.root.blob
+            self.__conn = c
 
         except Exception as e:
             msg = 'Something broke: {}'.format(repr(e))
