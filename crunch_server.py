@@ -64,7 +64,7 @@ def write_log(msg, print_=True, log=None):
     return
 
 if __name__ == '__main__':
-    port = 9999 if len(sys.argv) < 2 else sys.argv[1]
+    port = 9999 if len(sys.argv) < 2 else int(sys.argv[1])
     from rpyc.utils.server import ForkingServer
 
     t = ForkingServer(CrunchService, 'localhost', port=port)
