@@ -32,18 +32,17 @@ def get_top_results(critr, path, ext='json'):
     cr_hash = hash_sum(critr)
     critr = str_to_dict(critr, '&', '=')
     print('Given criteria "%s" with hash "%s"' % (critr, cr_hash))
-    memo_client = MemoryClient(sys.argv[0])
+    #memo_client = MemoryClient(sys.argv[0])
     print('%s: Loading %s...' % (currentTime(), path))
-    m_cont = memo_client(hash_sum(path))
+    m_cont = None#memo_client(hash_sum(path))
     if isinstance(m_cont, Exception): m_cont = None
     j_cont = m_cont if m_cont else loadJson(path) if ext == 'json' else load_yaml(path) if ext == 'yaml' else None
     path = path.replace('.yaml', '.json')  # temp compat hack
     if not isinstance(j_cont, list): raise Exception('%s should be a list' % path)
-    if not m_cont: memo_client(hash_sum(path), j_cont)
+    #if not m_cont: memo_client(hash_sum(path), j_cont)
     top = {'f1': 0.0, 'recall': 0.0, 'precision': 0.0, 'accuracy': 0.0, 'auc': 0.0, 'acc': 0.0, 'spc':0.0, 'npv': 0.0}
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
-    #pdb.set_trace()
     umls_key = re_findall('%s.+%s' % (s_pat, e_pat), loadText(os.environ['HOME'] + '/CREDS'), 0)[len(s_pat):] #(len(e_pat) * -1)]
     umls_clt = None
     try:
