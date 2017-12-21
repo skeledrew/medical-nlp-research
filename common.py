@@ -945,6 +945,17 @@ def is_primitive(item, primitives=None):
     if not primitives: primitives = [int, float, bool, str]
     return type(item) in primities
 
+def make_one_hot(seq, classes=[0, 1], hot=1, other=0):
+    '''Do one-hot conversion
+    - seq must be a list or compatible'''
+    if not isinstance(seq, list): seq = list(seq)
+    new_seq = [[other] * len(classes) for _ in range(len(seg))]
+    for pos, cls in enumerate(classes):
+        for idx in range(len(seq)):
+            if seq[idx] == cls:
+                new_seq[idx][pos] = hot
+    return new_seq
+
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
 commit_me(dataDir + 'tracking.json', 'common.py')
