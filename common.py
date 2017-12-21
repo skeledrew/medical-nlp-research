@@ -207,7 +207,7 @@ class CrunchClient():
         except Exception as e:
             msg = 'Something broke: {}'.format(repr(e))
             print(msg)
-            return(msg)
+            return msg
         name = name or host + port
         user = user or self.user or 'none'
         self.servers[name] = {'host': host, 'port': port, 'user': user, 'cpus': cpus}
@@ -388,6 +388,32 @@ class CSVWrapper():
 
 class Group():
     pass
+
+class MemoryClient():
+
+    def __init__(self, name, host='localhost', port=9998):
+        self._host = host
+        self._port = port
+        self._name = name
+        self.__blob = None
+        self.__connect()
+
+    def __call__(self, key, data=None):
+        self.__connect()
+        if self.__blob: return self.__blob(self._name, key, data)
+        return Exception('Something broke during the call.')
+
+    def __connect(self):
+        if self.__blob: return
+
+        try:
+            c = rpyc.connect(self._host, self._port)
+            self.__blob = c.root.blob
+
+        except Exception as e:
+            msg = 'Something broke: {}'.format(repr(e))
+            print(msg)
+            return msg
 
 ### For pickling operations
 
