@@ -945,11 +945,12 @@ def is_primitive(item, primitives=None):
     if not primitives: primitives = [int, float, bool, str]
     return type(item) in primities
 
-def make_one_hot(seq, classes=[0, 1], hot=1, other=0):
+def make_one_hot(seq, classes=[0, 1], hot=1, rest=0):
     '''Do one-hot conversion
     - seq must be a list or compatible'''
     if not isinstance(seq, list): seq = list(seq)
-    new_seq = [[other] * len(classes) for _ in range(len(seq))]
+    pdb.set_trace()
+    new_seq = [[rest] * len(classes) for _ in range(len(seq))]
     for pos, cls in enumerate(classes):
         for idx in range(len(seq)):
             if seq[idx] == cls:
