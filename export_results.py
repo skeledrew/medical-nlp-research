@@ -32,14 +32,15 @@ def get_top_results(critr, path, ext='json'):
     cr_hash = hash_sum(critr)
     critr = str_to_dict(critr, '&', '=')
     print('Given criteria "%s" with hash "%s"' % (critr, cr_hash))
-    #memo_client = MemoryClient(sys.argv[0])
-    print('%s: Loading %s...' % (currentTime(), path))
-    m_cont = None#memo_client(hash_sum(path))
-    if isinstance(m_cont, Exception): m_cont = None
+    memo_client = MemoryClient(sys.argv[0])
+    print('Attempting load from memory server...')
+    m_cont = memo_client(hash_sum(path))
+    if not type(m_cont) in [list, dict]: m_cont = None
+    if not m_cont: print('%s: Loading from %s...' % (currentTime(), path))
     j_cont = m_cont if m_cont else loadJson(path) if ext == 'json' else load_yaml(path) if ext == 'yaml' else None
     path = path.replace('.yaml', '.json')  # temp compat hack
     if not isinstance(j_cont, list): raise Exception('%s should be a list' % path)
-    #if not m_cont: memo_client(hash_sum(path), j_cont)
+    if not m_cont: memo_client(hash_sum(path), j_cont)
     top = {'f1': 0.0, 'recall': 0.0, 'precision': 0.0, 'accuracy': 0.0, 'auc': 0.0, 'acc': 0.0, 'spc':0.0, 'npv': 0.0}
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
@@ -54,6 +55,7 @@ def get_top_results(critr, path, ext='json'):
     print('%s: Searching for best matching criteria...' % currentTime())
     optimize = critr['optimize'] if 'optimize' in critr and critr['optimize'] in 'precision|recall|f1|acc|auc|spc|npv' else 'f1'
     resolve_cuis = critr['resolve_cuis'] if 'resolve_cuis' in critr and critr['resolve_cuis'] in 'yes|no' else 'no'
+    pdb.set_trace()
 
     for idx in range(len(j_cont)):
         # seek max specified score
