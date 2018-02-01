@@ -18,7 +18,7 @@ import custom_clfs
 
 
 ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix||ValueError..need more than 6 values'
-DEBUG = False
+DEBUG = True
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
@@ -112,7 +112,7 @@ def gSGenericRunner(
     result['f1'] = result['precision'] = result['recall'] = result['std'] = None
     pdb.set_trace()
     for other in result['others']: result[other] = result['others'][other]
-  if result['f1']: writeLog('%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, AUC = %s, Accuracy = %s, Specificity = %s, NPV = %s' % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std'], result['others']['auc'], result['others']['acc'], result['others']['spc'], result['others']['npv']))
+  if result['f1'] and 'auc' in result: writeLog('Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, AUC = %s, Accuracy = %s, Specificity = %s, NPV = %s' % (re.sub('\n *', ' ', str(result['classifier'])), str(result['options']), result['precision'], result['recall'], result['f1'], result['std'], result['others']['auc'], result['others']['acc'], result['others']['spc'], result['others']['npv']))
   return result
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_hash):
