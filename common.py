@@ -31,6 +31,7 @@ from threading import Timer
 import yaml
 import rpyc
 import random
+import logging
 
 
 baseDir = '/NLPShare/Alcohol/'
@@ -77,6 +78,15 @@ ripTest2 = '''>>> audits = []
 calls = 0
 mimic_bin = '/NLPShare/Lib/Word2Vec/Models/mimic.bin'
 dist = '/NLPShare/Lib/Word2Vec/word2vec/distance'
+
+# 18-02-01 - setup logging
+logger = logging.getLogger('lnlp')
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler(logFile)
+fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s (%(level)s): %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 class UMLSClient():
@@ -741,8 +751,9 @@ def writeLog(msg, print_=True, log=None):
     global logFile
     if log: logFile = log
 
-    with open(logFile, 'a') as lf:
-        lf.write(msg + '\n')
+    #with open(logFile, 'a') as lf:
+    #    lf.write(msg + '\n')
+    logger.info(msg)
     if print_: print(msg)
     return
 
