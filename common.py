@@ -506,7 +506,7 @@ def pyCut(lines, delimiter=',', columns=['0'], errors='ignore'):
                     nline.append(line[int(splice[0]) : int(splice[1])])
                     #raise Exception('Range splices not yet supported!')
             yield nline + '\n'  # should create a generator that returns individual lines
-            
+
         except Exception as e:
             writeStderr(e.args)
             err += 1
@@ -520,7 +520,7 @@ def pyGrep(lines, pattern):
             yield line
 
 def getFileList(path, recurse=False):
-    
+
     for dirname, dirnames, filenames in os.walk(path):
 
         if not recurse:
@@ -751,9 +751,9 @@ def writeLog(msg, print_=True, log=None):
     global logFile
     if log: logFile = log
 
-    #with open(logFile, 'a') as lf:
-    #    lf.write(msg + '\n')
-    logger.info(msg)
+    with open(logFile, 'a') as lf:
+        lf.write(msg + '\n')
+    #logger.info(msg)
     if print_: print(msg)
     return
 
