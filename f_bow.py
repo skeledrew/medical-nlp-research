@@ -18,12 +18,12 @@ import custom_clfs
 
 
 ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix||ValueError..need more than 6 values'
-DEBUG = True
+DEBUG = False
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
-config = load_yaml('config_single.yaml')
+config = load_yaml('config.yaml')
 gSParams = config['gSParams']  # TODO: validate contents
 custom_pp = ['text', 'bits']  # custom preprocessors
 
