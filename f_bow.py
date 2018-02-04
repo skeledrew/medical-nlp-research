@@ -241,12 +241,12 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw = {'tn': int(raw[0].get(0, 0)), 'fp': int(raw[0].get(1, 0)), 'fn': int(raw[1].get(0, 0)), 'tp': int(raw[1].get(1, 0))}
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
+    rocs.append(roc_curve(y_test, np.asarray([e[0] for e in pred_p])  if not type(pred_p) == type(None) and pred_p.shape[1] == 2 else [0.0] * len(y_test)))
     if not type(pred_p) == type(None) and not pred_p.shape == y_test.shape: y_test = np.asarray(make_one_hot(y_test))
     aucs.append(roc_auc_score(y_test, pred_p if not type(pred_p) == type(None) and pred_p.shape == y_test.shape else [0.0] * len(y_test)))
     #if not type(pred_p) == type(None): pdb.set_trace()
     spcs.append(raw['tn'] / ((raw['tn'] + raw['fp']) or 1))
     npvs.append(raw['tn'] / ((raw['tn'] + raw['fn']) or 1))
-    rocs.append(roc_curve(y_test, pred_p  if not type(pred_p) == type(None) and pred_p.shape == y_test.shape else [0.0] * len(y_test)))
   misses = list(set(misses))
   misses.sort()
   p, r, f1, std, acc, auc, spc, npv = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(accs)), float(np.mean(aucs)), float(np.mean(spcs)), float(np.mean(npvs))
