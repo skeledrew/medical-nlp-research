@@ -241,7 +241,11 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     raw = {'tn': int(raw[0].get(0, 0)), 'fp': int(raw[0].get(1, 0)), 'fn': int(raw[1].get(0, 0)), 'tp': int(raw[1].get(1, 0))}
     raw_results.append(raw)
     accs.append(accuracy_score(y_test, pred))
-    rocs.append(roc_curve(y_test, np.asarray([e[0] for e in pred_p])  if not type(pred_p) == type(None) and pred_p.shape[1] == 2 else [0.0] * len(y_test)))
+    roc = list(roc_curve(y_test, np.asarray([e[0] for e in pred_p])  if not type(pred_p) == type(None) and pred_p.shape[1] == 2 else [0.0] * len(y_test)))
+    roc[0] = [float(e) for e in roc[0]]
+    roc[1] = [float(e) for e in roc[1]]
+    roc[2] = [float(e) for e in roc[2]]
+    rocs.append(roc)
     if not type(pred_p) == type(None) and not pred_p.shape == y_test.shape: y_test = np.asarray(make_one_hot(y_test))
     aucs.append(roc_auc_score(y_test, pred_p if not type(pred_p) == type(None) and pred_p.shape == y_test.shape else [0.0] * len(y_test)))
     #if not type(pred_p) == type(None): pdb.set_trace()
