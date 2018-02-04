@@ -117,7 +117,7 @@ def get_top_results(critr, path, ext='json'):
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
-            umls_clt.save_cache()
+            if umls_clt: umls_clt.save_cache()
         top[0]['features'] = ff_name
 
     if 'mis' in top[0]:
