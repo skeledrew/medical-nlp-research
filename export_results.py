@@ -55,7 +55,7 @@ def get_top_results(critr, path, ext='json'):
     print('%s: Searching for best matching criteria...' % currentTime())
     optimize = critr['optimize'] if 'optimize' in critr and critr['optimize'] in 'precision|recall|f1|acc|auc|spc|npv' else 'f1'
     resolve_cuis = critr['resolve_cuis'] if 'resolve_cuis' in critr and critr['resolve_cuis'] in 'yes|no' else 'no'
-    pdb.set_trace()
+    #pdb.set_trace()
 
     for idx in range(len(j_cont)):
         # seek max specified score
