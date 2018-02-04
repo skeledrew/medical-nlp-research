@@ -11,7 +11,7 @@ from sklearn.metrics import f1_score
 from sklearn import svm, naive_bayes, linear_model, neighbors, ensemble, dummy
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix  # 17-09-25
-from sklearn.metrics import accuracy_score, roc_auc_score  # 17-11-16
+from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve  # 17-11-16
 
 from common import *
 import custom_clfs
@@ -23,7 +23,7 @@ IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
 clfMods = [svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy]
-config = load_yaml('config.yaml')
+config = load_yaml('config_single.yaml')
 gSParams = config['gSParams']  # TODO: validate contents
 custom_pp = ['text', 'bits']  # custom preprocessors
 
@@ -210,6 +210,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   aucs = []
   spcs = []
   npvs = []
+  rocs = []
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
@@ -245,8 +246,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
     #if not type(pred_p) == type(None): pdb.set_trace()
     spcs.append(raw['tn'] / ((raw['tn'] + raw['fp']) or 1))
     npvs.append(raw['tn'] / ((raw['tn'] + raw['fn']) or 1))
-    #rocs.append(roc_curve(y_test, pred_p))
-  #pdb.set_trace()
+    rocs.append(roc_curve(y_test, pred_p  if not type(pred_p) == type(None) and pred_p.shape == y_test.shape else [0.0] * len(y_test)))
   misses = list(set(misses))
   misses.sort()
   p, r, f1, std, acc, auc, spc, npv = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(accs)), float(np.mean(aucs)), float(np.mean(spcs)), float(np.mean(npvs))
@@ -263,6 +263,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   memo[kf_hash]['auc'] = other_results['auc'] = auc
   memo[kf_hash]['spc'] = other_results['spc'] = spc
   memo[kf_hash]['npv'] = other_results['npv'] = npv
+  memo[kf_hash]['rocs'] = other_results['rocs'] = rocs
   return p, r, f1, std, misses, raw_results, other_results
 
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
