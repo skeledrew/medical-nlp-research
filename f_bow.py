@@ -256,6 +256,7 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   p, r, f1, std, acc, auc, spc, npv = float(np.mean(ps)), float(np.mean(rs)), float(np.mean(f1s)), float(np.std(np.array(f1s))), float(np.mean(accs)), float(np.mean(aucs)), float(np.mean(spcs)), float(np.mean(npvs))
   raw_means = {key: sum(map(lambda result: result[key], raw_results)) / len(raw_results) for key in ['tn', 'fp', 'fn', 'tp']}
   raw_results.append(raw_means)
+  rocs.append(average_roc_folds(rocs))
   #roc = [sum(col) / float(len(col)) for col in zip(*rocs)]
   memo[kf_hash]['p'] = p
   memo[kf_hash]['r'] = r
@@ -382,7 +383,7 @@ def main(args):
   if save_progress: savePickle(memo, '%sexp%s_memo.pkl' % (dataDir, ex_num))
   if os.path.exists(curr_sess): os.remove(curr_sess)
   e_time = currentTime()
-  save_err_msg = '' if not save_err else ' . An error occurred during JSON save so YAML used instead.'
+  save_err_msg = '' if not save_err else ' An error occurred during JSON save so YAML used instead.'
   fin_msg = 'Operation complete for experiment #%d. Started %s and ended %s. %s' % (ex_num, s_time, e_time, save_err_msg)
   writeLog(fin_msg)
   slack_post(fin_msg, '@aphillips')
@@ -557,6 +558,22 @@ def get_test_path(train_path):
 
 def score(**kwargs):
   pass
+
+def average_roc_folds(rocs):
+  # 18-02-05 - find the mean of the points in each field of k folds of ROCs
+  roc_ave = [None, None, None]
+  pdb.set_trace()
+
+  for fold in range(len(rocs)):
+
+    for field in range(3):
+      # fpr, tpr or thresh
+      f_size = len(rocs[fold][field])  # field size, ie num points
+      if not roc_ave[field]: roc_ave[field] = [0.0] * f_size
+
+      for point in range(f_size):
+        roc_ave[field][point] = (roc_ave[field][point] * fold + rocs[fold][field][point]) / (fold + 1)
+  return roc_ave
 
 
 if __name__ == "__main__":
