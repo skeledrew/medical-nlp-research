@@ -129,14 +129,14 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
 
   if pre_task == 'text':
     text_matrix = np.array(text_matrix)
-    memo[param_hash]['matrix'] = text_matrix
+    memo[param_hash]['matrix'] = bunch.data = text_matrix
     memo[param_hash]['pipe'] = pipe
     return text_matrix, bunch, [], pipe  # no features
 
   if pre_task == 'bits':
     bit_vec = custom_clfs.BitVectorizor(ngram_range=ngramRange)
     bits_matrix = np.array(bit_vec.fit_transform(text_matrix))
-    memo[param_hash]['matrix'] = bits_matrix
+    memo[param_hash]['matrix'] = bunch.data = bits_matrix
     memo[param_hash]['pipe'] = pipe
     return bits_matrix, bunch, bit_vec._ent_list, pipe
 
@@ -160,7 +160,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   memo[param_hash]['features'] = features
 
   if pre_task == 'count':
-    memo[param_hash]['matrix'] = count_matrix
+    memo[param_hash]['matrix'] = bunch.data = count_matrix
     memo[param_hash]['pipe'] = pipe
     return count_matrix, bunch, features, pipe
 
@@ -168,7 +168,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task, param_h
   tf = TfidfTransformer()
   pipe.append(('tfidf', tf))
   tfidf_matrix = tf.fit_transform(count_matrix)
-  memo[param_hash]['matrix'] = tfidf_matrix
+  memo[param_hash]['matrix'] = bunch.data = tfidf_matrix
   memo[param_hash]['pipe'] = pipe
   return tfidf_matrix, bunch, features, pipe
 
@@ -214,7 +214,6 @@ def CrossVal(numFolds, classifier, matrix, bunch, pp_hash, clf_hash, feats, sk_f
   folds = KFold(n_splits=numFolds)
   misses = []
   wghts_read = False
-  #pdb.set_trace()
 
   for idx in range(len(feats)):
     if not sk_feats: break
@@ -390,17 +389,19 @@ def main(args):
 
 def test_eval(args, **rest_kw):
   # takes results file/dict, result index, test dir
-  save_progress = False if args[0]['options']['modSel'] in ['lc'] else True
   if isinstance(args[0], str) and not os.path.exists(args[0]): raise Exception('Invalid result file: %s' % args[0])
-  results = loadJson(args[0]) if isinstance(args[0], str) else args[0]
+  results = None
+  writeLog('%s: Loading results file...' % currentTime())
+  if isinstance(args[0], str): results = loadJson(args[0]) if args[0].endswith('.json') else load_yaml(args[0]) if args[0].endswith('.yaml') else args[0]
   if isinstance(results, dict): results = [results]
   if not isinstance(results, list): raise ValueError('Invalid result format; must be a list.')
+  save_progress = False if results[0][1]['options']['modSel'] in ['lc'] else True
   args[1] = str(args[1])
   #pdb.set_trace()
   if not args[1].isdigit() or int(args[1]) < 0 or int(args[1]) > len(results)-1: raise ValueError('Invalid index; must be a positive integer less than %d' % len(results))
-  result = results[int(args[1])]
+  result = results[int(args[1])][1]
   if not os.path.exists(args[2]): raise Exception('Invalid path for test set')
-  #writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
+  writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
   test_set = args[2].rstrip('/').split('/')[-1]
   params = result['options']
   hyparams = str_to_dict(re.split('\( *', result['classifier'])[-1][:-1], ', *', '=', True)  # get from clf string
@@ -414,7 +415,7 @@ def test_eval(args, **rest_kw):
   hyparams['random_state'] = 1
   classifier = MakeClf(params['clfName'], hyparams, clfMods)
   _, train_bunch, feats, pipe = PreProc(params['notesDirName'], params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'train_eval')
-  _, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
+  #_, test_bunch, _, _ = PreProc(test_set, params['ngramRange'], params['minDF'], params['analyzer'], params['binary'], params['preTask'], 'test_eval')
   if 'clf' in pipe[-1]: pipe.pop(-1)  # remove old classifier
   pipe.append(('clf', classifier))
   clf_pipe = Pipeline(pipe)
@@ -426,25 +427,42 @@ def test_eval(args, **rest_kw):
     feats[idx] = [feats[idx][0] + feats[idx][1]]
   x_train = train_bunch.data
   y_train = train_bunch.target
+  test_bunch = preproc_test(test_set, pipe)
   x_test = test_bunch.data
   y_test = test_bunch.target
-  model = clf_pipe.fit(x_train, y_train)
-  pred = clf_pipe.predict(x_test)
-  if hasattr(clf_pipe, 'coef_'): [feats[idx].append(clf_pipe.coef_[0][idx]) for idx in range(len(feats))]
+  writeLog('%s: Evaluating on test...' % currentTime())
+  model = classifier.fit(x_train, y_train)
+  pred = classifier.predict(x_test)
+  if hasattr(classifier, 'coef_'): [feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))]
   misses = GetMisses(y_test, pred, test_bunch.filenames)
   misses = list(set(misses))
   p = precision_score(y_test, pred, pos_label=1)
   r = recall_score(y_test, pred, pos_label=1)
   f1 = f1_score(y_test, pred, pos_label=1)
+  pred_p = auc = None
+
+  try:
+    pred_p = classifier.predict_proba(x_test) if hasattr(classifier, 'predict_proba') else None
+    if not type(pred_p) == type(None) and not pred_p.shape == y_test.shape: y_test = np.asarray(make_one_hot(y_test))
+    auc = roc_auc_score(y_test, pred_p) if pred_p else None
+  except Exception as e:
+    writeLog('%s: Error while evaluating on test: %s' % (currentTime(), repr(e)))
   mf_name = path_name_prefix('miscat-test_', args[0].replace('.json', '.txt')) if save_progress else None
   if save_progress: saveText('\n'.join(misses), mf_name)
   ff_name = path_name_prefix('feats-test_', args[0]) if save_progress else None
-  if save_progress: saveText('\n'.join(', '.join(f) for f in feats), ff_name)
+  if save_progress: saveText('\n'.join(', '.join(str(f)) for f in feats), ff_name)
   classifier = re.sub('\n *', ' ', str(clf_pipe.steps[-1][-1]))
-  writeLog('%s: Classifier %s \nwith options "%s..." on test set %s yielded: P = %s, R = %s, F1 = %s' % (currentTime(), classifier, str(params)[:200], test_set, p, r, f1))
+  writeLog('%s: Classifier %s \nwith options "%s..." on test set %s yielded: P = %s, R = %s, F1 = %s, AUC = %s' % (currentTime(), classifier, str(params)[:200], test_set, p, r, f1, auc))
   rf_name = path_name_prefix('test-res_', args[0]) if save_progress else None
   result = {'classifier': classifier, 'options': params, 'test_set': test_set, 'P': p, 'R': r, 'F1': f1}
-  if save_progress: saveJson(result, rf_name)
+  if save_progress:
+
+    try:
+      saveJson(result, rf_name)
+
+    except:
+      writeLog('%s: JSON save failed. Falling back to YAML...' % (currentTime()))
+      save_yaml(result, rf_name.replace('.json', '.yaml'))
   return result
 
 def test_it(args, kw):
@@ -575,6 +593,18 @@ def average_roc_folds(rocs):
         roc_ave[field][point] = (roc_ave[field][point] * fold + rocs[fold][field][point]) / (fold + 1)
   return roc_ave
 
+def preproc_test(test_set, pipe):
+  # apply preprocess transformations to test data
+  bunch = load_files(dataDir + test_set)
+  matrix = bunch.data #[s.decode('utf-8') for s in bunch.data]
+
+  for trans in pipe:
+    # apply each transformation
+    if 'clf' in trans: break
+    if not hasattr(trans[1], 'transform'): continue
+    matrix = trans[1].transform(matrix)
+  bunch.data = matrix
+  return bunch
 
 if __name__ == "__main__":
   try:
