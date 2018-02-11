@@ -444,7 +444,7 @@ def test_eval(args, **rest_kw):
   try:
     pred_p = classifier.predict_proba(x_test) if hasattr(classifier, 'predict_proba') else None
     if not type(pred_p) == type(None) and not pred_p.shape == y_test.shape: y_test = np.asarray(make_one_hot(y_test))
-    auc = roc_auc_score(y_test, pred_p) if pred_p else None
+    auc = roc_auc_score(y_test, pred_p) if not type(pred_p) == None else None
   except Exception as e:
     writeLog('%s: Error while evaluating on test: %s' % (currentTime(), repr(e)))
   mf_name = path_name_prefix('miscat-test_', args[0].replace('.json', '.txt')) if save_progress else None
