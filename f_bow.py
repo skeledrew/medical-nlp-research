@@ -606,6 +606,7 @@ def preproc_test(test_set, pipe):
   bunch.data = matrix
   return bunch
 
+
 if __name__ == "__main__":
   try:
     main(sys.argv)
