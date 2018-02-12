@@ -138,7 +138,6 @@ def gSGenericRunner(
                result['others']['npv']))
     return result
 
-
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task,
             param_hash):
     # 17-07-07 preprocessing with memoization for better speed and efficient memory use
@@ -202,7 +201,6 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task,
     memo[param_hash]['pipe'] = pipe
     return tfidf_matrix, bunch, features, pipe
 
-
 def MakeClf(clf_name, hyparams, clf_mods):
     # create classifier and add relevant hyperparameters
     clf = None
@@ -235,7 +233,6 @@ def MakeClf(clf_name, hyparams, clf_mods):
                                                                     params,
                                                                     repr(e)))
     return classifier
-
 
 def CrossVal(numFolds,
              classifier,
@@ -347,7 +344,6 @@ def CrossVal(numFolds,
     memo[kf_hash]['rocs'] = other_results['rocs'] = rocs
     return p, r, f1, std, misses, raw_results, other_results
 
-
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
     # train-test split
     tts_hash = hash_sum('%d%s%s' % (randState, pp_hash, clf_hash))
@@ -363,7 +359,6 @@ def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
     f1 = f1_score(y_test, pred, pos_label=1)
     return p, r, f1, 0
 
-
 def GetMisses(y_test, pred, names):
     # assumes bunch keeps it all in order (it does)
     misses = []
@@ -371,7 +366,6 @@ def GetMisses(y_test, pred, names):
     for idx in range(len(y_test)):
         if not y_test[idx] == pred[idx]: misses.append(names[idx])
     return misses
-
 
 def main(args):
     if len(args) > 2 and args[1] == 'test': return test_eval(args[2:])
@@ -491,7 +485,6 @@ def main(args):
         ex_num, s_time, e_time, save_err_msg)
     writeLog(fin_msg)
     slack_post(fin_msg, '@aphillips')
-
 
 def test_eval(args, **rest_kw):
     # takes results file/dict, result index, test dir
@@ -616,11 +609,9 @@ def test_eval(args, **rest_kw):
             save_yaml(result, rf_name.replace('.json', '.yaml'))
     return result
 
-
 def test_it(args, kw):
     print('Test ran fine...')
     return 'Success!'
-
 
 def learning_curve(*args):
     # 17-11-09
@@ -734,10 +725,8 @@ def get_test_path(train_path):
         path_parts[-1] = old_name
     raise OSError('Unable to find test set path from "{}"'.format(train_path))
 
-
 def score(**kwargs):
     pass
-
 
 def average_roc_folds(rocs):
     # 18-02-05 - find the mean of the points in each field of k folds of ROCs
@@ -756,7 +745,6 @@ def average_roc_folds(rocs):
                     roc_ave[field][point] * fold + rocs[fold][field][point]
                 ) / (fold + 1)
     return roc_ave
-
 
 def preproc_test(test_set, pipe):
     # apply preprocess transformations to test data
