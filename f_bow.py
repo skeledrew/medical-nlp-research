@@ -24,7 +24,7 @@ memo = {}  # for memoization
 clfMods = [
     svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy
 ]
-config = load_yaml('config_single.yaml')
+config = load_yaml('config.yaml')
 gSParams = config['gSParams']  # TODO: validate contents
 custom_pp = ['text', 'bits']  # custom preprocessors
 
@@ -280,8 +280,7 @@ def CrossVal(numFolds,
             classifier, 'predict_proba') else None
         if hasattr(classifier, 'coef_'):
             [
-                feats[idx].append(classifier.coef_[0][idx])
-                for idx in range(len(feats))
+                feats[idx].append(classifier.coef_[0][idx]) for idx in range(len(feats))
             ]
         misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
         ps.append(precision_score(y_test, pred, pos_label=1))
@@ -688,7 +687,6 @@ def learning_curve(*args):
     #pdb.set_trace()
     return 0.0, 0.0, 0.0, 0.0, [], [], {}
 
-
 def get_test_path(train_path):
     # 17-11-09
     # TODO: include 'train' in naming scheme to facilitate test name discovery
@@ -759,6 +757,13 @@ def preproc_test(test_set, pipe):
     bunch.data = matrix
     return bunch
 
+def get_args():
+    from argparse import ArgumentParser as AP
+    parser = AP()
+    p.add_argument('--config-file', help='Config file path', type=str, default=config)
+    p.add_argument('--learning-curve', help='Flag to generate a learning curve', action='store_true')
+    args = p.parse_args()
+    return args
 
 if __name__ == "__main__":
     try:
