@@ -397,7 +397,17 @@ class CSVWrapper():
         return True
 
 class Group():
-    pass
+
+    def __init__(self):
+        self.__members = {}
+
+    def __call__(self, key, val={'': [None]}):
+        neut = {'': [None]}
+        if not key : return ValueError('No key given')
+        if val == neut:
+            return ValueError('Not found') if not hasattr(self, key) else getattr(self, key)
+        setattr(self, key, val)
+        return True
 
 class MemoryClient():
     '''Holds objects for other processes
