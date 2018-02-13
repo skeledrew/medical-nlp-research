@@ -276,14 +276,13 @@ def CrossVal(numFolds,
         y_test = bunch.target[test_indices]
         model = classifier.fit(x_train, y_train)
         pred = classifier.predict(x_test)
-        pdb.set_trace()
         pred_p = classifier.predict_proba(x_test) if hasattr(
             classifier, 'predict_proba') else None
-        if hasattr(classifier, 'coef_'):
-            [
-                feats[idx].append(classifier.coef_[0][idx])
-                for idx in range(len(feats))
-            ]
+        #if hasattr(classifier, 'coef_'):
+        #    [
+        #        feats[idx].append(classifier.coef_[0][idx])
+        #        for idx in range(len(feats))
+        #    ]
         misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
         ps.append(precision_score(y_test, pred, pos_label=1))
         rs.append(recall_score(y_test, pred, pos_label=1))
@@ -731,7 +730,7 @@ def score(**kwargs):
 def average_roc_folds(rocs):
     # 18-02-05 - find the mean of the points in each field of k folds of ROCs
     roc_ave = [None, None, None]
-    pdb.set_trace()
+    #pdb.set_trace()
 
     for fold in range(len(rocs)):
 
