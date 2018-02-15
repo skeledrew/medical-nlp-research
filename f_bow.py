@@ -368,6 +368,8 @@ def GetMisses(y_test, pred, names):
     return misses
 
 def main(args):
+    state = Group()
+    state('args', get_args())
     if len(args) > 2 and args[1] == 'test': return test_eval(args[2:])
     s_time = currentTime()
     global memo, gSParams
@@ -760,11 +762,14 @@ def preproc_test(test_set, pipe):
 
 def get_args():
     from argparse import ArgumentParser as AP
-    parser = AP()
+    parser = AP(description='Train and evaluate different model configurations')
     p.add_argument('--config-file', help='Config file path', type=str, default=config)
     p.add_argument('--learning-curve', help='Flag to generate a learning curve', action='store_true')
+    p.add_argument('--test', help='Evaluate a model on a test set', action='store_true')
+    p.add_argument('--test-dir', help='Test set path', type=str, default='')
     args = p.parse_args()
     return args
+
 
 if __name__ == "__main__":
     try:
