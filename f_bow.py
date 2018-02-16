@@ -734,17 +734,21 @@ def average_roc_folds(rocs):
     roc_ave = [None, None, None]
     #pdb.set_trace()
 
-    for fold in range(len(rocs)):
+    try:
+        for fold in range(len(rocs)):
 
-        for field in range(3):
-            # fpr, tpr or thresh
-            f_size = len(rocs[fold][field])  # field size, ie num points
-            if not roc_ave[field]: roc_ave[field] = [0.0] * f_size
+            for field in range(3):
+                # fpr, tpr or thresh
+                f_size = len(rocs[fold][field])  # field size, ie num points
+                if not roc_ave[field]: roc_ave[field] = [0.0] * f_size
 
-            for point in range(f_size):
-                roc_ave[field][point] = (
-                    roc_ave[field][point] * fold + rocs[fold][field][point]
-                ) / (fold + 1)
+                for point in range(f_size):
+                    roc_ave[field][point] = (
+                        roc_ave[field][point] * fold + rocs[fold][field][point]
+                    ) / (fold + 1)
+    except Exception as e:
+        print(repr(e))
+        pdb.set_trace()
     return roc_ave
 
 def preproc_test(test_set, pipe):
@@ -762,7 +766,7 @@ def preproc_test(test_set, pipe):
 
 def get_args():
     from argparse import ArgumentParser as AP
-    parser = AP(description='Train and evaluate different model configurations')
+    p = AP(description='Train and evaluate different model configurations')
     p.add_argument('--config-file', help='Config file path', type=str, default=config)
     p.add_argument('--learning-curve', help='Flag to generate a learning curve', action='store_true')
     p.add_argument('--test', help='Evaluate a model on a test set', action='store_true')
