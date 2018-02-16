@@ -396,7 +396,7 @@ class CSVWrapper():
             pass
         return True
 
-class Group():
+class Group(dict):
 
     def __init__(self):
         pass
@@ -410,7 +410,7 @@ class Group():
         return True
 
     def __str__(self):
-        return self.__dict__
+        return str(self.__dict__)
 
     def __getitem__(self, key):
         val = self.__call__(key)
