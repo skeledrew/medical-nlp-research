@@ -336,19 +336,19 @@ def CrossVal(numFolds,
     raw_results.append(raw_means)
     rocs.append(average_roc_folds(rocs))
     #roc = [sum(col) / float(len(col)) for col in zip(*rocs)]
-    memo[kf_hash]['p'] = final_results['precision'] = p
-    memo[kf_hash]['r'] = final_results['recall']= r
-    memo[kf_hash]['f1'] = final_results['f1']= f1
-    memo[kf_hash]['std'] = final_results['std']= std
-    memo[kf_hash]['mis'] = final_results['mis']= misses
-    memo[kf_hash]['raw'] = final_results['raw']= raw_results
+    memo[kf_hash]['p'] = final_result['precision'] = p
+    memo[kf_hash]['r'] = final_result['recall']= r
+    memo[kf_hash]['f1'] = final_result['f1']= f1
+    memo[kf_hash]['std'] = final_result['std']= std
+    memo[kf_hash]['mis'] = final_result['mis']= misses
+    memo[kf_hash]['raw'] = final_result['raw']= raw_results
     memo[kf_hash]['acc'] = other_results['acc'] = acc
     memo[kf_hash]['auc'] = other_results['auc'] = auc
     memo[kf_hash]['spc'] = other_results['spc'] = spc
     memo[kf_hash]['npv'] = other_results['npv'] = npv
     memo[kf_hash]['rocs'] = other_results['rocs'] = rocs
-    final_results['others'] = other_results
-    return final_results #p, r, f1, std, misses, raw_results, other_results
+    final_result['others'] = other_results
+    return final_result #p, r, f1, std, misses, raw_results, other_results
 
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
     # train-test split
