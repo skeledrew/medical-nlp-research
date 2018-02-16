@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve  # 17-11-16
 from common import *
 import custom_clfs
 
-ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix||ValueError..need more than 6 values'
+ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix'#||ValueError..need more than 6 values'
 DEBUG = False
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
@@ -24,8 +24,8 @@ memo = {}  # for memoization
 clfMods = [
     svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy
 ]
-config = load_yaml('config.yaml')
-gSParams = config['gSParams']  # TODO: validate contents
+DEFAULT_CONFIG = 'config.yaml'
+#gSParams = config['gSParams']  # TODO: validate contents
 custom_pp = ['text', 'bits']  # custom preprocessors
 
 
@@ -121,11 +121,13 @@ def gSGenericRunner(
                  (currentTime(), repr(e)[:80]))
         result = {
             'classifier': result['classifier'],
-            'options': result['options']
+            'options': result['options'],
+            'others': []
         }
         result['error'] = e.args
         result['f1'] = result['precision'] = result['recall'] = result[
             'std'] = None
+        result['others'] = []
     for other in result['others']:
         result[other] = result['others'][other]
     if result['f1'] and 'auc' in result:
@@ -372,7 +374,12 @@ def main(args):
     state('args', get_args())
     if len(args) > 2 and args[1] == 'test': return test_eval(args[2:])
     s_time = currentTime()
-    global memo, gSParams
+    pdb.set_trace()
+    cfg_file = state.args.config_file or DEFAULT_CONFIG
+    writeLog('Loading state from %s' % cfg_file)
+    config = load_yaml(cfg_file)
+    gsParams = config.get('gsParams')
+    global memo#, gSParams
     g_size = 1
     sess_hash = hash_sum(str(gSParams))
     curr_sess = '%sf_bow_session_%s.pkl' % (dataDir,
@@ -732,7 +739,9 @@ def score(**kwargs):
 def average_roc_folds(rocs):
     # 18-02-05 - find the mean of the points in each field of k folds of ROCs
     roc_ave = [None, None, None]
+    if not isinstance(rocs, list) or False in [isinstance(f, list) for f in rocs]: return roc_ave
     #pdb.set_trace()
+    err = None
 
     try:
         for fold in range(len(rocs)):
@@ -748,7 +757,8 @@ def average_roc_folds(rocs):
                     ) / (fold + 1)
     except Exception as e:
         print(repr(e))
-        pdb.set_trace()
+        #pdb.set_trace()
+        err = e
     return roc_ave
 
 def preproc_test(test_set, pipe):
