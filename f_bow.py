@@ -51,6 +51,7 @@ def gSGenericRunner(
         nJobs,
         alpha,
         lc_params,
+        probability,
 ):
     result = Group()  # holds all the created objects, etc
     frame = currentframe()
@@ -75,6 +76,7 @@ def gSGenericRunner(
         'n_jobs': nJobs,
         'random_state': randState,  # make deterministic
         'alpha': alpha,
+        'probability': probability,
     }
     classifier = MakeClf(clfName, hyParams, clfMods)
     result['classifier'] = re.sub('\n *', ' ', str(classifier))
