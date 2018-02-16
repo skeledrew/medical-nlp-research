@@ -417,7 +417,7 @@ class Group():
         return val
 
     def __setitem__(self, key, val):
-        self.__call__(self, key, val)
+        self.__call__(key, val)
         return
 
 class MemoryClient():
