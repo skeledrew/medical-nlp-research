@@ -52,7 +52,7 @@ def gSGenericRunner(
         alpha,
         lc_params,
 ):
-    result = {}  # holds all the created objects, etc
+    result = Group()  # holds all the created objects, etc
     frame = currentframe()
     args, _, _, values = getargvalues(frame)
     result['options'] = allArgs = {arg: values[arg] for arg in args}
@@ -88,21 +88,23 @@ def gSGenericRunner(
         lc_params['train_set'] = notesDirName
         lc_params['mode'] = modSel
         lc_params['assoc_data'] = result
-        p, r, f1, std, mis, raw, others = CrossVal(
+        #p, r, f1, std, mis, raw, others
+        scores = CrossVal(
             numFolds, classifier, matrix, bunch, preproc_hash, clf_hash,
             result['features'], sk_feats
         ) if modSel == 'kf' else learning_curve(
             numFolds, classifier, matrix, bunch, preproc_hash, clf_hash,
             result['features'], sk_feats, lc_params
         )  #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
-        result['precision'] = p
-        result['recall'] = r
-        result['f1'] = f1
-        result['std'] = std
-        result['mis'] = mis
-        result['raw'] = raw
-        result['others'] = others
+        #result['precision'] = p
+        #result['recall'] = r
+        #result['f1'] = f1
+        #result['std'] = std
+        #result['mis'] = mis
+        #result['raw'] = raw
+        #result['others'] = others
         result['error'] = None
+        [result(k, v) for k, v in scores]
 
     except (KeyError, IndexError) as e:
         print(repr(e))
@@ -262,6 +264,7 @@ def CrossVal(numFolds,
     spcs = []
     npvs = []
     rocs = []
+    final_result = Group()
     folds = KFold(n_splits=numFolds)
     misses = []
     wghts_read = False
@@ -333,18 +336,19 @@ def CrossVal(numFolds,
     raw_results.append(raw_means)
     rocs.append(average_roc_folds(rocs))
     #roc = [sum(col) / float(len(col)) for col in zip(*rocs)]
-    memo[kf_hash]['p'] = p
-    memo[kf_hash]['r'] = r
-    memo[kf_hash]['f1'] = f1
-    memo[kf_hash]['std'] = std
-    memo[kf_hash]['mis'] = misses
-    memo[kf_hash]['raw'] = raw_results
+    memo[kf_hash]['p'] = final_results['precision'] = p
+    memo[kf_hash]['r'] = final_results['recall']= r
+    memo[kf_hash]['f1'] = final_results['f1']= f1
+    memo[kf_hash]['std'] = final_results['std']= std
+    memo[kf_hash]['mis'] = final_results['mis']= misses
+    memo[kf_hash]['raw'] = final_results['raw']= raw_results
     memo[kf_hash]['acc'] = other_results['acc'] = acc
     memo[kf_hash]['auc'] = other_results['auc'] = auc
     memo[kf_hash]['spc'] = other_results['spc'] = spc
     memo[kf_hash]['npv'] = other_results['npv'] = npv
     memo[kf_hash]['rocs'] = other_results['rocs'] = rocs
-    return p, r, f1, std, misses, raw_results, other_results
+    final_results['others'] = other_results
+    return final_results #p, r, f1, std, misses, raw_results, other_results
 
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
     # train-test split
@@ -372,13 +376,14 @@ def GetMisses(y_test, pred, names):
 def main(args):
     state = Group()
     state('args', get_args())
-    if state.args.test: return test_eval(state)
+    if state.args.eval: return test_eval(state)
     s_time = currentTime()
     cfg_file = state.args.config_file or DEFAULT_CONFIG
-    writeLog('Loading state from %s' % cfg_file)
+    writeLog('Loading config from "%s"' % cfg_file)
     config = load_yaml(cfg_file)
-    gSParams = config.get('gsParams')
-    global memo#, gSParams
+    state('config', config)
+    gSParams = config.get('gSParams')
+    global memo
     g_size = 1
     sess_hash = hash_sum(str(gSParams))
     curr_sess = '%sf_bow_session_%s.pkl' % (dataDir,
@@ -396,7 +401,7 @@ def main(args):
     save_progress = True
     save_err = 0
 
-    if '--learn-curve' in args:
+    if state.args.learning_curve:
         # set stage
         save_progress = False
         if not 'lc' in gSParams[9]: gSParams[9] = ['lc']
@@ -430,7 +435,7 @@ def main(args):
         try:
             writeLog('\n%s: Processing #%d of %d: %s' %
                      (currentTime(), idx + 1, len(results), results[idx]))
-            results[idx] = [results[idx], eval(results[idx])]
+            results[idx] = [results[idx], str(eval(results[idx]))]
             #func = globals()[results[idx].split('(')[0]]
             #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
             #crunch_client.add_task(func, args)
@@ -494,33 +499,32 @@ def main(args):
     writeLog(fin_msg)
     slack_post(fin_msg, '@aphillips')
 
-def test_eval(args, **rest_kw):
+def test_eval(state, **rest_kw):
     # takes results file/dict, result index, test dir
-    if isinstance(args[0], str) and not os.path.exists(args[0]):
-        raise Exception('Invalid result file: %s' % args[0])
+    args = state.args
+    #if not os.path.exists(args.clfs_file):
+    #    raise Exception('Invalid result file: %s' % args.clfs_file)
     results = None
     writeLog('%s: Loading results file...' % currentTime())
-    if isinstance(args[0], str):
+    if os.path.exists(args.clfs_file):
         results = loadJson(
             args[0]) if args[0].endswith('.json') else load_yaml(
-                args[0]) if args[0].endswith('.yaml') else args[0]
+                args.clfs_file) if args.clfs_file.endswith('.yaml') else args.clfs_file
     if isinstance(results, dict): results = [results]
     if not isinstance(results, list):
         raise ValueError('Invalid result format; must be a list.')
-    save_progress = False if results[0][1]['options']['modSel'] in ['lc'
+    save_progress = False if results[args.result_index][1]['options']['modSel'] in ['lc'
                                                                     ] else True
-    args[1] = str(args[1])
     #pdb.set_trace()
-    if not args[1].isdigit() or int(args[1]) < 0 or int(
-            args[1]) > len(results) - 1:
+    if args.result_index < 0 or args.result_index > len(results) - 1:
         raise ValueError(
-            'Invalid index; must be a positive integer less than %d' %
+            'Invalid index; must be 0 or a positive integer less than %d' %
             len(results))
-    result = results[int(args[1])][1]
-    if not os.path.exists(args[2]):
+    result = results[args.result_index][1]
+    if not os.path.exists(args.test_dir):
         raise Exception('Invalid path for test set')
     writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
-    test_set = args[2].rstrip('/').split('/')[-1]
+    test_set = args.test_dir.rstrip('/').split('/')[-1]
     params = result['options']
     hyparams = str_to_dict(
         re.split('\( *', result['classifier'])[-1][:-1], ', *', '=',
@@ -778,8 +782,11 @@ def get_args():
     p = AP(description='Train and evaluate different model configurations')
     p.add_argument('--config-file', help='Config file path', type=str, default=DEFAULT_CONFIG)
     p.add_argument('--learning-curve', help='Flag to generate a learning curve', action='store_true')
-    p.add_argument('--test', help='Evaluate a model on a test set', action='store_true')
+    p.add_argument('--eval', help='Evaluate a model on a test set', action='store_true')
     p.add_argument('--test-dir', help='Test set path', type=str, default='')
+    p.add_argument('--clfs-file', help='Result file with classifiers for eval', default='')
+    p.add_argument('--result-index', help='Index of classifier in result file', type=int, default=0)
+    p.add_argument('-mp', '--multiprocess', help='Use crunch service', action='store_true')
     args = p.parse_args()
     return args
 
