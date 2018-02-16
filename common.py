@@ -399,7 +399,7 @@ class CSVWrapper():
 class Group():
 
     def __init__(self):
-        self.__members = {}
+        pass
 
     def __call__(self, key, val={'': [None]}):
         neut = {'': [None]}
@@ -408,6 +408,17 @@ class Group():
             return ValueError('Not found') if not hasattr(self, key) else getattr(self, key)
         setattr(self, key, val)
         return True
+
+    def __str__(self):
+        return self.__dict__
+
+    def __getitem__(self, key):
+        val = self.__call__(key)
+        return val
+
+    def __setitem__(self, key, val):
+        self.__call__(self, key, val)
+        return
 
 class MemoryClient():
     '''Holds objects for other processes
