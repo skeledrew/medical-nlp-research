@@ -81,7 +81,7 @@ def gSGenericRunner(
     clf_hash = hash_sum(result['classifier'])
     if not clf_hash in memo: memo[clf_hash] = classifier
     sk_feats = False if preTask in custom_pp else True
-    #pdb.set_trace()
+    pdb.set_trace()
 
     try:
         p = r = f1 = std = 0
@@ -268,6 +268,7 @@ def CrossVal(numFolds,
     folds = KFold(n_splits=numFolds)
     misses = []
     wghts_read = False
+    pdb.set_trace()
 
     for idx in range(len(feats)):
         if not sk_feats: break
