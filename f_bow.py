@@ -99,6 +99,7 @@ def gSGenericRunner(
             result['features'], sk_feats, lc_params
         )  #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
         result['error'] = None
+        if not isinstance(scores, Group): pdb.set_trace()
         [result(k, scores(k)) for k in scores]
 
     except (KeyError, IndexError) as e:
