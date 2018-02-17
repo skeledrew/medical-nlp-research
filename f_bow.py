@@ -435,7 +435,7 @@ def main(args):
             writeLog('\n%s: Processing #%d of %d: %s' %
                      (currentTime(), idx + 1, len(results), results[idx]))
             #if idx == 24: pdb.set_trace()  # for debugging tuple issue
-            results[idx] = [results[idx], str(eval(results[idx]))]
+            results[idx] = [results[idx], eval(results[idx]).to_dict()]
             #func = globals()[results[idx].split('(')[0]]
             #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
             #crunch_client.add_task(func, args)
