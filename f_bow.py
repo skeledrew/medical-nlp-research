@@ -83,7 +83,7 @@ def gSGenericRunner(
     clf_hash = hash_sum(result['classifier'])
     if not clf_hash in memo: memo[clf_hash] = classifier
     sk_feats = False if preTask in custom_pp else True
-    pdb.set_trace()
+    #pdb.set_trace()
 
     try:
         p = r = f1 = std = 0
@@ -98,15 +98,8 @@ def gSGenericRunner(
             numFolds, classifier, matrix, bunch, preproc_hash, clf_hash,
             result['features'], sk_feats, lc_params
         )  #TTS(randState, classifier, matrix, bunch, preproc_hash, clf_hash)
-        #result['precision'] = p
-        #result['recall'] = r
-        #result['f1'] = f1
-        #result['std'] = std
-        #result['mis'] = mis
-        #result['raw'] = raw
-        #result['others'] = others
         result['error'] = None
-        [result(k, v) for k, v in scores]
+        [result(k, scores(k)) for k in scores]
 
     except (KeyError, IndexError) as e:
         print(repr(e))
@@ -270,7 +263,7 @@ def CrossVal(numFolds,
     folds = KFold(n_splits=numFolds)
     misses = []
     wghts_read = False
-    pdb.set_trace()
+    #pdb.set_trace()
 
     for idx in range(len(feats)):
         if not sk_feats: break
@@ -338,7 +331,6 @@ def CrossVal(numFolds,
     }
     raw_results.append(raw_means)
     rocs.append(average_roc_folds(rocs))
-    #roc = [sum(col) / float(len(col)) for col in zip(*rocs)]
     memo[kf_hash]['p'] = final_result['precision'] = p
     memo[kf_hash]['r'] = final_result['recall']= r
     memo[kf_hash]['f1'] = final_result['f1']= f1
@@ -351,6 +343,7 @@ def CrossVal(numFolds,
     memo[kf_hash]['npv'] = other_results['npv'] = npv
     memo[kf_hash]['rocs'] = other_results['rocs'] = rocs
     final_result['others'] = other_results
+    if not isinstance(final_result, Group): pdb.set_trace()
     return final_result #p, r, f1, std, misses, raw_results, other_results
 
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
@@ -377,6 +370,7 @@ def GetMisses(y_test, pred, names):
     return misses
 
 def main(args):
+    #pdb.set_trace()
     state = Group()
     state('args', get_args())
     if state.args.eval: return test_eval(state)
@@ -682,7 +676,8 @@ def learning_curve(*args):
         args[3] = sub_bunch
 
         try:
-            train_result = lc_p['assoc_data']
+            train_result = Group()
+            train_result(lc_p['assoc_data'])
             p, r, f1, std, mis, raw = CrossVal(*args[:-1])
             train_result['precision'] = p
             train_result['recall'] = r
