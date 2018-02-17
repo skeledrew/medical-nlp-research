@@ -429,6 +429,11 @@ class Group(dict):
         self.__call__(key, val)
         return
 
+    def to_dict(self):
+        """Return a regular dict"""
+        d = {k: v for k, v in zip(self.keys(), self.values())}
+        return d
+
 class MemoryClient():
     '''Holds objects for other processes
     Todo: Make dict interface'''
