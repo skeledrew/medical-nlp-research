@@ -16,10 +16,9 @@ from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve  # 17-11-16
 from common import *
 import custom_clfs
 
-ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix'#||ValueError..need more than 6 values'
+ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix'
 DEBUG = False
 IGNORE = '~~IGNORE_THIS_PARAM~~'
-numCalls = 300  # number of calls; TODO: facilitate passing call num to called function
 memo = {}  # for memoization
 clfMods = [
     svm, naive_bayes, linear_model, neighbors, custom_clfs, ensemble, dummy
@@ -120,22 +119,22 @@ def gSGenericRunner(
         result = {
             'classifier': result['classifier'],
             'options': result['options'],
-            'others': []
+            #'others': []
         }
         result['error'] = e.args
         result['f1'] = result['precision'] = result['recall'] = result[
             'std'] = None
-        result['others'] = []
-    for other in result['others']:
-        result[other] = result['others'][other]
+        #result['others'] = []
+    #for other in result['others']:
+    #    result[other] = result['others'][other]
     if result['f1'] and 'auc' in result:
         writeLog(
             '%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, AUC = %s, Accuracy = %s, Specificity = %s, NPV = %s'
             % (currentTime(), re.sub('\n *', ' ', str(result['classifier'])),
                str(result['options']), result['precision'], result['recall'],
-               result['f1'], result['std'], result['others']['auc'],
-               result['others']['acc'], result['others']['spc'],
-               result['others']['npv']))
+               result['f1'], result['std'], result['auc'],
+               result['acc'], result['spc'],
+               result['npv']))
     return result
 
 def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task,
@@ -246,9 +245,11 @@ def CrossVal(numFolds,
     # KFold
     kf_hash = hash_sum('%d%s%s' % (numFolds, pp_hash, clf_hash))
     if kf_hash in memo and memo[kf_hash]:
-        return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash][
-            'f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash][
-                'raw']
+        result = Group(**memo[kf_hash])
+        return result
+        #return memo[kf_hash]['p'], memo[kf_hash]['r'], memo[kf_hash][
+        #    'f1'], memo[kf_hash]['std'], memo[kf_hash]['mis'], memo[kf_hash][
+        #        'raw']
     memo[kf_hash] = {}
     ps = []
     rs = []
@@ -332,8 +333,8 @@ def CrossVal(numFolds,
     }
     raw_results.append(raw_means)
     rocs.append(average_roc_folds(rocs))
-    memo[kf_hash]['p'] = final_result['precision'] = p
-    memo[kf_hash]['r'] = final_result['recall']= r
+    memo[kf_hash]['precision'] = final_result['precision'] = p
+    memo[kf_hash]['recall'] = final_result['recall']= r
     memo[kf_hash]['f1'] = final_result['f1']= f1
     memo[kf_hash]['std'] = final_result['std']= std
     memo[kf_hash]['mis'] = final_result['mis']= misses
@@ -343,7 +344,7 @@ def CrossVal(numFolds,
     memo[kf_hash]['spc'] = other_results['spc'] = spc
     memo[kf_hash]['npv'] = other_results['npv'] = npv
     memo[kf_hash]['rocs'] = other_results['rocs'] = rocs
-    final_result['others'] = other_results
+    [final_result(r, other_results[r]) for r in other_results]
     if not isinstance(final_result, Group): pdb.set_trace()
     return final_result #p, r, f1, std, misses, raw_results, other_results
 
@@ -433,6 +434,7 @@ def main(args):
         try:
             writeLog('\n%s: Processing #%d of %d: %s' %
                      (currentTime(), idx + 1, len(results), results[idx]))
+            #if idx == 24: pdb.set_trace()  # for debugging tuple issue
             results[idx] = [results[idx], str(eval(results[idx]))]
             #func = globals()[results[idx].split('(')[0]]
             #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
