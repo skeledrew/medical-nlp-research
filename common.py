@@ -411,6 +411,7 @@ class Group(dict):
 
             else:
                 val = dict.__getitem__(self, key)
+                return val
         dict.__setitem__(self, key, val)
         setattr(self, key, val)
         return True
