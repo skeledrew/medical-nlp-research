@@ -406,8 +406,13 @@ class Group(dict):
         neut = {'': [None]}
         if not key : return ValueError('No key given')
         if val == neut:
-            return ValueError('Not found') if not hasattr(self, key) else dict.__getitem__(self, key)
+            if not hasattr(self, key):
+                return ValueError('Not found')
+
+            else:
+                val = dict.__getitem__(self, key)
         dict.__setitem__(self, key, val)
+        setattr(self, key, val)
         return True
 
     #def __str__(self):
