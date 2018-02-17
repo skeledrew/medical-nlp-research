@@ -398,26 +398,28 @@ class CSVWrapper():
 
 class Group(dict):
 
-    #def __init__(self, *args):
-    #    dict.__init__(self, args)
-    #    return
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
+        [setattr(self, k, kwargs[k]) for k in kwargs]
+        return
 
     def __call__(self, key, val={'': [None]}):
         neut = {'': [None]}
         if not key : return ValueError('No key given')
         if val == neut:
             if not hasattr(self, key):
-                return ValueError('Not found')
+                return ValueError('Key not found')
 
             else:
                 val = dict.__getitem__(self, key)
                 return val
+
+            if isinstance(key, dict):
+                [setattr(self, k, key[k]) for k in key]
+                return True
         dict.__setitem__(self, key, val)
         setattr(self, key, val)
         return True
-
-    #def __str__(self):
-    #    return str(self.__dict__)
 
     def __getitem__(self, key):
         val = self.__call__(key)
