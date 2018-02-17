@@ -26,7 +26,7 @@ def grabTriggerSections(args):
     if 'seed' in opt_args and 'seed_sep' in opt_args: wv_seed = opt_args['seed'].split(opt_args['seed_sep'])
     if 'number' in opt_args: wv_number = opt_args['number']
     if 'level' in opt_args: wv_level = opt_args['level']
-    triggers += gen_triggers(wv_seed, wv_number, wv_level)
+    #triggers += gen_triggers(wv_seed, wv_number, wv_level)
     triggers = list(set(triggers))
 
     for subDir in subDirs:
