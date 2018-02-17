@@ -49,6 +49,7 @@ def get_top_results(critr, path, ext='json'):
     try:
         umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
         umls_clt.gettgt()
+        writeLog('UMLS client initialized!')
     except Exception as e:
         writeLog('Unable to initialize UMLS client: {}'.format(repr(e)))
         umls_clt = None
@@ -89,7 +90,6 @@ def get_top_results(critr, path, ext='json'):
         if targ.get(optimize, 0.0) <= top.get(optimize, 0.0): continue  # if not better than current
         top = deepcopy(targ)  # set new best
     top['criteria'] = critr
-    pdb.set_trace()
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
     mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
     rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
