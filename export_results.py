@@ -33,10 +33,10 @@ def get_top_results(critr, path, ext='json'):
     critr = str_to_dict(critr, '&', '=')
     print('Given criteria "%s" with hash "%s"' % (critr, cr_hash))
     memo_client = MemoryClient(sys.argv[0])
-    print('Attempting load from memory server...')
+    print('Attempting load from memory server . . .')
     m_cont = memo_client(hash_sum(path))
     if not type(m_cont) in [list, dict]: m_cont = None
-    if not m_cont: print('%s: Loading from %s...' % (currentTime(), path))
+    if not m_cont: print('%s: Loading from %s . . .' % (currentTime(), path))
     j_cont = m_cont if m_cont else loadJson(path) if ext == 'json' else load_yaml(path) if ext == 'yaml' else None
     path = path.replace('.yaml', '.json')  # temp compat hack
     if not isinstance(j_cont, list): raise Exception('%s should be a list' % path)
@@ -64,25 +64,32 @@ def get_top_results(critr, path, ext='json'):
         skip = False
 
         for cr in critr:
+            if skip: break
 
             if cr in targ:
-                # is p, r, f1
-                check = None
+                # is a score
+                score_within_limits = False
 
                 try:
-                    if critr[cr][:2] in ['<=', '>=', '==']: check = eval('%s%s' % (targ[cr], critr[cr]))
-                    if not check: continue
+                    if critr[cr][:2] in ['<=', '>=', '==']:
+                        score_within_limits = eval('%s%s' % (targ[cr], critr[cr]))
+
+                        if not score_within_limits:
+                            skip = True
+                            break
 
                 except:
                     pass
-            if not cr in targ['options']: continue
+            if not cr in targ['options']: continue  # if criteria outside run params
             t_cr = targ['options'][cr]
-            if isinstance(t_cr, str) and  re.match(critr[cr], t_cr): continue  # regex non-match
-            skip = True  # invalidate for any other criteria
-            break
-        if skip: continue
-        if targ.get(optimize, 0.0) <= top.get(optimize, 0.0): continue
-        top = deepcopy(targ)
+            if isinstance(t_cr, str) and re.match(critr[cr], t_cr): continue  # if regex match
+            skip = True  # invalidate current result due to non-match
+            break  # no need to go further with current
+        if skip: continue  # if invalidated
+        if targ.get(optimize, 0.0) <= top.get(optimize, 0.0): continue  # if not better than current
+        top = deepcopy(targ)  # set new best
+    top['criteria'] = critr
+    pdb.set_trace()
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
     mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
     rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
@@ -135,7 +142,13 @@ def get_top_results(critr, path, ext='json'):
         save_yaml(top, rf_name)
     fin_msg = '\n%s: Top results for "%s" with criteria "%s" hash "%s":\n%s\nSaved to %s' % (currentTime(), path, critr, cr_hash, top, rf_name)
     writeLog(fin_msg)
-    slack_post(fin_msg, '@aphillips')
+
+    try:
+        slack_post(fin_msg, '@aphillips')
+
+    except OSError as e:
+        fin_msg = '\n%s: Top results for "%s" with criteria "%s" hash "%s"\nsaved to %s' % (currentTime(), path, critr, cr_hash, rf_name)
+        slack_post(fin_msg, '@aphillips')
     return top
 
 def get_gs_params(path):
