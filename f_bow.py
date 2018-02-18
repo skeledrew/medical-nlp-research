@@ -521,8 +521,9 @@ def test_eval(state, **rest_kw):
             'Invalid index; must be 0 or a positive integer less than %d' %
             len(results))
     result = results[args.result_index]  # dbg1
+    if not args.test_dir: args.test_dir = dataDir + result['options']['notesDirName'].replace('notes', 'notes_test')  # generate test dir path if not given
     if not os.path.exists(args.test_dir):
-        raise Exception('Invalid path for test set')
+        raise Exception('Invalid path for test set: %s' % args.test_dir)
     writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
     test_set = args.test_dir.rstrip('/').split('/')[-1]
     params = result['options']
@@ -786,7 +787,7 @@ def get_args():
     p.add_argument('--config-file', help='Config file path', type=str, default=DEFAULT_CONFIG)
     p.add_argument('--learning-curve', help='Flag to generate a learning curve', action='store_true')
     p.add_argument('--eval', help='Evaluate a model on a test set', action='store_true')
-    p.add_argument('--test-dir', help='Test set path', type=str, default='')
+    p.add_argument('--test-dir', help='Test set path (opt)', type=str, default='')
     p.add_argument('--clfs-file', help='Result file with classifiers for eval', default='')
     p.add_argument('--result-index', help='Index of classifier in result file', type=int, default=0)
     p.add_argument('-mp', '--multiprocess', help='Use crunch service', action='store_true')
