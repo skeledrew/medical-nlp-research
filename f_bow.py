@@ -514,13 +514,13 @@ def test_eval(state, **rest_kw):
     if not isinstance(results, list):
         raise ValueError('Invalid result format; must be a list.')
     save_progress = False if results[args.result_index]['options']['modSel'] in ['lc'
-                                                                    ] else True  # TODO: fix runner params not being preserved?
+                                                                    ] else True  # TODO: fix runner params not being preserved? dbg1
     #pdb.set_trace()
     if args.result_index < 0 or args.result_index > len(results) - 1:
         raise ValueError(
             'Invalid index; must be 0 or a positive integer less than %d' %
             len(results))
-    result = results[args.result_index][1]
+    result = results[args.result_index]  # dbg1
     if not os.path.exists(args.test_dir):
         raise Exception('Invalid path for test set')
     writeLog('%s: Args validated: %s' % (currentTime(), str(args)))
