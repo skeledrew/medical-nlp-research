@@ -513,8 +513,8 @@ def test_eval(state, **rest_kw):
     if isinstance(results, dict): results = [results]
     if not isinstance(results, list):
         raise ValueError('Invalid result format; must be a list.')
-    save_progress = False if results[args.result_index][1]['options']['modSel'] in ['lc'
-                                                                    ] else True
+    save_progress = False if results[args.result_index]['options']['modSel'] in ['lc'
+                                                                    ] else True  # TODO: fix runner params not being preserved?
     #pdb.set_trace()
     if args.result_index < 0 or args.result_index > len(results) - 1:
         raise ValueError(
