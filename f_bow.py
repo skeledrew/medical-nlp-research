@@ -567,11 +567,11 @@ def test_eval(state, **rest_kw):
     writeLog('%s: Evaluating on test...' % currentTime())
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
-    if hasattr(classifier, 'coef_'):
-        [
-            feats[idx].append(classifier.coef_[0][idx])
-            for idx in range(len(feats))
-        ]
+    #if hasattr(classifier, 'coef_'):
+    #    [
+    #        feats[idx].append(classifier.coef_[0][idx])
+    #        for idx in range(len(feats))
+    #    ]
     misses = GetMisses(y_test, pred, test_bunch.filenames)
     misses = list(set(misses))
     p = precision_score(y_test, pred, pos_label=1)
