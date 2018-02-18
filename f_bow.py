@@ -589,11 +589,12 @@ def test_eval(state, **rest_kw):
     except Exception as e:
         writeLog('%s: Error while evaluating on test: %s' % (currentTime(),
                                                              repr(e)))
-    mf_name = path_name_prefix('miscat-test_', args[0].replace(
-        '.json', '.txt')) if save_progress else None
+    mf_name = path_name_prefix('miscat-test_', args.clfs_file.replace(
+        '.json', '.txt') if args.clfs_file.endswith('.json') else args.clfs_file.replace(
+        '.yaml', '.txt')) if save_progress else None
     if save_progress: saveText('\n'.join(misses), mf_name)
     ff_name = path_name_prefix('feats-test_',
-                               args[0]) if save_progress else None
+                               args.clfs_file) if save_progress else None
     if save_progress:
         saveText('\n'.join(', '.join(str(f)) for f in feats), ff_name)
     classifier = re.sub('\n *', ' ', str(clf_pipe.steps[-1][-1]))
@@ -601,7 +602,7 @@ def test_eval(state, **rest_kw):
         '%s: Classifier %s \nwith options "%s..." on test set %s yielded: P = %s, R = %s, F1 = %s, AUC = %s'
         % (currentTime(), classifier, str(params)[:200], test_set, p, r, f1,
            auc))
-    rf_name = path_name_prefix('test-res_', args[0]) if save_progress else None
+    rf_name = path_name_prefix('test-res_', args.clfs_file) if save_progress else None
     result = {
         'classifier': classifier,
         'options': params,
