@@ -577,6 +577,7 @@ def test_eval(state, **rest_kw):
     p = precision_score(y_test, pred, pos_label=1)
     r = recall_score(y_test, pred, pos_label=1)
     f1 = f1_score(y_test, pred, pos_label=1)
+    if not f1: pdb.set_trace()
     pred_p = auc = None
 
     try:
