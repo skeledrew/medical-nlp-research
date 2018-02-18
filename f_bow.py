@@ -508,7 +508,7 @@ def test_eval(state, **rest_kw):
     writeLog('%s: Loading results file...' % currentTime())
     if os.path.exists(args.clfs_file):
         results = loadJson(
-            args[0]) if args[0].endswith('.json') else load_yaml(
+            args.clfs_file) if args.clfs_file.endswith('.json') else load_yaml(
                 args.clfs_file) if args.clfs_file.endswith('.yaml') else args.clfs_file
     if isinstance(results, dict): results = [results]
     if not isinstance(results, list):
