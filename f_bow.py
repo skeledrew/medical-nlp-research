@@ -282,11 +282,17 @@ def CrossVal(numFolds,
         pred = classifier.predict(x_test)
         pred_p = classifier.predict_proba(x_test) if hasattr(
             classifier, 'predict_proba') else None
-        #if hasattr(classifier, 'coef_'):
-        #    [
-        #        feats[idx].append(classifier.coef_[0][idx])
-        #        for idx in range(len(feats))
-        #    ]
+        if hasattr(classifier, 'coef_'):
+
+            try:
+                [
+                    feats[idx].append(classifier.coef_[0][idx])
+                    for idx in range(len(feats))
+                ]
+
+            except Exception as e:
+                print(repr(e))
+                pdb.set_trace()
         misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
         ps.append(precision_score(y_test, pred, pos_label=1))
         rs.append(recall_score(y_test, pred, pos_label=1))
