@@ -102,12 +102,26 @@ class UMLSClient():
         self.access_cnt = 0
         self.tgt = None
         self.st = None
+        self._error = None
+        self._conn = False
 
     def save_cache(self):
         saveJson(self.cache, self.cache_path)
         return
 
     def gettgt(self):
+        """Wrap actual call to allow cache only operation"""
+
+        try:
+            self._gettgt()
+            writeLog('Connection to UMLS service initialized!')
+            self._conn = True
+
+        except Exception as e:
+            self._error = e
+            writeLog('Unable to connect to UMLS service: {}'.format(repr(e)))
+
+    def _gettgt(self):
         params = {'apikey': self.api_key}
         h = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain", "User-Agent":"python" }
         r = requests.post(self.auth_uri+self.auth_endpoint,data=params,headers=h)
@@ -128,6 +142,7 @@ class UMLSClient():
 
     def query_umls(self, identifier, tgt=None, source=None, version='current'):
         # get info from UMLS
+        if not self._conn: return {}
         uri = "https://uts-ws.nlm.nih.gov"
         if not tgt: tgt = self.tgt or self.gettgt()
         content_endpoint = '/rest/content/%s/CUI/%s' % (version, identifier) if not source else '/rest/content/%s/source/%s/%s' % (str(version), str(source), identifier)
