@@ -10,6 +10,7 @@ DEBUG = True
 COMMA_SUB = ';'  # replace commas in CUI real names with this
 usage = 'Usage: %s top {criteria} /path/to/exp_results' % (sys.argv[0])
 #resolve_cuis = False
+NA = 'N/A'
 
 
 def get_fields_in_json(args):
@@ -45,14 +46,8 @@ def get_top_results(critr, path, ext='json'):
     s_pat = 'UMLS_API_KEY='
     e_pat = '$'
     umls_key = re_findall('%s.+%s' % (s_pat, e_pat), loadText(os.environ['HOME'] + '/CREDS'), 0)[len(s_pat):] #(len(e_pat) * -1)]
-    umls_clt = None
-    try:
-        umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
-        umls_clt.gettgt()
-        writeLog('UMLS client initialized!')
-    except Exception as e:
-        writeLog('Unable to initialize UMLS client: {}'.format(repr(e)))
-        umls_clt = None
+    umls_clt = UMLSClient(umls_key, dataDir + 'umls_cache.json')
+    umls_clt.gettgt()
     print('%s: Searching for best matching criteria...' % currentTime())
     optimize = critr['optimize'] if 'optimize' in critr and critr['optimize'] in 'precision|recall|f1|acc|auc|spc|npv' else 'f1'
     resolve_cuis = critr['resolve_cuis'] if 'resolve_cuis' in critr and critr['resolve_cuis'] in 'yes|no' else 'no'
@@ -120,7 +115,7 @@ def get_top_results(critr, path, ext='json'):
                     cui_name = name.lstrip('-').upper()
                     if cui_name.startswith('NEG'): cui_name = cui_name[3:]
                     if not len(cui_name) == 8: raise ValueError('CUI must be formatted C#######, got "%s"' % cui_name)
-                    real_name = umls_clt.find_cui(cui_name)['name'].replace(',', COMMA_SUB)
+                    real_name = umls_clt.find_cui(cui_name).get('name', NA).replace(',', COMMA_SUB)
                     name = '%s (%s)' % (name, real_name)
                 feat = '%s,%s\n' % (name, ', '.join(str(f) for f in feat[2:]))
                 fo.write(feat)
