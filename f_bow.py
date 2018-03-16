@@ -150,6 +150,7 @@ def PreProc(notesDirName, ngramRange, minDF, analyzer, binary, pre_task,
     b_hash = hash_sum(notesRoot)
     bunch = memo[b_hash] if b_hash in memo else load_files(notesRoot)
     if not b_hash in memo: memo[b_hash] = bunch
+
     memo[param_hash]['bunch'] = bunch
     pipe = []  # hold transformer objects
     text_matrix = [s.decode('utf-8') for s in bunch.data]  # make str
