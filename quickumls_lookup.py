@@ -85,3 +85,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+commit_me(dataDir + 'tracking.json', 'quickumls_lookup.py')
