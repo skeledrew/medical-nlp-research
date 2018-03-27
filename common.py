@@ -17,7 +17,6 @@ from random import shuffle
 import math
 import shutil
 import json
-import pexpect
 import time
 import pdb
 #import jsonpickle
@@ -26,13 +25,15 @@ import pdb
 from zlib import adler32
 from inspect import getmembers, getargvalues, currentframe
 import requests
-from pexpect.replwrap import REPLWrapper
 from threading import Timer
-import yaml
-import rpyc
 import random
 import logging
 
+import pexpect
+from pexpect.replwrap import REPLWrapper
+import yaml
+import rpyc
+import prettyparse
 
 baseDir = '/NLPShare/Alcohol/'
 dataDir = baseDir + 'data/'
@@ -686,6 +687,9 @@ def fileList(path, fullpath=False):
             nameList[idx] = path + '/' + nameList[idx]
     return nameList
 
+def get_file_list(path, fullpath=False):
+    return fileList(path, fullpath)
+
 def splitDir(srcDir, destDir, percentOut, random=True, test=False):
     content = fileList(srcDir, True)
     numOut = len(content) - math.ceil(percentOut / 100 * len(content))  # take from end
@@ -1044,6 +1048,12 @@ def make_one_hot(seq, classes=[0, 1], hot=1, rest=0):
             if seq[idx] == cls:
                 new_seq[idx][pos] = hot
     return new_seq
+
+def get_args(usage):
+    """Parse command line args and return parsed args"""
+    args = prettyparser.create_parser(usage).parse_args()
+    return args
+
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
