@@ -1059,7 +1059,7 @@ def get_args(usage):
 
 def get_log(name, level='WARNING', format=''):
     if not format: format = '%(asctime)s: %(message)s'
-    logging.basicConfig(format=format, level=getattr(logging, level).upper())
+    logging.basicConfig(format=format, level=getattr(logging, level, 'WARNING'))
     return logging.getLogger(name)
 
 
