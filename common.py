@@ -1051,7 +1051,7 @@ def make_one_hot(seq, classes=[0, 1], hot=1, rest=0):
 
 def get_args(usage):
     """Parse command line args and return parsed args"""
-    args = prettyparser.create_parser(usage).parse_args()
+    args = prettyparse.create_parser(usage).parse_args()
     return args
 
 
