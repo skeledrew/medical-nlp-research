@@ -1,4 +1,4 @@
-#! /home/aphillips5/envs/nlpenv/bin/python3
+#! /usr/bin/env python3
 
 import numpy as np
 from sklearn.datasets import load_files
@@ -575,11 +575,11 @@ def test_eval(state, **rest_kw):
     writeLog('%s: Evaluating on test...' % currentTime())
     model = classifier.fit(x_train, y_train)
     pred = classifier.predict(x_test)
-    #if hasattr(classifier, 'coef_'):
-    #    [
-    #        feats[idx].append(classifier.coef_[0][idx])
-    #        for idx in range(len(feats))
-    #    ]
+    if hasattr(classifier, 'coef_'):
+        [
+            feats[idx].append(classifier.coef_[0][idx])
+            for idx in range(len(feats))
+        ]
     misses = GetMisses(y_test, pred, test_bunch.filenames)
     misses = list(set(misses))
     p = precision_score(y_test, pred, pos_label=1)
@@ -592,15 +592,23 @@ def test_eval(state, **rest_kw):
         pred_p = classifier.predict_proba(x_test) if hasattr(
             classifier, 'predict_proba') else None
         if not type(pred_p) == type(None) and not pred_p.shape == y_test.shape:
-            y_test = np.asarray(make_one_hot(y_test))
-        auc = roc_auc_score(y_test,
-                            pred_p) if not type(pred_p) == None else None
+            y_test_oh = np.asarray(make_one_hot(y_test))
+            auc = roc_auc_score(y_test_oh,
+                                pred_p) if not type(pred_p) == None else None
     except Exception as e:
         writeLog('%s: Error while evaluating on test: %s' % (currentTime(),
                                                              repr(e)))
     mf_name = path_name_prefix('miscat-test_', args.clfs_file.replace(
         '.json', '.txt') if args.clfs_file.endswith('.json') else args.clfs_file.replace(
         '.yaml', '.txt')) if save_progress else None
+    report = gen_report(
+        [name.replace('.txt', '') for name in test_bunch.filenames],
+        pred,
+        y_test,
+        pred_p
+    )
+    rf_name = path_name_prefix('report-test_', args.clfs_file) + '.csv'
+    saveText(report, rf_name)
     if save_progress: saveText('\n'.join(misses), mf_name)
     ff_name = path_name_prefix('feats-test_',
                                args.clfs_file) if save_progress else None
@@ -618,6 +626,7 @@ def test_eval(state, **rest_kw):
         'test_set': test_set,
         'P': p,
         'R': r,
+
         'F1': f1
     }
     if save_progress:
@@ -801,7 +810,15 @@ def get_args():
     args = p.parse_args()
     return args
 
+def gen_report(names, preds, y_test, probs):
+    report = 'mrn,pred,gold,prob'
+    body = '\n'.join(['{},{},{},{}'.format(name, pred, y, prob)
+                        for name, pred, y, prob in zip(names, preds, y_test, probs)])
+    report += '\n' + body
+    return report
 
+    for idx in range(len(y_test)):
+        entry = '{},{},{},{}'.format(names)
 if __name__ == "__main__":
     try:
         main(sys.argv)
