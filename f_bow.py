@@ -602,7 +602,7 @@ def test_eval(state, **rest_kw):
         '.json', '.txt') if args.clfs_file.endswith('.json') else args.clfs_file.replace(
         '.yaml', '.txt')) if save_progress else None
     report = gen_report(
-        [name.replace('.txt', '') for name in test_bunch.filenames],
+        [name.split('/')[-1].replace('.txt', '') for name in test_bunch.filenames],
         pred,
         y_test,
         pred_p
