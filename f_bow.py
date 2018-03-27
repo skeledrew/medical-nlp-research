@@ -605,7 +605,7 @@ def test_eval(state, **rest_kw):
         [name.split('/')[-1].replace('.txt', '') for name in test_bunch.filenames],
         pred,
         y_test,
-        pred_p
+        pred_p[:,-1]
     )
     rf_name = path_name_prefix('report-test_', args.clfs_file) + '.csv'
     saveText(report, rf_name)
