@@ -800,6 +800,9 @@ def currentTime():
     # 17-06-09
     return time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
 
+def current_time():
+    return currentTime()
+
 def writeLog(msg, print_=True, log=None):
     # 17-06-11
     global logFile
