@@ -1057,6 +1057,11 @@ def get_args(usage):
     args = prettyparse.create_parser(usage).parse_args()
     return args
 
+def get_log(name, level='WARNING', format=''):
+    if not format: format = '%(asctime)s: %(message)s'
+    logging.basicConfig(format=format, level=getattr(logging, level).upper())
+    return logging.getLogger(name)
+
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
