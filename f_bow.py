@@ -89,7 +89,6 @@ def gSGenericRunner(
         lc_params['train_set'] = notesDirName
         lc_params['mode'] = modSel
         lc_params['assoc_data'] = result
-        #p, r, f1, std, mis, raw, others
         scores = CrossVal(
             numFolds, classifier, matrix, bunch, preproc_hash, clf_hash,
             result['features'], sk_feats
@@ -124,9 +123,6 @@ def gSGenericRunner(
         result['error'] = e.args
         result['f1'] = result['precision'] = result['recall'] = result[
             'std'] = None
-        #result['others'] = []
-    #for other in result['others']:
-    #    result[other] = result['others'][other]
     if result['f1'] and 'auc' in result:
         writeLog(
             '%s: Classifier %s \nwith options %s yielded: P = %s, R = %s, F1 = %s, Std = %s, AUC = %s, Accuracy = %s, Specificity = %s, NPV = %s'
@@ -262,6 +258,7 @@ def CrossVal(numFolds,
     spcs = []
     npvs = []
     rocs = []
+    indiv_preds = []
     final_result = Group()
     folds = KFold(n_splits=numFolds)
     misses = []
@@ -319,14 +316,21 @@ def CrossVal(numFolds,
         roc[2] = [float(e) for e in roc[2]]
         rocs.append(roc)
         if not type(pred_p) == type(None) and not pred_p.shape == y_test.shape:
-            y_test = np.asarray(make_one_hot(y_test))
+            y_test_oh = np.asarray(make_one_hot(y_test))
         aucs.append(
-            roc_auc_score(y_test, pred_p if not type(pred_p) == type(None)
-                          and pred_p.shape == y_test.shape else
-                          [0.0] * len(y_test)))
+            roc_auc_score(y_test_oh, pred_p if not type(pred_p) == type(None)
+                          and pred_p.shape == y_test_oh.shape else
+                          [0.0] * len(y_test_oh)))
         #if not type(pred_p) == type(None): pdb.set_trace()
         spcs.append(raw['tn'] / ((raw['tn'] + raw['fp']) or 1))
         npvs.append(raw['tn'] / ((raw['tn'] + raw['fn']) or 1))
+        ip = [
+            [name.split('/')[-1].replace('.txt', '') for name in bunch.filenames[test_indices]],
+            pred,
+            y_test,
+            pred_p[:,-1]
+        ]
+        indiv_preds.append(ip)
     misses = list(set(misses))
     misses.sort()
     p, r, f1, std, acc, auc, spc, npv = float(np.mean(ps)), float(
@@ -352,8 +356,9 @@ def CrossVal(numFolds,
     memo[kf_hash]['npv'] = other_results['npv'] = npv
     memo[kf_hash]['rocs'] = other_results['rocs'] = rocs
     [final_result(r, other_results[r]) for r in other_results]
+    memo[kf_hash]['indiv_preds'] = final_result['indiv_preds'] = indiv_preds
     if not isinstance(final_result, Group): pdb.set_trace()
-    return final_result #p, r, f1, std, misses, raw_results, other_results
+    return final_result
 
 def TTS(randState, classifier, tfidf_matrix, bunch, pp_hash, clf_hash):
     # train-test split
@@ -601,14 +606,14 @@ def test_eval(state, **rest_kw):
     mf_name = path_name_prefix('miscat-test_', args.clfs_file.replace(
         '.json', '.txt') if args.clfs_file.endswith('.json') else args.clfs_file.replace(
         '.yaml', '.txt')) if save_progress else None
-    report = gen_report(
+    ip_report = gen_ip_report(
         [name.split('/')[-1].replace('.txt', '') for name in test_bunch.filenames],
         pred,
         y_test,
         pred_p[:,-1]
     )
-    rf_name = path_name_prefix('report-test_', args.clfs_file) + '.csv'
-    saveText(report, rf_name)
+    rf_name = path_name_prefix('ipredict-test_', args.clfs_file) + '.csv'
+    saveText(ip_report, rf_name)
     if save_progress: saveText('\n'.join(misses), mf_name)
     ff_name = path_name_prefix('feats-test_',
                                args.clfs_file) if save_progress else None
@@ -810,15 +815,7 @@ def get_args():
     args = p.parse_args()
     return args
 
-def gen_report(names, preds, y_test, probs):
-    report = 'mrn,pred,gold,prob'
-    body = '\n'.join(['{},{},{},{}'.format(name, pred, y, prob)
-                        for name, pred, y, prob in zip(names, preds, y_test, probs)])
-    report += '\n' + body
-    return report
 
-    for idx in range(len(y_test)):
-        entry = '{},{},{},{}'.format(names)
 if __name__ == "__main__":
     try:
         main(sys.argv)
