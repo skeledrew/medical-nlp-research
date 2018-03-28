@@ -1,4 +1,4 @@
-#! /home/aphillips5/envs/nlpenv/bin/python3
+#! /usr/bin/env python3
 
 # regular imports
 from copy import deepcopy
@@ -88,10 +88,12 @@ def get_top_results(critr, path, ext='json'):
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
     mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
     rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
+    ipf_name = path_name_prefix('ipredict-train-foldFLD-%s_' % cr_hash, path).replace('.json', '.csv')
     if not isinstance(top, list): top = [top]
     tmp_top = deepcopy(top)
-    if 'features' in tmp_top: del tmp_top[0]['features']
-    if 'mis' in tmp_top: del tmp_top[0]['mis']
+    if 'features' in tmp_top[0]: del tmp_top[0]['features']
+    if 'mis' in tmp_top[0]: del tmp_top[0]['mis']
+    if 'indiv_preds' in tmp_top[0]: del tmp_top[0]['indiv_preds']
     try:
         saveJson(tmp_top, rf_name)
     except:
@@ -129,6 +131,14 @@ def get_top_results(critr, path, ext='json'):
         with open(mf_name, 'w') as fo:
             fo.write('\n'.join(top[0]['mis']))
         top[0]['mis'] = mf_name
+
+    if 'indiv_preds' in top[0]:
+        # process individual predictions
+
+        for idx, ip in enumerate(top[0]['indiv_preds']):
+            # save each fold in a diff file
+            ip_report = gen_ip_report(*ip)
+            saveText(ip_report, ipf_name.replace('FLD', str(idx)))
     try:
         saveJson(top, rf_name)
 
