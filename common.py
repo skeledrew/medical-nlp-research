@@ -1062,6 +1062,14 @@ def get_log(name, level='WARNING', format=''):
     logging.basicConfig(format=format, level=getattr(logging, level.upper(), 'WARNING'))
     return logging.getLogger(name)
 
+def gen_ip_report(names, preds, y_test, probs):
+    """Generate individual predictions report"""
+    report = 'mrn,pred,gold,prob'
+    body = '\n'.join(['{},{},{},{}'.format(name, pred, y, prob)
+                        for name, pred, y, prob in zip(names, preds, y_test, probs)])
+    report += '\n' + body
+    return report
+
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
