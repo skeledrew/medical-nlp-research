@@ -1090,6 +1090,23 @@ def gen_ip_report_2(ip_detail):
     report += '\n' + body
     return report
 
+def mirror_dir_split(src_dir, dest_dir, mirror_dir, test=False):
+    """Split a folder based on another folder"""
+    if not os.path.exists(src_dir): raise OSError(f'Source dir {src_dir} does not exist!')
+    if not os.path.exists(mirror_dir): raise OSError(f'Mirror dir {src_dir} does not exist!')
+    content = get_file_list(src_dir, True)
+    mirror = get_file_list(mirror_dir, True)
+    ensure_dirs(dest_dir)
+    cnt = 0
+
+    for path in mirror:
+        candidate = os.path.join(src_dir, path.split(os.path.sep)[-1])
+
+        if candidate in content:
+            if not test: shutil.move(path, dest_dir)
+            cnt += 1
+    print(f'Moved {cnt} of {len(content)} files to {dest_dir}')
+
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
