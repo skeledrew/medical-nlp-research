@@ -1078,6 +1078,7 @@ def gen_ip_report_2(ip_detail):
     patients = {}
 
     for idx, fold in enumerate(ip_detail):
+        fold = zip(*fold)
 
         for patient in fold:
 
