@@ -1079,7 +1079,7 @@ def gen_ip_report_2(ip_detail):
 
     for idx, fold in enumerate(ip_detail):
 
-        for patient in zip(fold):
+        for patient in zip(*fold):
 
             if not patient[0] in patients:
                 patients[patient[0]] = [patient[2]] + (['-'] * 2 * num_folds)  # mrn and gold
