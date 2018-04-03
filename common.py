@@ -1072,7 +1072,7 @@ def gen_ip_report(names, preds, y_test, probs):
 
 def gen_ip_report_2(ip_detail):
     """Generate individual predictions report with multiple folds"""
-    num_folds = len(ip_details)
+    num_folds = len(ip_detail)
     report = 'mrn,gold,{}'.format(['pred_{},prob_{}'.format(idx, idx) for idx in num_folds])
     #entry_template = 'MRN,GLD,{}'.format(''.join(['FLD{}'.format(idx) for idx in num_folds]))
     patients = {}
