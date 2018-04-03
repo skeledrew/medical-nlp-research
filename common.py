@@ -1078,12 +1078,11 @@ def gen_ip_report_2(ip_detail):
     patients = {}
 
     for idx, fold in enumerate(ip_detail):
-        fold = zip(*fold)
 
-        for patient in fold:
+        for patient in zip(fold):
 
             if not patient[0] in patients:
-                patients[patient[0]] = [patient[2]] + (['-'] * num_folds)  # mrn and gold
+                patients[patient[0]] = [patient[2]] + (['-'] * 2 * num_folds)  # mrn and gold
 
             patients[patient[0]][idx * 2 + 1] = patient[1]  # pred
             patients[patient[0]][idx * 2 + 2] = patient[3]  # prob
