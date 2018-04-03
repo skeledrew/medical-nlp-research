@@ -1086,7 +1086,7 @@ def gen_ip_report_2(ip_detail):
 
             patients[patient[0]][idx * 2 + 1] = patient[1]  # pred
             patients[patient[0]][idx * 2 + 2] = patient[3]  # prob
-    body = '\n'.join([','.join(mrn + patients[mrn]) for mrn in patients])
+    body = '\n'.join([','.join([mrn] + patients[mrn]) for mrn in patients])
     report += '\n' + body
     return report
 
