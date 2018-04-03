@@ -1070,6 +1070,26 @@ def gen_ip_report(names, preds, y_test, probs):
     report += '\n' + body
     return report
 
+def gen_ip_report_2(ip_detail):
+    """Generate individual predictions report with multiple folds"""
+    num_folds = len(ip_details)
+    report = 'mrn,gold,{}'.format(['pred_{},prob_{}'.format(idx, idx) for idx in num_folds])
+    #entry_template = 'MRN,GLD,{}'.format(''.join(['FLD{}'.format(idx) for idx in num_folds]))
+    patients = {}
+
+    for idx, fold in enumerate(ip_detail):
+
+        for patient in fold:
+
+            if not patient[0] in patients:
+                patients[patient[0]] = [patient[2]] + (['-'] * num_folds)  # mrn and gold
+
+            patients[patient[0]][idx * 2 + 1] = patient[1]  # pred
+            patients[patient[0]][idx * 2 + 2] = patient[3]  # prob
+    body = '\n'.join([','.join(mrn + patients[mrn]) for mrn in patients])
+    report += '\n' + body
+    return report
+
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
