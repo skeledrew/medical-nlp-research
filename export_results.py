@@ -88,7 +88,7 @@ def get_top_results(critr, path, ext='json'):
     ff_name = path_name_prefix('feats-%s_' % cr_hash, path).replace('.json', '.csv')
     mf_name = path_name_prefix('miscat-%s_' % cr_hash, path).replace('.json', '.txt')
     rf_name = path_name_prefix('top-res-%s_' % cr_hash, path)
-    ipf_name = path_name_prefix('ipredict-train-foldFLD-%s_' % cr_hash, path).replace('.json', '.csv')
+    ipf_name = path_name_prefix('ipredict-train-%s_' % cr_hash, path).replace('.json', '.csv')
     if not isinstance(top, list): top = [top]
     tmp_top = deepcopy(top)
     if 'features' in tmp_top[0]: del tmp_top[0]['features']
@@ -134,11 +134,10 @@ def get_top_results(critr, path, ext='json'):
 
     if 'indiv_preds' in top[0]:
         # process individual predictions
+        ip_detail = top[0]['indiv_preds']
+        ip_report = gen_ip_report_2(ip_detail)
+        saveText(ip_report, ipf_name)
 
-        for idx, ip in enumerate(top[0]['indiv_preds']):
-            # save each fold in a diff file
-            ip_report = gen_ip_report(*ip)
-            saveText(ip_report, ipf_name.replace('FLD', str(idx)))
     try:
         saveJson(top, rf_name)
 
