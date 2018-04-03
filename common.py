@@ -1103,9 +1103,9 @@ def mirror_dir_split(src_dir, dest_dir, mirror_dir, test=False):
         candidate = os.path.join(src_dir, path.split(os.path.sep)[-1])
 
         if candidate in content:
-            if not test: shutil.move(path, dest_dir)
+            if not test: shutil.move(candidate, dest_dir)
             cnt += 1
-    print(f'Moved {cnt} of {len(content)} files to {dest_dir}')
+    print(f'Moved {cnt} of {len(content)} files from {src_dir} to {dest_dir}')
 
 
 if __name__ == '__main__':
