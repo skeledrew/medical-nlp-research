@@ -290,7 +290,12 @@ def CrossVal(numFolds,
             except Exception as e:
                 print(repr(e))
                 pdb.set_trace()
-        misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
+        try:
+            misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
+
+        except Exception as e:
+            print(repr(e))
+            pdb.set_trace()
         ps.append(precision_score(y_test, pred, pos_label=1))
         rs.append(recall_score(y_test, pred, pos_label=1))
         f1s.append(f1_score(y_test, pred, pos_label=1))
@@ -453,7 +458,7 @@ def main(args):
             #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
             #crunch_client.add_task(func, args)
 
-        except KeyboardInterrupt, BdbQuit:
+        except (KeyboardInterrupt, BdbQuit):
             writeLog('%s: Process INTerrupted by user. Saving progress...' %
                      (currentTime()))
             sess = {
