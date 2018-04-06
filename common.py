@@ -1109,7 +1109,7 @@ def mirror_dir_split(src_dir, dest_dir, mirror_dir, test=False):
 
 def merge_dirs(dest_dir, *src_dirs, test=False):
     """Merge multiple folders into a single destination"""
-    if not isinstance(src_dirs, list): src_dirs = [src_dirs]
+    if isinstance(src_dirs, str): src_dirs = [src_dirs]
     ensure_dirs(dest_dir)
     cnt = 0
 
