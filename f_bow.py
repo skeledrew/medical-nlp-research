@@ -283,19 +283,14 @@ def CrossVal(numFolds,
 
             try:
                 [
-                    feats[idx].append(classifier.coef_[0][idx])
+                    feats[idx].append(classifier.coef_[0,idx])  # BUGFIX: SVC breaks on _[0][idx]
                     for idx in range(len(feats))
                 ]
 
             except Exception as e:
                 print(repr(e))
                 pdb.set_trace()
-        try:
-            misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
-
-        except Exception as e:
-            print(repr(e))
-            pdb.set_trace()
+        misses += GetMisses(y_test, pred, bunch.filenames[test_indices])
         ps.append(precision_score(y_test, pred, pos_label=1))
         rs.append(recall_score(y_test, pred, pos_label=1))
         f1s.append(f1_score(y_test, pred, pos_label=1))
@@ -458,7 +453,7 @@ def main(args):
             #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
             #crunch_client.add_task(func, args)
 
-        except (KeyboardInterrupt, BdbQuit):
+        except (KeyboardInterrupt):
             writeLog('%s: Process INTerrupted by user. Saving progress...' %
                      (currentTime()))
             sess = {
@@ -473,10 +468,13 @@ def main(args):
             return
 
         except Exception as e:
+            if repr(e).startswith('BdbQuit'): sys.exit()
             ignore = False
 
             for err_pat in ERROR_IGNORE.split('||'):
-                if re.search(err_pat, repr(e)): ignore = True
+                if re.search(err_pat, repr(e)):
+                    ignore = True
+                    break
 
             if (DEBUG or not state.args.ignore_errors) and not ignore:
                 results[idx] = 'Error in #%d: %s.\nSaving progress...' % (
