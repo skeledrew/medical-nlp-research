@@ -1107,6 +1107,18 @@ def mirror_dir_split(src_dir, dest_dir, mirror_dir, test=False):
             cnt += 1
     print(f'Moved {cnt} of {len(content)} files from {src_dir} to {dest_dir}')
 
+def merge_dirs(dest_dir, *src_dirs, test=False):
+    if not isinstance(src_dirs, list): src_dirs = [src_dirs]
+    ensure_dirs(dest_dir)
+
+    for src_dir in src_dirs:
+
+        for src in get_file_list(src_dir):
+            dest = f'{dest_dir}{os.path.sep}{src.split(os.path.sep)[-1]}'
+
+            with open(src) as s, open(dest, 'a') as d:
+                d.write(s.read())
+
 
 if __name__ == '__main__':
     print('This is a library module not meant to be run directly!')
