@@ -1110,6 +1110,8 @@ def mirror_dir_split(src_dir, dest_dir, mirror_dir, test=False):
 def merge_dirs(dest_dir, *src_dirs, test=False):
     """Merge multiple folders into a single destination"""
     if isinstance(src_dirs, str): src_dirs = [src_dirs]
+    if False in [isinstance(d, str) and os.path.exists(d) for d in src_dirs]:
+        raise OSError('One or more of the specified source folders does not exist')
     ensure_dirs(dest_dir)
     cnt = 0
 
@@ -1119,7 +1121,7 @@ def merge_dirs(dest_dir, *src_dirs, test=False):
             dest = os.path.join(dest_dir, src.split(os.path.sep)[-1])
 
             with open(src) as s, open(dest, 'a') as d:
-                if not os.path.exist(dest): cnt += 1
+                if not os.path.exists(dest): cnt += 1
                 d.write(s.read())
     print(f'Merged {cnt} files from {", ".join(src_dirs)} into {dest_dir}')
 
