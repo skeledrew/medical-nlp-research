@@ -1108,8 +1108,10 @@ def mirror_dir_split(src_dir, dest_dir, mirror_dir, test=False):
     print(f'Moved {cnt} of {len(content)} files from {src_dir} to {dest_dir}')
 
 def merge_dirs(dest_dir, *src_dirs, test=False):
+    """Merge multiple folders into a single destination"""
     if not isinstance(src_dirs, list): src_dirs = [src_dirs]
     ensure_dirs(dest_dir)
+    cnt = 0
 
     for src_dir in src_dirs:
 
@@ -1118,6 +1120,8 @@ def merge_dirs(dest_dir, *src_dirs, test=False):
 
             with open(src) as s, open(dest, 'a') as d:
                 d.write(s.read())
+                cnt += 1
+    print(f'Merged {cnt} files from {", ".join(src_dirs)} into {dest_dir}')
 
 
 if __name__ == '__main__':
