@@ -55,7 +55,7 @@ def get_top_results(critr, path, ext='json'):
 
     for idx in range(len(j_cont)):
         # seek max specified score
-        targ = j_cont[idx][1]
+        targ = j_cont[idx][1] if j_cont[idx] and hasattr(j_cont[idx], '__len__') else []
         if not 'f1' in targ or targ['f1'] == None: continue
         skip = False
 
