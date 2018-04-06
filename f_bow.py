@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve  # 17-11-16
 from common import *
 import custom_clfs
 
-ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix'
+ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix||IndexError..index (1) out of range'
 DEBUG = False
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 memo = {}  # for memoization
@@ -436,6 +436,7 @@ def main(args):
             gSParams, doEval=False, funcList=[gSGenericRunner])
     if not results:
         raise ValueError('Grid failed. Params are: {}'.format(str(gSParams)))
+    bad_grids = []  # store errored grids
     writeLog('%s: Processing method calls %s to %s' %
              (currentTime(), results[resume], results[-1]))
     #pdb.set_trace()
@@ -472,7 +473,7 @@ def main(args):
             for err_pat in ERROR_IGNORE.split('||'):
                 if re.search(err_pat, repr(e)): ignore = True
 
-            if DEBUG and not ignore:
+            if (DEBUG or not state.args.ignore_errors) and not ignore:
                 results[idx] = 'Error in #%d: %s.\nSaving progress...' % (
                     idx + 1, repr(e))
                 writeLog('%s: %s' % (currentTime(), results[idx]))
@@ -488,20 +489,23 @@ def main(args):
                 pdb.post_mortem()
 
             else:
+                bad_grids.append({'idx': idx, 'params': results[idx], 'error': repr(e)})
                 results[idx] = 'Exception in #%d: %s.' % (idx + 1, repr(e))
                 writeLog('%s: %s' % (currentTime(), results[idx]))
-                #raise
     crunch_client.wait()
     writeLog('%s: Crunching complete. Wrapping up...' % (currentTime()))
     #results = crunch_client.get_results()
     results.append(gSParams)
+    results.append(bad_grids)
     ex_num = getExpNum(dataDir + 'tracking.json')
-    rf_name = '%sexp%s_anc_notes_GS_results' % (dataDir, ex_num)
+    rf_name = f'{dataDir}exp{ex_num}_gridsearch_results'
+
     try:
         if save_progress: saveJson(results, rf_name + '.json')
     except:
         save_err += 1
         save_yaml(results, rf_name + '.yaml')
+        if os.path.exists(f'{rf_name}.json'): os.remove(f'{rf_name}.json')
     if save_progress: savePickle(memo, '%sexp%s_memo.pkl' % (dataDir, ex_num))
     if os.path.exists(curr_sess): os.remove(curr_sess)
     e_time = currentTime()
@@ -812,6 +816,7 @@ def get_args():
     p.add_argument('--clfs-file', help='Result file with classifiers for eval', default='')
     p.add_argument('--result-index', help='Index of classifier in result file', type=int, default=0)
     p.add_argument('-mp', '--multiprocess', help='Use crunch service', action='store_true')
+    p.add_argument('-i', '--ignore-errors', help='Ignore errors in some grids', action='store_true')
     args = p.parse_args()
     return args
 
