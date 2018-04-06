@@ -1115,8 +1115,8 @@ def merge_dirs(dest_dir, *src_dirs, test=False):
 
     for src_dir in src_dirs:
 
-        for src in get_file_list(src_dir):
-            dest = f'{dest_dir}{os.path.sep}{src.split(os.path.sep)[-1]}'
+        for src in get_file_list(src_dir, True):
+            dest = os.path.join(dest_dir, src.split(os.path.sep)[-1])
 
             with open(src) as s, open(dest, 'a') as d:
                 d.write(s.read())
