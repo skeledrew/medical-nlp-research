@@ -1119,8 +1119,8 @@ def merge_dirs(dest_dir, *src_dirs, test=False):
             dest = os.path.join(dest_dir, src.split(os.path.sep)[-1])
 
             with open(src) as s, open(dest, 'a') as d:
+                if not os.path.exist(dest): cnt += 1
                 d.write(s.read())
-                cnt += 1
     print(f'Merged {cnt} files from {", ".join(src_dirs)} into {dest_dir}')
 
 
