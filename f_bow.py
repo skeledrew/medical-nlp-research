@@ -514,7 +514,7 @@ def main(args):
     e_time = currentTime()
     save_err_msg = '' if not save_err else ' An error occurred during JSON save so YAML used instead.'
     grid_errs_msg = '' if not bad_grids else f' Skipped {len(bad_grids)} bad grids.'
-    fin_msg = 'Operation complete for experiment #%d. Started %s and ended %s. %s %s' % (
+    fin_msg = 'Operation complete for experiment #%d. Started %s and ended %s.%s%s' % (
         ex_num, s_time, e_time, save_err_msg, grid_errs_msg)
     writeLog(fin_msg)
     slack_post(fin_msg, '@aphillips')
