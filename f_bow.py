@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve  # 17-11-16
 from common import *
 import custom_clfs
 
-ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix||IndexError..index (1) out of range'
+ERROR_IGNORE = 'ValueError..eta0||TypeError..sequence||Failed to create||ValueError..Unsupported set||TypeError..A sparse matrix||IndexError..index .+ out of range'
 DEBUG = False
 IGNORE = '~~IGNORE_THIS_PARAM~~'
 memo = {}  # for memoization
@@ -453,7 +453,7 @@ def main(args):
             #args = list(eval('(' + '('.join(results[idx].split('(')[1:]).strip(' ')))
             #crunch_client.add_task(func, args)
 
-        except KeyboardInterrupt:
+        except KeyboardInterrupt, BdbQuit:
             writeLog('%s: Process INTerrupted by user. Saving progress...' %
                      (currentTime()))
             sess = {
