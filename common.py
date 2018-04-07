@@ -1124,6 +1124,48 @@ def merge_dirs(dest_dir, *src_dirs, test=False):
                 if not os.path.exists(dest): cnt += 1
                 d.write(s.read())
     print(f'Merged {cnt} files from {", ".join(src_dirs)} into {dest_dir}')
+    return
+
+def get_separated_values_file_iterator(path, sep=',', headers=[], filter_='^[.*]', encoding='utf-8'):
+    """Return a generic iterator for processing large structured text files.
+
+    Text file types include CSV, TSV, RRF, etc which are structured with one record per line
+    and fields separated by a separator charactor(s). This iterator is mainly for handling
+    very large files which probably won't hold in memory all at once very well.
+
+    Arguments:
+    path (str) -- path to text file.
+
+    Keyword arguments:
+    sep (str) -- values separator (default: ",").
+    headers (list|str) -- used as fields (columns) headers (optional, default: []).
+        length must match the length of each record (row) in the file; if not the record will not
+          be processed.
+    filter_ (str) -- regex filter that excludes matched records (default: "^[.*]").
+    encoding (str) -- encoding used to open the file (default: "utf-8").
+
+    Returns:
+    an iterator that yields:
+        a record as a list if headers not given
+        a record with associated header as a dict otherwise
+    """
+    if not os.path.exists(path): raise OSError(f'"{path}" does not exist')
+    if not isinstance(sep, str): raise ValueError('Values separator "sep" must be a string')
+    if isinstance(headers, str) and sep in headers: headers = headers.split(sep)
+    if not isinstance(headers, list):
+        raise ValueError('"headers" must be a list or string with valid separators')
+    if not isinstance(filter_, str): raise ValueError('"filter_" must be a string')
+
+    with codecs.open(path, encoding=encoding) as fo:
+
+        for line in fo:
+            if re.match(filter_, line): continue
+            record = line.strip().split(sep)
+
+            if headers:
+                if len(headers) is not len(record): continue
+                record = dict(zip(headers, record))
+            yield content
 
 
 if __name__ == '__main__':
