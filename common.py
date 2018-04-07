@@ -1165,7 +1165,7 @@ def get_separated_values_file_iterator(path, sep=',', headers=[], filter_='^[.*]
             if headers:
                 if len(headers) is not len(record): continue
                 record = dict(zip(headers, record))
-            yield content
+            yield record
 
 
 if __name__ == '__main__':
