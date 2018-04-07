@@ -1160,7 +1160,10 @@ def get_separated_values_file_iterator(path, sep=',', headers=[], filter_='^[.*]
 
         for line in fo:
             if re.match(filter_, line): continue
-            record = line.strip().split(sep)
+            if strip_last: line = line[:-1]
+            line = line.strip()
+            if line.endswith(sep): line = line[:-len(sep)]
+            record = line.split(sep)
 
             if headers:
                 if len(headers) is not len(record): continue
