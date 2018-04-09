@@ -34,6 +34,8 @@ from pexpect.replwrap import REPLWrapper
 import yaml
 import rpyc
 import prettyparse
+from dotenv import load_dotenv, find_dotenv, dotenv_values
+
 
 baseDir = '/NLPShare/Alcohol/'
 dataDir = baseDir + 'data/'
@@ -92,7 +94,18 @@ logger.addHandler(fh)
 
 class UMLSClient():
 
-    def __init__(self, api_key, cache_path=''):
+    def __init__(self, api_key='', cache_path='', adb={}):
+        self._using = ''
+
+        if api_key:
+            self._using = 'api'
+            self._setup_online(api_key, cache_path)
+
+        elif adb:
+            self._using = 'arango'
+            self._setup_offline(adb, cache_path)
+
+    def _setup_online(self, api_key, cache_path):
         self.api_key = api_key
         self.auth_uri="https://utslogin.nlm.nih.gov"
         self.auth_endpoint = "/cas/v1/api-key"
@@ -105,9 +118,20 @@ class UMLSClient():
         self.st = None
         self._error = None
         self._conn = False
+        return
+
+    def _setup_offline(self, adb, cache_path):
+        self._umls_mrconso = adb['UMLS_MRCONSO']
+        self._umls_mrsty = adb['UMLS_MRSTY']
+        self._umls_cache = adb['UMLS_CACHE']
+        from arango import ArangoClient as AC
+        clt_args = ['host', 'port', 'username', 'password']
+        self._a_clt = AC(**{k[4:].lowercase(): v for k, v in adb if k[4:].lowercase() in clt_args})
+        self._umls_db = self._a_clt.database(adb['UMLS_ADB'])
+        return
 
     def save_cache(self):
-        saveJson(self.cache, self.cache_path)
+        if self._using == 'api': saveJson(self.cache, self.cache_path)
         return
 
     def gettgt(self):
@@ -160,8 +184,23 @@ class UMLSClient():
 
     def find_cui(self, identifier):
         # seek a cui in cache
-        if not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
+        if using == 'api' and not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
+        if using == 'arango': return self.query_adb(identifier)
         return self.cache['cuis'][identifier]
+
+    def query_adb(self, identifier, fields=['cui', 'str']):
+        """Find a given CUI in an Arango UMLS database.
+        """
+        umls_cache = self._umls_db.collection(self._umls_cache)
+        res = umls_cache.find({'cui': identifier}).batch()
+        if res: return res[0]
+        mrconso = self._umls_db.collection(self._umls_mrconso)
+        #mrsty = self._umls_db.collection(self._umls_mrsty)
+        res = [r for r in mrconso.find({'cui', identifier}).batch() if r['ispref'] == 'Y']
+        if not res: return {}
+        res = {'name' if k == 'str' else k: v for k, v in res[0] if k in fields}
+        umls_cache.insert(res)
+        return res
 
 class Distance():
     # Word2Vec distance wrapper by default
@@ -1168,6 +1207,12 @@ def get_separated_values_file_iterator(path, sep=',', headers=[], filter_='^[.*]
                 if len(headers) is not len(record): continue
                 record = dict(zip(headers, record))
             yield record
+
+def get_umls_client(mode='api', extra={}):
+    """Return a UMLS client setup for online API or offline ArangoDB access."""
+    if mode == 'api': return UMLSClient(**extra)
+    if mode == 'arango': return UMLSClient(adb=extra)
+    return
 
 
 if __name__ == '__main__':
