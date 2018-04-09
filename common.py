@@ -184,8 +184,8 @@ class UMLSClient():
 
     def find_cui(self, identifier):
         # seek a cui in cache
-        if using == 'api' and not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
-        if using == 'arango': return self.query_adb(identifier)
+        if self._using == 'api' and not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
+        if self._using == 'arango': return self.query_adb(identifier)
         return self.cache['cuis'][identifier]
 
     def query_adb(self, identifier, fields=['cui', 'str']):
