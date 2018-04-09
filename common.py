@@ -105,6 +105,7 @@ class UMLSClient():
         elif adb:
             self._using = 'arango'
             self._setup_offline(adb, cache_path)
+        return
 
     def _setup_online(self, api_key, cache_path):
         self.api_key = api_key
@@ -198,7 +199,7 @@ class UMLSClient():
         if res: return res[0]
         mrconso = self._umls_db.collection(self._umls_mrconso)
         #mrsty = self._umls_db.collection(self._umls_mrsty)
-        res = [r for r in mrconso.find({'cui', identifier}).batch() if r['ispref'] == 'Y']
+        res = [r for r in mrconso.find({'cui': identifier}).batch() if r['ispref'] == 'Y']
         if not res: return {}
         res = {
             'name' if k == 'str' else k: v
