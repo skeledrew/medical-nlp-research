@@ -186,20 +186,21 @@ class UMLSClient():
 
     def find_cui(self, identifier):
         # seek a cui in cache
-        if self._using == 'arango': return self.query_adb(identifier)
+        if self._using == 'arango': return self.query_adb({'cui': identifier})
         if self._using == 'api' and not 'cuis' in self.cache or not identifier in self.cache['cuis']:
             return self.query_umls(identifier)
         return self.cache['cuis'][identifier]
 
-    def query_adb(self, identifier, fields=['cui', 'str']):
+    def query_adb(self, query, fields=['cui', 'str']):
         """Find a given CUI in an Arango UMLS database.
         """
         umls_cache = self._umls_db.collection(self._umls_cache)
-        res = umls_cache.find({'cui': identifier}).batch()
+        res = umls_cache.find(query).batch()
         if res: return res[0]
         mrconso = self._umls_db.collection(self._umls_mrconso)
         #mrsty = self._umls_db.collection(self._umls_mrsty)
-        res = [r for r in mrconso.find({'cui': identifier}).batch() if r['ispref'] == 'Y']
+        res = mrconso.find(query).batch()
+        res = [r for r in res if r['ispref'] == 'Y']
         if not res: return {}
         res = {
             'name' if k == 'str' else k: v
