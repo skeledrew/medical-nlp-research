@@ -192,11 +192,17 @@ class UMLSClient():
         return self.cache['cuis'][identifier]
 
     def query_adb(self, query, fields=['cui', 'str']):
-        """Find a given CUI in an Arango UMLS database.
+        """Return record for a given query in an Arango UMLS database.
         """
+        adb_elements = ['_key', '_id', '_rev']
         umls_cache = self._umls_db.collection(self._umls_cache)
         res = umls_cache.find(query).batch()
-        if res: return res[0]
+        if res:
+            return {
+                k: v
+                for k, v in zip(res[0].keys(), res[0].values())
+                if not k in adb_elements
+            }
         mrconso = self._umls_db.collection(self._umls_mrconso)
         #mrsty = self._umls_db.collection(self._umls_mrsty)
 
@@ -205,6 +211,8 @@ class UMLSClient():
 
         except Exception as e:
             print(repr(e))
+            if 'HTTP 404' in repr(e):
+                print('Check to ensure collection exists and is spelt properly')
             pdb.post_mortem()
         res = [r for r in res if r['ispref'] == 'Y']
         if not res: return {}
