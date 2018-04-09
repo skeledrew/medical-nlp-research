@@ -125,9 +125,8 @@ class UMLSClient():
         self._umls_mrsty = adb['UMLS_MRSTY']
         self._umls_cache = adb['UMLS_CACHE']
         from arango import ArangoClient as AC
-        #pdb.set_trace()
-        clt_args = ['host', 'port', 'username', 'password']
-        self._a_clt = AC(**{k[4:].lowercase(): v for k, v in adb if k[4:].lowercase() in clt_args})
+        #clt_args = ['host', 'port', 'username', 'password']  # NB: dictcomp doesn't see it
+        self._a_clt = AC(**{k[4:].lower(): v for k, v in zip(adb.keys(), adb.values()) if k[4:].lower() in ['host', 'port', 'username', 'password']})
         self._umls_db = self._a_clt.database(adb['UMLS_ADB'])
         return
 
@@ -185,7 +184,8 @@ class UMLSClient():
 
     def find_cui(self, identifier):
         # seek a cui in cache
-        if self._using == 'api' and not 'cuis' in self.cache or not identifier in self.cache['cuis']: return self.query_umls(identifier)
+        if self._using == 'api' and not 'cuis' in self.cache or not identifier in self.cache['cuis']:
+            return self.query_umls(identifier)
         if self._using == 'arango': return self.query_adb(identifier)
         return self.cache['cuis'][identifier]
 
@@ -199,7 +199,11 @@ class UMLSClient():
         #mrsty = self._umls_db.collection(self._umls_mrsty)
         res = [r for r in mrconso.find({'cui', identifier}).batch() if r['ispref'] == 'Y']
         if not res: return {}
-        res = {'name' if k == 'str' else k: v for k, v in res[0] if k in fields}
+        res = {
+            'name' if k == 'str' else k: v
+            for k, v in zip(res[0].keys(), res[0].values())
+            if k in fields
+        }
         umls_cache.insert(res)
         return res
 
