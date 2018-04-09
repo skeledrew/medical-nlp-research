@@ -125,6 +125,7 @@ class UMLSClient():
         self._umls_mrsty = adb['UMLS_MRSTY']
         self._umls_cache = adb['UMLS_CACHE']
         from arango import ArangoClient as AC
+        #pdb.set_trace()
         clt_args = ['host', 'port', 'username', 'password']
         self._a_clt = AC(**{k[4:].lowercase(): v for k, v in adb if k[4:].lowercase() in clt_args})
         self._umls_db = self._a_clt.database(adb['UMLS_ADB'])
@@ -1211,9 +1212,16 @@ def get_separated_values_file_iterator(path, sep=',', headers=[], filter_='^[.*]
 def get_umls_client(mode='api', dotenv=True, extra={}):
     """Return a UMLS client setup for online API or offline ArangoDB access."""
     if not extra and dotenv: extra = dotenv_values(find_dotenv())
-    if mode == 'api': return UMLSClient(**extra)
-    if mode == 'arango': return UMLSClient(adb=extra)
-    return
+    clt = None
+
+    try:
+        if mode == 'api': clt = UMLSClient(**extra)
+        if mode == 'arango': clt =  UMLSClient(adb=extra)
+
+    except Exception as e:
+        print(repr(e))
+        pdb.post_mortem()
+    return clt
 
 
 if __name__ == '__main__':
