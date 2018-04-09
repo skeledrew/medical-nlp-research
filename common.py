@@ -1208,8 +1208,9 @@ def get_separated_values_file_iterator(path, sep=',', headers=[], filter_='^[.*]
                 record = dict(zip(headers, record))
             yield record
 
-def get_umls_client(mode='api', extra={}):
+def get_umls_client(mode='api', dotenv=True, extra={}):
     """Return a UMLS client setup for online API or offline ArangoDB access."""
+    if not extra and dotenv: extra = dotenv_values(find_dotenv())
     if mode == 'api': return UMLSClient(**extra)
     if mode == 'arango': return UMLSClient(adb=extra)
     return
