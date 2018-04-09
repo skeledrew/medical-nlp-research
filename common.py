@@ -125,8 +125,8 @@ class UMLSClient():
         self._umls_mrsty = adb['UMLS_MRSTY']
         self._umls_cache = adb['UMLS_CACHE']
         from arango import ArangoClient as AC
-        #clt_args = ['host', 'port', 'username', 'password']  # NB: dictcomp doesn't see it
-        self._a_clt = AC(**{k[4:].lower(): v for k, v in zip(adb.keys(), adb.values()) if k[4:].lower() in ['host', 'port', 'username', 'password']})
+        clt_args = ['host', 'port', 'username', 'password']
+        self._a_clt = AC(**{k[4:].lower(): v for k, v in zip(adb.keys(), adb.values()) if k[4:].lower() in clt_args})
         self._umls_db = self._a_clt.database(adb['UMLS_ADB'])
         return
 
