@@ -96,6 +96,7 @@ class UMLSClient():
 
     def __init__(self, api_key='', cache_path='', adb={}):
         self._using = ''
+        self.cache = {}
 
         if api_key:
             self._using = 'api'
