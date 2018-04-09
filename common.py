@@ -199,7 +199,13 @@ class UMLSClient():
         if res: return res[0]
         mrconso = self._umls_db.collection(self._umls_mrconso)
         #mrsty = self._umls_db.collection(self._umls_mrsty)
-        res = mrconso.find(query).batch()
+
+        try:
+            res = mrconso.find(query).batch()
+
+        except Exception as e:
+            print(repr(e))
+            pdb.post_mortem()
         res = [r for r in res if r['ispref'] == 'Y']
         if not res: return {}
         res = {
